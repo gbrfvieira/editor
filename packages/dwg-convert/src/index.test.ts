@@ -27,7 +27,11 @@ test('reports a missing converter', async () => {
 
 test('invokes ODA with documented arguments', async () => {
   const executable = join(temp, 'ODAFileConverter.exe')
-  const dwg = join(temp, 'plan.dwg')
+  const inDir = join(temp, 'in')
+  const outDir = join(temp, 'out')
+  const dwg = join(inDir, 'plan.dwg')
+  mkdirSync(inDir, { recursive: true })
+  mkdirSync(outDir, { recursive: true })
   writeFileSync(executable, '')
   writeFileSync(dwg, '')
   process.env.ODA_FILE_CONVERTER_PATH = executable
@@ -38,18 +42,23 @@ test('invokes ODA with documented arguments', async () => {
       _options: unknown,
       callback: (error: null, stdout: string, stderr: string) => void,
     ) => {
-      expect(args).toEqual([temp, temp, 'ACAD2018', 'DXF', '0', '1'])
-      writeFileSync(join(temp, 'plan.dxf'), '')
+      expect(args).toEqual([inDir, outDir, 'ACAD2018', 'DXF', '0', '1'])
+      writeFileSync(join(outDir, 'plan.dxf'), '')
       callback(null, '', '')
     },
   }))
   const { convertDwgToDxf } = await import('./index')
-  expect(await convertDwgToDxf(dwg, temp)).toEqual({ ok: true, dxfPath: join(temp, 'plan.dxf') })
+  expect(await convertDwgToDxf(dwg, outDir)).toEqual({
+    ok: true,
+    dxfPath: join(outDir, 'plan.dxf'),
+  })
 })
 
 test('returns conversion_failed for process errors and timeout-like errors', async () => {
   const executable = join(temp, 'ODAFileConverter.exe')
-  const dwg = join(temp, 'plan.dwg')
+  const inDir = join(temp, 'in')
+  const dwg = join(inDir, 'plan.dwg')
+  mkdirSync(inDir, { recursive: true })
   writeFileSync(executable, '')
   writeFileSync(dwg, '')
   process.env.ODA_FILE_CONVERTER_PATH = executable
@@ -63,4 +72,43 @@ test('returns conversion_failed for process errors and timeout-like errors', asy
   }))
   const { convertDwgToDxf } = await import('./index')
   expect(await convertDwgToDxf(dwg, temp)).toMatchObject({ ok: false, reason: 'conversion_failed' })
+})
+
+test('rejects a source directory equal to the output directory', async () => {
+  process.env.ODA_FILE_CONVERTER_PATH = join(temp, 'ODAFileConverter.exe')
+  writeFileSync(join(temp, 'ODAFileConverter.exe'), '')
+  const { convertDwgToDxf } = await import('./index')
+  const result = await convertDwgToDxf(join(temp, 'plan.dwg'), temp)
+  expect(result).toMatchObject({ ok: false, reason: 'conversion_failed' })
+  expect((result as { message: string }).message).toContain('directory')
+})
+
+test('surfaces the ODA .dxf.err report when a specific file fails to convert', async () => {
+  const executable = join(temp, 'ODAFileConverter.exe')
+  const inDir = join(temp, 'in')
+  const outDir = join(temp, 'out')
+  const dwg = join(inDir, 'plan.dwg')
+  mkdirSync(inDir, { recursive: true })
+  mkdirSync(outDir, { recursive: true })
+  writeFileSync(executable, '')
+  writeFileSync(dwg, '')
+  process.env.ODA_FILE_CONVERTER_PATH = executable
+  mock.module('node:child_process', () => ({
+    execFile: (
+      _file: string,
+      _args: string[],
+      _options: unknown,
+      callback: (error: null, stdout: string, stderr: string) => void,
+    ) => {
+      writeFileSync(join(outDir, 'plan.dxf.err'), 'Unexpected end of file: "plan.dwg".')
+      callback(null, '', '')
+    },
+  }))
+  const { convertDwgToDxf } = await import('./index')
+  const result = await convertDwgToDxf(dwg, outDir)
+  expect(result).toMatchObject({
+    ok: false,
+    reason: 'conversion_failed',
+    message: 'Unexpected end of file: "plan.dwg".',
+  })
 })

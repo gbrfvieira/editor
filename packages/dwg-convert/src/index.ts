@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, parse, resolve } from 'node:path'
 
 export type ConversionResult =
@@ -86,6 +86,15 @@ export async function convertDwgToDxf(dwgPath: string, outDir: string): Promise<
   }
   const sourceDir = dirname(resolve(dwgPath))
   const targetDir = resolve(outDir)
+  if (sourceDir === targetDir) {
+    return {
+      ok: false,
+      reason: 'conversion_failed',
+      message:
+        'convertDwgToDxf requires the DWG source directory and the output directory to differ — ' +
+        'ODA File Converter silently converts nothing when they are the same path.',
+    }
+  }
   const args = [sourceDir, targetDir, 'ACAD2018', 'DXF', '0', '1']
   try {
     mkdirSync(targetDir, { recursive: true })
@@ -99,10 +108,15 @@ export async function convertDwgToDxf(dwgPath: string, outDir: string): Promise<
     }
     const dxfPath = join(targetDir, `${parse(dwgPath).name}.dxf`)
     if (!existsSync(dxfPath)) {
+      // On a per-file failure, ODA writes a sibling `<name>.dxf.err` report
+      // instead of the `.dxf` (e.g. "Unexpected end of file", unsupported
+      // DWG version) rather than a nonzero process exit code.
+      const errPath = `${dxfPath}.err`
+      const detail = existsSync(errPath) ? readFileSync(errPath, 'utf8').trim() : undefined
       return {
         ok: false,
         reason: 'conversion_failed',
-        message: `Converter completed but did not create ${dxfPath}`,
+        message: detail || `Converter completed but did not create ${dxfPath}`,
       }
     }
     return { ok: true, dxfPath }
