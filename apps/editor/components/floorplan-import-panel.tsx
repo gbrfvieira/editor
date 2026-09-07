@@ -19,11 +19,19 @@ import {
 } from '@pascal-app/floorplan-import'
 import { extractPdfVectorSegments } from '@pascal-app/pdf-vector-extract'
 import { useViewer } from '@pascal-app/viewer'
-import { detectDoorOpenings, detectWalls } from '@pascal-app/wall-detect'
+import {
+  detectDoorOpenings,
+  detectWalls,
+  detectWindowOpenings,
+  type WindowOpening,
+} from '@pascal-app/wall-detect'
 import { useCallback, useState } from 'react'
+import { recenterSegments } from './floorplan-import-geometry'
 
 type EditableWall = DetectedWall & { id: number }
-type PreviewOpening = DxfOpening & { id: number }
+type PreviewOpening = (DxfOpening | WindowOpening) & { id: number }
+
+const WALL_PREVIEW_PAGE_SIZE = 50
 
 // Matches DoorNode/WindowNode schema defaults — kept explicit here so the
 // wall-local Y position math below stays correct regardless of schema drift.
@@ -38,36 +46,6 @@ function toEditableWalls(source: DetectedWall[]): EditableWall[] {
     end: [...wall.end] as [number, number],
     id,
   }))
-}
-
-/**
- * Real CAD files are usually drawn far from (0,0) — survey coordinates, or
- * just wherever the drawing happened to sit in the original file. Importing
- * at those raw coordinates puts the walls thousands of meters from where the
- * camera starts (they're technically there, but invisible and unreachable)
- * and risks Three.js float-precision jitter at that distance from the
- * origin. Recenter on the bounding-box center of the extracted segments
- * before anything is previewed or created.
- */
-function boundingBoxCenter(segments: { start: [number, number]; end: [number, number] }[]): [
-  number,
-  number,
-] {
-  let minX = Number.POSITIVE_INFINITY
-  let minY = Number.POSITIVE_INFINITY
-  let maxX = Number.NEGATIVE_INFINITY
-  let maxY = Number.NEGATIVE_INFINITY
-  for (const segment of segments) {
-    for (const [x, y] of [segment.start, segment.end]) {
-      if (x < minX) minX = x
-      if (x > maxX) maxX = x
-      if (y < minY) minY = y
-      if (y > maxY) maxY = y
-    }
-  }
-  return Number.isFinite(minX) && Number.isFinite(maxX)
-    ? [(minX + maxX) / 2, (minY + maxY) / 2]
-    : [0, 0]
 }
 
 function updatePoint(
@@ -104,10 +82,12 @@ export function FloorplanImportPanel() {
   const [pdfFallback, setPdfFallback] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState<string | null>(null)
+  const [visibleWallCount, setVisibleWallCount] = useState(WALL_PREVIEW_PAGE_SIZE)
 
   const processDxfText = useCallback(
     (text: string, scale: number) => {
       setLastDxfText(text)
+      setVisibleWallCount(WALL_PREVIEW_PAGE_SIZE)
       const dxfLayers = extractDxfVectorSegments(text)
       const segments = dxfLayers.flatMap((layer) =>
         layer.segments.map((segment) => ({
@@ -118,16 +98,18 @@ export function FloorplanImportPanel() {
         })),
       )
 
-      const offset = boundingBoxCenter(segments)
+      // Real CAD files are usually drawn far from (0,0) — survey coordinates,
+      // or just wherever the drawing happened to sit in the original file.
+      // Importing at those raw coordinates puts the walls thousands of
+      // meters from where the camera starts (they're technically there, but
+      // invisible and unreachable) and risks Three.js float-precision jitter
+      // at that distance from the origin. Recenter the whole import on its
+      // own bounding-box center before anything is previewed or created.
+      const { segments: recenteredSegments, offset } = recenterSegments(segments)
       const recenter = (point: [number, number]): [number, number] => [
         point[0] - offset[0],
         point[1] - offset[1],
       ]
-      const recenteredSegments = segments.map((segment) => ({
-        ...segment,
-        start: recenter(segment.start),
-        end: recenter(segment.end),
-      }))
       const recenteredArcs = dxfLayers.flatMap((layer) =>
         (layer.arcs ?? []).map((arc) => ({
           ...arc,
@@ -168,6 +150,18 @@ export function FloorplanImportPanel() {
           ),
       )
 
+      const geometricWindows = detectWindowOpenings(recenteredSegments, detected).filter(
+        (window) =>
+          !blockOpenings.some(
+            (opening) =>
+              opening.type === 'window' &&
+              Math.hypot(
+                opening.position[0] - window.position[0],
+                opening.position[1] - window.position[1],
+              ) < 0.4,
+          ),
+      )
+
       let openingId = 0
       setOpenings([
         ...blockOpenings.map((opening) => ({ ...opening, id: openingId++ })),
@@ -179,9 +173,10 @@ export function FloorplanImportPanel() {
           blockName: 'arco de porta',
           id: openingId++,
         })),
+        ...geometricWindows.map((window) => ({ ...window, id: openingId++ })),
       ])
 
-      const openingCount = blockOpenings.length + arcDoors.length
+      const openingCount = blockOpenings.length + arcDoors.length + geometricWindows.length
       setStatus(
         `${detected.length} parede(s) e ${openingCount} vão(s) detectados (recentralizado na origem). Revise e confirme.`,
       )
@@ -198,6 +193,7 @@ export function FloorplanImportPanel() {
       setPdfFallback(null)
       setOpenings([])
       setRemovedWalls([])
+      setVisibleWallCount(WALL_PREVIEW_PAGE_SIZE)
       setConverterMissing(false)
       const isDwg = file.name.toLocaleLowerCase().endsWith('.dwg')
       const isPdf = file.name.toLocaleLowerCase().endsWith('.pdf')
@@ -244,7 +240,7 @@ export function FloorplanImportPanel() {
           // scale (1:50, 1:100...) needs further correction beyond the raw
           // point size — same manual override as the DXF/DWG path.
           const pointsToMeters = 0.0254 / 72
-          const segments = rawSegments.map((segment) => ({
+          const scaledSegments = rawSegments.map((segment) => ({
             ...segment,
             start: [
               segment.start[0] * pointsToMeters * unitScale,
@@ -255,16 +251,8 @@ export function FloorplanImportPanel() {
               segment.end[1] * pointsToMeters * unitScale,
             ] as [number, number],
           }))
-          const offset = boundingBoxCenter(segments)
-          const recenteredSegments = segments.map((segment) => ({
-            ...segment,
-            start: [segment.start[0] - offset[0], segment.start[1] - offset[1]] as [
-              number,
-              number,
-            ],
-            end: [segment.end[0] - offset[0], segment.end[1] - offset[1]] as [number, number],
-          }))
-          const detected = detectWalls(recenteredSegments, {
+          const { segments } = recenterSegments(scaledSegments)
+          const detected = detectWalls(segments, {
             preferLayerContaining: 'PAREDE',
             snapToleranceM: snapTolerance,
           }).walls
@@ -482,57 +470,69 @@ export function FloorplanImportPanel() {
       {status ? <p className="text-emerald-600 text-xs">{status}</p> : null}
 
       {walls.length > 0 ? (
-        <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
-          {walls.map((wall, index) => (
-            <div className="rounded-lg bg-muted/30 p-2" key={wall.id}>
-              <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>Parede {index + 1}</span>
-                <div className="flex items-center gap-2">
-                  <span>{Math.round(wall.confidence * 100)}% confiança</span>
-                  <button
-                    aria-label={`Excluir parede ${index + 1}`}
-                    className="text-red-500 hover:text-red-600"
-                    onClick={() => removeWall(wall.id)}
-                    type="button"
-                  >
-                    Excluir
-                  </button>
+        <div className="flex flex-col gap-2">
+          <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
+            {walls.slice(0, visibleWallCount).map((wall, index) => (
+              <div className="rounded-lg bg-muted/30 p-2" key={wall.id}>
+                <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Parede {index + 1}</span>
+                  <div className="flex items-center gap-2">
+                    <span>{Math.round(wall.confidence * 100)}% confiança</span>
+                    <button
+                      aria-label={`Excluir parede ${index + 1}`}
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => removeWall(wall.id)}
+                      type="button"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-1">
+                  {(['start', 'end'] as const).flatMap((point) =>
+                    ([0, 1] as const).map((axis) => (
+                      <input
+                        aria-label={`${point} ${axis === 0 ? 'x' : 'y'}`}
+                        className="min-w-0 rounded border border-border/60 bg-background px-1.5 py-1 text-xs"
+                        key={`${point}-${axis}`}
+                        onChange={(event) =>
+                          updateWall(wall.id, (current) =>
+                            updatePoint(current, point, axis, event.target.value),
+                          )
+                        }
+                        step="0.01"
+                        type="number"
+                        value={wall[point][axis]}
+                      />
+                    )),
+                  )}
+                  <input
+                    aria-label="thickness"
+                    className="min-w-0 rounded border border-border/60 bg-background px-1.5 py-1 text-xs"
+                    onChange={(event) => {
+                      const thickness = Number(event.target.value)
+                      if (Number.isFinite(thickness)) {
+                        updateWall(wall.id, (current) => ({ ...current, thickness }))
+                      }
+                    }}
+                    step="0.01"
+                    type="number"
+                    value={wall.thickness}
+                  />
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-1">
-                {(['start', 'end'] as const).flatMap((point) =>
-                  ([0, 1] as const).map((axis) => (
-                    <input
-                      aria-label={`${point} ${axis === 0 ? 'x' : 'y'}`}
-                      className="min-w-0 rounded border border-border/60 bg-background px-1.5 py-1 text-xs"
-                      key={`${point}-${axis}`}
-                      onChange={(event) =>
-                        updateWall(wall.id, (current) =>
-                          updatePoint(current, point, axis, event.target.value),
-                        )
-                      }
-                      step="0.01"
-                      type="number"
-                      value={wall[point][axis]}
-                    />
-                  )),
-                )}
-                <input
-                  aria-label="thickness"
-                  className="min-w-0 rounded border border-border/60 bg-background px-1.5 py-1 text-xs"
-                  onChange={(event) => {
-                    const thickness = Number(event.target.value)
-                    if (Number.isFinite(thickness)) {
-                      updateWall(wall.id, (current) => ({ ...current, thickness }))
-                    }
-                  }}
-                  step="0.01"
-                  type="number"
-                  value={wall.thickness}
-                />
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          {visibleWallCount < walls.length ? (
+            <button
+              className="rounded-lg border border-border/60 px-3 py-2 text-xs hover:bg-muted"
+              onClick={() => setVisibleWallCount((count) => count + WALL_PREVIEW_PAGE_SIZE)}
+              type="button"
+            >
+              Carregar mais ({Math.min(WALL_PREVIEW_PAGE_SIZE, walls.length - visibleWallCount)} de{' '}
+              {walls.length - visibleWallCount})
+            </button>
+          ) : null}
         </div>
       ) : null}
 
@@ -553,7 +553,8 @@ export function FloorplanImportPanel() {
             {openings.map((opening) => (
               <div className="flex items-center justify-between" key={opening.id}>
                 <span>
-                  {opening.type === 'door' ? 'Porta' : 'Janela'} · {opening.blockName}
+                  {opening.type === 'door' ? 'Porta' : 'Janela'}
+                  {'blockName' in opening ? ` · ${opening.blockName}` : ' · geometria CAD'}
                 </span>
                 <span>
                   {opening.width.toFixed(2)} m · ({opening.position[0].toFixed(2)},{' '}
