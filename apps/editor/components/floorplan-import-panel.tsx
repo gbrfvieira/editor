@@ -87,26 +87,58 @@ export function FloorplanImportPanel() {
           end: [segment.end[0] * scale, segment.end[1] * scale] as [number, number],
         })),
       )
+
+      // Real CAD files are usually drawn far from (0,0) — survey coordinates,
+      // or just wherever the drawing happened to sit in the original file.
+      // Importing at those raw coordinates puts the walls thousands of
+      // meters from where the camera starts (they're technically there, but
+      // invisible and unreachable) and risks Three.js float-precision jitter
+      // at that distance from the origin. Recenter the whole import on its
+      // own bounding-box center before anything is previewed or created.
+      let minX = Number.POSITIVE_INFINITY
+      let minY = Number.POSITIVE_INFINITY
+      let maxX = Number.NEGATIVE_INFINITY
+      let maxY = Number.NEGATIVE_INFINITY
+      for (const segment of segments) {
+        for (const [x, y] of [segment.start, segment.end]) {
+          if (x < minX) minX = x
+          if (x > maxX) maxX = x
+          if (y < minY) minY = y
+          if (y > maxY) maxY = y
+        }
+      }
+      const offset: [number, number] =
+        Number.isFinite(minX) && Number.isFinite(maxX)
+          ? [(minX + maxX) / 2, (minY + maxY) / 2]
+          : [0, 0]
+      const recenter = (point: [number, number]): [number, number] => [
+        point[0] - offset[0],
+        point[1] - offset[1],
+      ]
+      const recenteredSegments = segments.map((segment) => ({
+        ...segment,
+        start: recenter(segment.start),
+        end: recenter(segment.end),
+      }))
+
       let openingId = 0
       setOpenings(
         dxfLayers.flatMap((layer) =>
           (layer.openings ?? []).map((opening) => ({
             ...opening,
-            position: [opening.position[0] * scale, opening.position[1] * scale] as [
-              number,
-              number,
-            ],
+            position: recenter([opening.position[0] * scale, opening.position[1] * scale]),
             id: openingId++,
           })),
         ),
       )
-      const detected = detectWalls(segments, {
+      const detected = detectWalls(recenteredSegments, {
         preferLayerContaining: 'PAREDE',
         snapToleranceM: snapTolerance,
       }).walls
       setWalls(toEditableWalls(detected))
+      const openingCount = dxfLayers.reduce((sum, layer) => sum + (layer.openings?.length ?? 0), 0)
       setStatus(
-        `${detected.length} parede(s) e ${dxfLayers.reduce((sum, layer) => sum + (layer.openings?.length ?? 0), 0)} vão(s) detectados. Revise e confirme.`,
+        `${detected.length} parede(s) e ${openingCount} vão(s) detectados (recentralizado na origem). Revise e confirme.`,
       )
     },
     [snapTolerance],
