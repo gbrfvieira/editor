@@ -35,7 +35,7 @@ const controls: ControlConfig[] = [
   {
     id: 'zone',
     imageSrc: '/icons/zone.webp',
-    label: 'Zone',
+    label: 'Ambiente',
     shortcut: 'Z',
     color: 'hover:bg-green-500/20 hover:text-green-400',
     activeColor: 'bg-green-500/20 text-green-400',

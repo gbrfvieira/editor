@@ -445,9 +445,9 @@ export const stairDefinition: NodeDefinition<typeof StairNode> = {
   // snapping chip shows during placement.
   snapDraftDirectional: false,
   toolHints: [
-    { key: 'Left click', label: 'Place stairs' },
-    { key: 'R / T', label: 'Rotate' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Posicionar escada' },
+    { key: 'R / T', label: 'Girar' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
   surfaceRole: 'joinery',
 
@@ -525,9 +525,9 @@ export const stairDefinition: NodeDefinition<typeof StairNode> = {
   },
 
   presentation: {
-    label: 'Stair',
+    label: 'Escada',
     description:
-      'A stair composed of one or more flights with configurable treads, risers, railings.',
+      'Uma escada com um ou mais lances e pisos, espelhos e guarda-corpos configuráveis.',
     icon: { kind: 'url', src: '/icons/stairs.webp' },
     paletteSection: 'structure',
     paletteOrder: 110,

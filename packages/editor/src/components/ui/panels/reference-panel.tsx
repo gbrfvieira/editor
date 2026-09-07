@@ -203,13 +203,13 @@ export function ReferencePanel() {
               <ActionButton
                 disabled={isReplacing}
                 icon={<Upload className="h-3.5 w-3.5" />}
-                label={isReplacing ? 'Replacing...' : 'Replace'}
+                label={isReplacing ? 'Substituindo...' : 'Substituir'}
                 onClick={() => replaceInputRef.current?.click()}
               />
               <ActionButton
                 className="text-destructive hover:bg-destructive/10"
                 icon={<Trash2 className="h-3.5 w-3.5" />}
-                label="Delete"
+                label="Excluir"
                 onClick={handleDeleteGuide}
               />
             </ActionGroup>
@@ -223,7 +223,7 @@ export function ReferencePanel() {
                     <Eye className="h-3.5 w-3.5" />
                   )
                 }
-                label={node.visible === false ? 'Show' : 'Hide'}
+                label={node.visible === false ? 'Mostrar' : 'Ocultar'}
                 onClick={() => handleUpdate({ visible: node.visible === false })}
               />
               <ActionButton
@@ -234,7 +234,7 @@ export function ReferencePanel() {
                     <Unlock className="h-3.5 w-3.5" />
                   )
                 }
-                label={guideLocked ? 'Unlock' : 'Lock'}
+                label={guideLocked ? 'Desbloquear' : 'Bloquear'}
                 onClick={() => setGuideLocked(node.id, !guideLocked)}
               />
             </ActionGroup>
@@ -247,7 +247,7 @@ export function ReferencePanel() {
 
             {isAssetMissing && (
               <div className="rounded-md border border-amber-500/35 bg-amber-500/10 px-2 py-1.5 text-amber-700 text-xs dark:text-amber-300">
-                Overlay image unavailable. Replace the image to restore it.
+                Imagem de sobreposição indisponível. Substitua a imagem para restaurá-la.
               </div>
             )}
           </PanelSection>
@@ -266,8 +266,8 @@ export function ReferencePanel() {
             {!node.scaleReference && (
               <p className="px-0.5 text-muted-foreground text-xs leading-snug">
                 {isScaleFlowActive
-                  ? 'Click both ends of a known distance on the plan, then type its real length.'
-                  : 'Draw a line over a known dimension on the plan, then type its real length to scale the image exactly.'}
+                  ? 'Clique nas duas extremidades de uma distância conhecida na planta e digite seu comprimento real.'
+                  : 'Desenhe uma linha sobre uma medida conhecida na planta e digite seu comprimento real para ajustar a escala da imagem com precisão.'}
               </p>
             )}
 
@@ -279,7 +279,7 @@ export function ReferencePanel() {
                     'border-primary/50 bg-primary/15 text-primary hover:bg-primary/25 active:bg-primary/25',
                 )}
                 label={
-                  isScaleFlowActive ? 'Cancel' : node.scaleReference ? 'Edit Scale' : 'Set Scale'
+                  isScaleFlowActive ? 'Cancelar' : node.scaleReference ? 'Editar escala' : 'Definir escala'
                 }
                 onClick={isScaleFlowActive ? handleCancelScale : handleStartScale}
               />
@@ -288,11 +288,11 @@ export function ReferencePanel() {
             {node.scaleReference && (
               <ActionGroup>
                 <ActionButton
-                  label={scaleReferenceVisible ? 'Hide Scale' : 'Show Scale'}
+                  label={scaleReferenceVisible ? 'Ocultar escala' : 'Mostrar escala'}
                   onClick={() => setGuideScaleReferenceVisible(node.id, !scaleReferenceVisible)}
                 />
                 <ActionButton
-                  label="Clear Scale"
+                  label="Limpar escala"
                   onClick={() => {
                     handleUpdate({ scaleReference: null } as Partial<GuideNode>)
                     // Calibrating auto-locked the guide; clearing the scale
@@ -308,7 +308,7 @@ export function ReferencePanel() {
             <ActionGroup>
               <ActionButton
                 icon={<LocateFixed className="h-3.5 w-3.5" />}
-                label="Center"
+                label="Centro"
                 onClick={() =>
                   handleUpdate({
                     position: [0, node.position[1], 0],
@@ -317,7 +317,7 @@ export function ReferencePanel() {
               />
               <ActionButton
                 icon={<RotateCcw className="h-3.5 w-3.5" />}
-                label="Reset Rotation"
+                label="Redefinir rotação"
                 onClick={() =>
                   handleUpdate({
                     rotation: [node.rotation[0], 0, node.rotation[2]],
@@ -328,7 +328,7 @@ export function ReferencePanel() {
             <ActionGroup>
               <ActionButton
                 icon={<Ruler className="h-3.5 w-3.5" />}
-                label="Reset Image Scale"
+                label="Redefinir escala da imagem"
                 onClick={() => handleUpdate({ scale: 1 } as Partial<GuideNode>)}
               />
             </ActionGroup>
@@ -341,7 +341,7 @@ export function ReferencePanel() {
           <ActionGroup>
             <ActionButton
               icon={<Move className="h-3.5 w-3.5" />}
-              label="Move"
+              label="Mover"
               onClick={handleMoveScan}
             />
             <ActionButton
@@ -352,7 +352,7 @@ export function ReferencePanel() {
                   <Eye className="h-3.5 w-3.5" />
                 )
               }
-              label={node.visible === false ? 'Show' : 'Hide'}
+              label={node.visible === false ? 'Mostrar' : 'Ocultar'}
               onClick={() => handleUpdate({ visible: node.visible === false })}
             />
           </ActionGroup>
@@ -363,7 +363,7 @@ export function ReferencePanel() {
         <SliderControl
           label={
             <>
-              X<sub className="ml-[1px] text-[11px] opacity-70">pos</sub>
+              X<sub className="ml-[1px] text-[11px] opacity-70">pos.</sub>
             </>
           }
           max={50}
@@ -381,7 +381,7 @@ export function ReferencePanel() {
         <SliderControl
           label={
             <>
-              Y<sub className="ml-[1px] text-[11px] opacity-70">pos</sub>
+              Y<sub className="ml-[1px] text-[11px] opacity-70">pos.</sub>
             </>
           }
           max={50}
@@ -399,7 +399,7 @@ export function ReferencePanel() {
         <SliderControl
           label={
             <>
-              Z<sub className="ml-[1px] text-[11px] opacity-70">pos</sub>
+              Z<sub className="ml-[1px] text-[11px] opacity-70">pos.</sub>
             </>
           }
           max={50}
@@ -420,7 +420,7 @@ export function ReferencePanel() {
         <SliderControl
           label={
             <>
-              Y<sub className="ml-[1px] text-[11px] opacity-70">rot</sub>
+              Y<sub className="ml-[1px] text-[11px] opacity-70">rot.</sub>
             </>
           }
           max={180}
@@ -460,7 +460,7 @@ export function ReferencePanel() {
         <SliderControl
           label={
             <>
-              XYZ<sub className="ml-[1px] text-[11px] opacity-70">scale</sub>
+              XYZ<sub className="ml-[1px] text-[11px] opacity-70">escala</sub>
             </>
           }
           max={10}
@@ -476,7 +476,7 @@ export function ReferencePanel() {
         />
 
         <SliderControl
-          label="Opacity"
+          label="Opacidade"
           max={100}
           min={0}
           onChange={(v) => handleUpdate({ opacity: v })}

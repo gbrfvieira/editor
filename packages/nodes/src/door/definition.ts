@@ -243,15 +243,15 @@ export const doorDefinition: NodeDefinition<typeof DoorNode> = {
   },
 
   toolHints: [
-    { key: 'Left click', label: 'Place door on wall' },
-    { key: 'R', label: 'Flip side' },
-    { key: 'Alt', label: 'Force place' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Posicionar porta na parede' },
+    { key: 'R', label: 'Inverter lado' },
+    { key: 'Alt', label: 'Forçar posicionamento' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
-    label: 'Door',
-    description: 'A door cut into a wall. Animated open/close state.',
+    label: 'Porta',
+    description: 'Uma porta inserida na parede, com animação de abertura e fechamento.',
     icon: { kind: 'url', src: '/icons/door.webp' },
     paletteSection: 'structure',
     paletteOrder: 50,

@@ -150,8 +150,8 @@ function OptionItem({
 const PAGE_LABEL: Record<string, string> = {
   'wall-mode': 'Modo parede',
   'level-mode': 'Modo nível',
-  'rename-level': 'Rename Level',
-  'goto-level': 'Go to Level',
+  'rename-level': 'Renomear nível',
+  'goto-level': 'Ir para o nível',
 }
 
 // ---------------------------------------------------------------------------
@@ -245,16 +245,16 @@ export function CommandPalette({ emptyAction }: { emptyAction?: CommandPaletteEm
   }
 
   const wallModeLabel: Record<'cutaway' | 'up' | 'down' | 'translucent', string> = {
-    cutaway: 'Cutaway',
-    up: 'Up',
-    down: 'Down',
-    translucent: 'Translucent',
+    cutaway: 'Em corte',
+    up: 'Altura total',
+    down: 'Baixas',
+    translucent: 'Translúcidas',
   }
   const levelModeLabel: Record<'manual' | 'stacked' | 'exploded' | 'solo', string> = {
     manual: 'Manual',
-    stacked: 'Stacked',
-    exploded: 'Exploded',
-    solo: 'Solo',
+    stacked: 'Empilhados',
+    exploded: 'Separados',
+    solo: 'Isolado',
   }
 
   const confirmRename = () => {
@@ -293,7 +293,7 @@ export function CommandPalette({ emptyAction }: { emptyAction?: CommandPaletteEm
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogContent className="max-w-lg gap-0 overflow-hidden p-0" showCloseButton={false}>
-        <DialogTitle className="sr-only">Command Palette</DialogTitle>
+        <DialogTitle className="sr-only">Paleta de comandos</DialogTitle>
 
         {modeView && <modeView.Component onBack={onBack} onClose={onClose} />}
 
@@ -326,9 +326,9 @@ export function CommandPalette({ emptyAction }: { emptyAction?: CommandPaletteEm
                 onValueChange={setInputValue}
                 placeholder={
                   page === 'rename-level'
-                    ? 'Type a new name…'
+                    ? 'Digite um novo nome…'
                     : page
-                      ? 'Filter options…'
+                      ? 'Filtrar opções…'
                       : 'Pesquisar ações…'
                 }
                 value={inputValue}
@@ -338,7 +338,7 @@ export function CommandPalette({ emptyAction }: { emptyAction?: CommandPaletteEm
             <Command.List className="max-h-100 overflow-y-auto p-1.5">
               {(!emptyAction || page) && (
                 <Command.Empty className="py-8 text-center text-muted-foreground text-sm">
-                  No commands found.
+                  Nenhum comando encontrado.
                 </Command.Empty>
               )}
               {emptyAction && !page && <EmptyActionItem action={emptyAction} />}
@@ -448,10 +448,10 @@ export function CommandPalette({ emptyAction }: { emptyAction?: CommandPaletteEm
                     <span className="flex-1 truncate">
                       {inputValue.trim() ? (
                         <>
-                          Rename to <span className="font-medium">"{inputValue.trim()}"</span>
+                          Renomear para <span className="font-medium">"{inputValue.trim()}"</span>
                         </>
                       ) : (
-                        <span className="text-muted-foreground">Type a new name above…</span>
+                        <span className="text-muted-foreground">Digite um novo nome acima…</span>
                       )}
                     </span>
                   </Command.Item>
@@ -462,18 +462,18 @@ export function CommandPalette({ emptyAction }: { emptyAction?: CommandPaletteEm
             {/* Footer hint */}
             <div className="flex items-center justify-between border-border/50 border-t px-3 py-2">
               <span className="text-[11px] text-muted-foreground">
-                <Shortcut keys={['↑', '↓']} /> navigate
+                <Shortcut keys={['↑', '↓']} /> navegar
               </span>
               <span className="text-[11px] text-muted-foreground">
-                <Shortcut keys={['↵']} /> select
+                <Shortcut keys={['↵']} /> selecionar
               </span>
               {page ? (
                 <span className="text-[11px] text-muted-foreground">
-                  <Shortcut keys={['⌫']} /> back
+                  <Shortcut keys={['⌫']} /> voltar
                 </span>
               ) : (
                 <span className="text-[11px] text-muted-foreground">
-                  <Shortcut keys={['Esc']} /> close
+                  <Shortcut keys={['Esc']} /> fechar
                 </span>
               )}
             </div>

@@ -27,10 +27,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '../primitives/popover'
 import { ActionButton } from './action-button'
 
 const measurementOptions = [
-  { kind: 'distance', label: 'Distance', icon: Ruler },
-  { kind: 'angle', label: 'Angle', icon: Triangle },
-  { kind: 'area', label: 'Area', icon: Square },
-  { kind: 'perimeter', label: 'Perimeter', icon: Waypoints },
+  { kind: 'distance', label: 'Distância', icon: Ruler },
+  { kind: 'angle', label: 'Ângulo', icon: Triangle },
+  { kind: 'area', label: 'Área', icon: Square },
+  { kind: 'perimeter', label: 'Perímetro', icon: Waypoints },
   { kind: 'volume', label: 'Volume', icon: Box },
 ] as const satisfies readonly {
   kind: CreatableMeasurementKind
@@ -39,20 +39,20 @@ const measurementOptions = [
 }[]
 
 const measurementMenuOptions = [
-  { kind: 'smart', label: 'Smart', icon: ScanSearch },
+  { kind: 'smart', label: 'Inteligente', icon: ScanSearch },
   ...measurementOptions,
 ] as const
 
 const constructionDimensionOptions = [
-  { mode: 'linear', chainMode: 'point-to-point', label: 'Linear dimension', icon: Ruler },
-  { mode: 'linear', chainMode: 'continuous', label: 'Continuous dimension', icon: Waypoints },
-  { mode: 'radius', chainMode: 'point-to-point', label: 'Radius dimension', icon: CircleIcon },
-  { mode: 'diameter', chainMode: 'point-to-point', label: 'Diameter dimension', icon: CircleIcon },
-  { mode: 'center-mark', chainMode: 'point-to-point', label: 'Center mark', icon: Crosshair },
-  { mode: 'chord', chainMode: 'point-to-point', label: 'Chord dimension', icon: Minus },
-  { mode: 'arc-length', chainMode: 'point-to-point', label: 'Arc length', icon: CircleIcon },
-  { mode: 'angular', chainMode: 'point-to-point', label: 'Angular dimension', icon: Triangle },
-  { mode: 'coordinate', chainMode: 'continuous', label: 'Coordinate dimensions', icon: Grid2X2 },
+  { mode: 'linear', chainMode: 'point-to-point', label: 'Cota linear', icon: Ruler },
+  { mode: 'linear', chainMode: 'continuous', label: 'Cota contínua', icon: Waypoints },
+  { mode: 'radius', chainMode: 'point-to-point', label: 'Cota de raio', icon: CircleIcon },
+  { mode: 'diameter', chainMode: 'point-to-point', label: 'Cota de diâmetro', icon: CircleIcon },
+  { mode: 'center-mark', chainMode: 'point-to-point', label: 'Marca de centro', icon: Crosshair },
+  { mode: 'chord', chainMode: 'point-to-point', label: 'Cota de corda', icon: Minus },
+  { mode: 'arc-length', chainMode: 'point-to-point', label: 'Comprimento do arco', icon: CircleIcon },
+  { mode: 'angular', chainMode: 'point-to-point', label: 'Cota angular', icon: Triangle },
+  { mode: 'coordinate', chainMode: 'continuous', label: 'Cotas por coordenadas', icon: Grid2X2 },
 ] as const satisfies readonly {
   mode: ConstructionDimensionMode
   chainMode: ConstructionDimensionChainMode
@@ -98,9 +98,9 @@ export function MeasurementControl() {
       ? ScanSearch
       : selectedOption.icon
   const selectedLabel = isConstructionDimensionActive
-    ? (activeConstructionDimensionOption?.label ?? 'Linear dimension')
+    ? (activeConstructionDimensionOption?.label ?? 'Cota linear')
     : isSmartActive
-      ? 'Smart'
+      ? 'Inteligente'
       : selectedOption.label
 
   const activateMeasurement = (kind: CreatableMeasurementKind) => {
@@ -148,7 +148,7 @@ export function MeasurementControl() {
     <Popover onOpenChange={setIsOpen} open={isOpen}>
       <div className="flex items-center">
         <ActionButton
-          aria-label={`Measure: ${selectedLabel}`}
+          aria-label={`Medir: ${selectedLabel}`}
           aria-pressed={isControlActive}
           className={cn(
             'rounded-r-none p-0 text-muted-foreground',
@@ -156,7 +156,7 @@ export function MeasurementControl() {
               ? 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/20'
               : 'hover:bg-cyan-500/15 hover:text-cyan-400',
           )}
-          label={`Measure: ${selectedLabel}`}
+          label={`Medir: ${selectedLabel}`}
           onClick={handlePrimaryClick}
           shortcut="M"
           size="icon"
@@ -228,7 +228,7 @@ export function MeasurementControl() {
             <>
               <div className="my-1.5 h-px bg-border/60" />
               <div className="px-2.5 pt-1 pb-0.5 font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
-                Floor plan
+                Planta baixa
               </div>
 
               {constructionDimensionOptions.map((option) => {

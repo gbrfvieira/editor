@@ -312,7 +312,7 @@ export const slabDefinition: NodeDefinition<typeof SlabNode> = {
       polygonMeasurementFeatures({
         featurePrefix: 'slab',
         height: node.elevation,
-        label: 'Slab',
+        label: 'Laje',
         polygon: node.polygon,
       }),
     quickMeasure: (node) => slabQuickMeasurement(node),
@@ -362,14 +362,14 @@ export const slabDefinition: NodeDefinition<typeof SlabNode> = {
   },
 
   toolHints: [
-    { key: 'Left click', label: 'Trace slab outline' },
-    { key: 'Enter', label: 'Finish slab', minDraftVertices: 3 },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Traçar contorno da laje' },
+    { key: 'Enter', label: 'Concluir laje', minDraftVertices: 3 },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
-    label: 'Slab',
-    description: 'A polygon-bounded floor surface that hosts items on top.',
+    label: 'Laje',
+    description: 'Uma superfície poligonal de piso que recebe itens sobre ela.',
     icon: { kind: 'url', src: '/icons/floor.webp' },
     paletteSection: 'structure',
     paletteOrder: 30,

@@ -705,7 +705,7 @@ export const MoveWallEndpointTool: React.FC<{ target: MovingWallEndpoint }> = ({
                     : 'border-border bg-background/95 text-muted-foreground'
                 }`}
               >
-                {altPressed ? 'Detaching corner' : 'Alt to detach'}
+                {altPressed ? 'Desvinculando canto' : 'Alt para desvincular'}
               </div>
             </div>
           </Html>

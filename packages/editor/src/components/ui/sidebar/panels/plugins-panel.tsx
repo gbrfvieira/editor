@@ -67,7 +67,7 @@ export function PluginsPanel() {
             variant="ghost"
           >
             <ChevronLeft className="h-4 w-4" />
-            All plugins
+            Todos os plugins
           </Button>
 
           <div className="mt-5 flex items-start gap-4">
@@ -77,7 +77,7 @@ export function PluginsPanel() {
             <div className="min-w-0 pt-1">
               <h2 className="font-semibold text-lg text-sidebar-foreground">{panel.label}</h2>
               <p className="text-sidebar-foreground/50 text-sm">
-                {installed ? 'Installed' : 'Not installed'}
+                {installed ? 'Instalado' : 'Não instalado'}
               </p>
             </div>
           </div>
@@ -88,12 +88,12 @@ export function PluginsPanel() {
 
           <dl className="mt-6 divide-y divide-border/50 rounded-xl border border-border/60">
             <div className="p-3">
-              <dt className="text-sidebar-foreground/50 text-xs">Plugin ID</dt>
+              <dt className="text-sidebar-foreground/50 text-xs">ID do plugin</dt>
               <dd className="mt-1 break-all text-sidebar-foreground text-sm">{pluginId}</dd>
             </div>
             {panel.creator && (
               <div className="p-3">
-                <dt className="text-sidebar-foreground/50 text-xs">Creator</dt>
+                <dt className="text-sidebar-foreground/50 text-xs">Criador</dt>
                 <dd className="mt-1 text-sm">
                   {panel.creator.url ? (
                     <a
@@ -121,7 +121,7 @@ export function PluginsPanel() {
                     rel="noreferrer"
                     target="_blank"
                   >
-                    View plugin
+                    Ver plugin
                     <ExternalLink className="h-3 w-3" />
                   </a>
                 </dd>
@@ -140,7 +140,7 @@ export function PluginsPanel() {
             }}
             variant={installed ? 'outline' : 'default'}
           >
-            {installed ? 'Uninstall' : 'Install'}
+            {installed ? 'Desinstalar' : 'Instalar'}
           </Button>
         </div>
 
@@ -151,7 +151,7 @@ export function PluginsPanel() {
             rel="noreferrer"
             target="_blank"
           >
-            Create a Pascal plugin
+            Criar um plugin Pascal
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </div>
@@ -164,7 +164,7 @@ export function PluginsPanel() {
       <div className="mb-5">
         <h2 className="font-semibold text-lg text-sidebar-foreground">Plugins</h2>
         <p className="mt-1 text-sidebar-foreground/60 text-sm">
-          Add focused tools and content to this project.
+          Adicione ferramentas específicas e conteúdo a este projeto.
         </p>
       </div>
 
@@ -187,7 +187,7 @@ export function PluginsPanel() {
                     <div>
                       <h3 className="font-medium text-sidebar-foreground">{panel.label}</h3>
                       <p className="text-sidebar-foreground/50 text-xs">
-                        {installed ? 'Installed' : 'Not installed'}
+                        {installed ? 'Instalado' : 'Não instalado'}
                       </p>
                     </div>
                     <ChevronRight className="h-4 w-4 shrink-0 text-sidebar-foreground/50" />
@@ -209,7 +209,7 @@ export function PluginsPanel() {
           rel="noreferrer"
           target="_blank"
         >
-          Create a Pascal plugin
+          Criar um plugin Pascal
           <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>

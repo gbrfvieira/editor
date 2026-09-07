@@ -340,7 +340,7 @@ function resolveHudInteract(target: FirstPersonInteractableTarget | null): Walkt
   if (!target) return null
   if (target.type === 'elevator') {
     return {
-      label: target.action === 'open-door' ? 'door button' : 'elevator button',
+      label: target.action === 'open-door' ? 'botão da porta' : 'botão do elevador',
       verb: 'press',
     }
   }
@@ -349,14 +349,14 @@ function resolveHudInteract(target: FirstPersonInteractableTarget | null): Walkt
   if (target.type === 'window') {
     if (node?.type !== 'window') return null
     const isOpen = getDisplayedWindowValue(target.id, node.operationState) > 0
-    return { label: node.name || 'window', verb: isOpen ? 'close' : 'open' }
+    return { label: node.name || 'janela', verb: isOpen ? 'close' : 'open' }
   }
 
   if (node?.type !== 'door') return null
   const isOpen = isOperationDoorType(node.doorType)
     ? getDisplayedDoorValue(target.id, 'operationState', node.operationState) > 0
     : getDisplayedDoorValue(target.id, 'swingAngle', node.swingAngle) > 0
-  return { label: node.name || 'door', verb: isOpen ? 'close' : 'open' }
+  return { label: node.name || 'porta', verb: isOpen ? 'close' : 'open' }
 }
 
 function resolveElevatorButtonTarget(object: Object3D): ElevatorButtonTarget | null {
@@ -1773,7 +1773,7 @@ export const FirstPersonOverlay = ({ onExit }: { onExit: () => void }) => {
     >
       {!hasPlacedSpawn && (
         <div className="corner-smooth rounded-full border border-border/40 bg-background/80 px-3 py-1 text-center text-muted-foreground text-xs shadow-elevation-3 backdrop-blur-xl">
-          Place a spawn point from the Build tab to control where walkthrough starts.
+          Posicione um ponto inicial na aba Construir para definir onde começa o passeio.
         </div>
       )}
     </WalkthroughHud>

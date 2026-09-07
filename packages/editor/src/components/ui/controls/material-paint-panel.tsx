@@ -97,7 +97,7 @@ export function MaterialPaintPanel({ onCreateMaterialRequest }: MaterialPaintPan
           variant={paintEraser ? 'default' : 'outline'}
         >
           <Eraser />
-          Erase
+          Apagar
         </Button>
         <Button
           className="flex-1"
@@ -107,7 +107,7 @@ export function MaterialPaintPanel({ onCreateMaterialRequest }: MaterialPaintPan
           variant="outline"
         >
           <RotateCcw />
-          Reset all
+          Redefinir tudo
         </Button>
       </div>
 
@@ -128,7 +128,7 @@ export function MaterialPaintPanel({ onCreateMaterialRequest }: MaterialPaintPan
       <div className="mt-2 shrink-0 space-y-1.5 border-border/60 border-t pt-2">
         <div className="flex items-center justify-between">
           <span className="font-medium text-muted-foreground text-xs uppercase tracking-[0.12em]">
-            Scene materials
+            Materiais da cena
           </span>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -150,7 +150,7 @@ export function MaterialPaintPanel({ onCreateMaterialRequest }: MaterialPaintPan
             <SceneMaterialList autoEditId={autoEditMaterialId} />
           ) : (
             <p className="px-0.5 py-1 text-muted-foreground text-xs">
-              No custom materials yet — add one with +.
+              Ainda não há materiais personalizados — adicione um com +.
             </p>
           )}
         </div>

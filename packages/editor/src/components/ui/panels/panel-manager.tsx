@@ -172,7 +172,7 @@ function MobileMultiPanelLayer({
   type: string | null
 }) {
   const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const display = type ? getTypeDisplay(type) : { icon: '/icons/select.webp', label: 'Selection' }
+  const display = type ? getTypeDisplay(type) : { icon: '/icons/select.webp', label: 'Seleção' }
   const title = breakdown || display.label
 
   useEffect(() => {

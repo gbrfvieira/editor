@@ -265,13 +265,13 @@ export const shelfDefinition: NodeDefinition<typeof ShelfNode> = {
   preview: () => import('./preview'),
   tool: () => import('./tool'),
   toolHints: [
-    { key: 'Left click', label: 'Place shelf' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Posicionar prateleira' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
-    label: 'Shelf',
-    description: 'A configurable shelving unit. Items host on each row.',
+    label: 'Prateleira',
+    description: 'Uma estante configurável. Cada prateleira pode receber itens.',
     icon: { kind: 'url', src: '/icons/shelf.webp' },
     paletteSection: 'furnish',
     paletteOrder: 30,

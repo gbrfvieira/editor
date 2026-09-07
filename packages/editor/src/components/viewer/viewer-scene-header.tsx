@@ -118,7 +118,7 @@ export const ViewerSceneHeader = ({
           )}
           <div className="min-w-0 flex-1">
             <div className="truncate font-medium text-foreground text-sm">
-              {projectName || 'Untitled'}
+              {projectName || 'Sem título'}
             </div>
             {owner?.username && (
               <Link
@@ -143,7 +143,7 @@ export const ViewerSceneHeader = ({
                 className="text-muted-foreground transition-colors hover:text-foreground"
                 onClick={() => handleBreadcrumbClick('root')}
               >
-                Site
+                Terreno
               </button>
 
               <ChevronRight className="h-3 w-3 text-muted-foreground/50" />
@@ -194,7 +194,7 @@ export const ViewerSceneHeader = ({
       {building && levels.length > 0 && (
         <div className="corner-smooth pointer-events-auto flex w-48 flex-col overflow-hidden rounded-2xl border border-border/40 bg-background/95 py-1 shadow-elevation-4 backdrop-blur-xl transition-colors duration-200 ease-out">
           <span className="px-3 py-2 font-medium text-[10px] text-muted-foreground uppercase tracking-wider">
-            Levels
+            Níveis
           </span>
           <div className="flex flex-col">
             {levels.map((lvl) => {

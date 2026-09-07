@@ -70,16 +70,16 @@ export const constructionDimensionDefinition: NodeDefinition<typeof Construction
     'move-construction-dimension-witness': moveConstructionDimensionWitnessAffordance,
   },
   toolHints: [
-    { key: 'Left click', label: 'Pick witness point' },
-    { key: 'Enter', label: 'Finish multi-point witnesses' },
-    { key: 'Left click', label: 'Place dimension line when needed' },
-    { key: 'Backspace', label: 'Remove last witness' },
-    { key: 'Esc', label: 'Step back or cancel' },
+    { key: 'Left click', label: 'Escolher ponto de referência' },
+    { key: 'Enter', label: 'Concluir pontos de referência' },
+    { key: 'Left click', label: 'Posicionar linha de cota quando necessário' },
+    { key: 'Backspace', label: 'Remover última referência' },
+    { key: 'Esc', label: 'Voltar uma etapa ou cancelar' },
   ],
 
   presentation: {
-    label: 'Construction Dimension',
-    description: 'Associative linear, curved, circular, angular, or coordinate plan dimension.',
+    label: 'Cota construtiva',
+    description: 'Cota associativa linear, curva, circular, angular ou por coordenadas na planta.',
     icon: { kind: 'iconify', name: 'lucide:ruler-dimension-line' },
     hidden: true,
     actionMenu: false,

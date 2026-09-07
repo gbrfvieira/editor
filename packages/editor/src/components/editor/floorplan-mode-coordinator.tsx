@@ -66,7 +66,7 @@ export function FloorplanModeCoordinator() {
           }}
           type="button"
         >
-          Switch to Expert
+          Alternar para especialista
         </button>
       ) : null}
       <button

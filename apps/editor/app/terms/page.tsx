@@ -39,85 +39,84 @@ export default function TermsPage() {
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">1. Introdução</h2>
             <p className="text-foreground/90 leading-relaxed">
-              Welcome to Pascal Editor (&quot;Editor&quot;) and the Pascal platform at pascal.app
-              (&quot;Platform&quot;), operated by Pascal Group Inc. (&quot;we,&quot; &quot;us,&quot;
-              or &quot;our&quot;). By accessing or using our services, you agree to these Terms of
-              Service.
+              Boas-vindas ao Pascal Editor (“Editor”) e à plataforma Pascal em pascal.app
+              (“Plataforma”), operados pela Pascal Group Inc. (“nós” ou “nosso”). Ao acessar ou usar
+              nossos serviços, você concorda com estes Termos de Serviço.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">2. O editor e a plataforma</h2>
             <p className="text-foreground/90 leading-relaxed">
-              The Pascal Editor is open-source software released under the MIT License. You may use,
-              copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Editor
-              software in accordance with the MIT License terms.
+              O Pascal Editor é um software de código aberto disponibilizado sob a licença MIT. Você
+              pode usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou vender
+              cópias do software Editor de acordo com os termos da licença MIT.
             </p>
             <p className="text-foreground/90 leading-relaxed">
-              The Pascal platform (pascal.app) and its associated services, including user accounts,
-              cloud storage, and project hosting, are proprietary services owned and operated by
-              Pascal Group Inc. These Terms govern your use of the Platform.
+              A plataforma Pascal (pascal.app) e seus serviços associados, incluindo contas de
+              usuário, armazenamento em nuvem e hospedagem de projetos, são serviços proprietários
+              pertencentes à Pascal Group Inc. e operados por ela. Estes Termos regem seu uso da
+              Plataforma.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">3. Contas e autenticação</h2>
             <p className="text-foreground/90 leading-relaxed">
-              To use certain features of the Platform, you must create an account. We use Google
-              OAuth and magic link email authentication through Supabase. You are responsible for
-              maintaining the security of your account credentials and for all activities that occur
-              under your account.
+              Para usar determinados recursos da Plataforma, você deve criar uma conta. Usamos
+              Google OAuth e autenticação por link de acesso enviado por e-mail, via Supabase. Você
+              é responsável por manter a segurança das credenciais da sua conta e por todas as
+              atividades realizadas nela.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">4. Uso aceitável</h2>
-            <p className="text-foreground/90 leading-relaxed">You agree not to:</p>
+            <p className="text-foreground/90 leading-relaxed">Você concorda em não:</p>
             <ul className="list-disc space-y-2 pl-6 text-foreground/90">
+              <li>Usar a Plataforma para fins ilegais ou em violação de qualquer lei aplicável</li>
               <li>
-                Use the Platform for any unlawful purpose or in violation of any applicable laws
+                Enviar, compartilhar ou distribuir conteúdo que viole direitos de propriedade
+                intelectual
               </li>
-              <li>
-                Upload, share, or distribute content that infringes intellectual property rights
-              </li>
-              <li>Attempt to gain unauthorized access to the Platform or its systems</li>
-              <li>Interfere with or disrupt the Platform&apos;s infrastructure</li>
-              <li>Upload malicious code, viruses, or harmful content</li>
-              <li>Harass, abuse, or harm other users</li>
-              <li>Use the Platform to send spam or unsolicited communications</li>
+              <li>Tentar obter acesso não autorizado à Plataforma ou aos seus sistemas</li>
+              <li>Interferir na infraestrutura da Plataforma ou interromper seu funcionamento</li>
+              <li>Enviar código malicioso, vírus ou conteúdo prejudicial</li>
+              <li>Assediar, abusar ou causar danos a outros usuários</li>
+              <li>Usar a Plataforma para enviar spam ou comunicações não solicitadas</li>
             </ul>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">5. Seu conteúdo e propriedade intelectual</h2>
             <p className="text-foreground/90 leading-relaxed">
-              You retain full ownership of all content, projects, and data you create or upload to
-              the Platform (&quot;Your Content&quot;). By using the Platform, you grant us a limited
-              license to store, display, and transmit Your Content solely to provide our services to
-              you.
+              Você mantém a titularidade integral de todo conteúdo, projeto e dado que criar ou
+              enviar à Plataforma (“Seu Conteúdo”). Ao usar a Plataforma, você nos concede uma
+              licença limitada para armazenar, exibir e transmitir Seu Conteúdo exclusivamente para
+              prestar nossos serviços a você.
             </p>
             <p className="text-foreground/90 leading-relaxed">
-              We do not claim any ownership rights over Your Content. You may export or delete Your
-              Content at any time.
+              Não reivindicamos quaisquer direitos de propriedade sobre Seu Conteúdo. Você pode
+              exportar ou excluir Seu Conteúdo a qualquer momento.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">6. Propriedade da plataforma</h2>
             <p className="text-foreground/90 leading-relaxed">
-              The Platform, including its design, features, and proprietary code, is owned by Pascal
-              Group Inc. and protected by intellectual property laws. While the Editor source code
-              is open-source under the MIT License, the Platform services, branding, and
-              infrastructure remain our proprietary property.
+              A Plataforma, incluindo seu design, recursos e código proprietário, pertence à Pascal
+              Group Inc. e é protegida pelas leis de propriedade intelectual. Embora o código-fonte
+              do Editor seja aberto sob a licença MIT, os serviços, a marca e a infraestrutura da
+              Plataforma continuam sendo de nossa propriedade exclusiva.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">7. Encerramento da conta</h2>
             <p className="text-foreground/90 leading-relaxed">
-              We reserve the right to suspend or terminate your account if you violate these Terms
-              or engage in conduct that we determine is harmful to the Platform or other users. You
-              may also delete your account at any time by contacting us at{' '}
+              Reservamo-nos o direito de suspender ou encerrar sua conta se você violar estes Termos
+              ou adotar condutas que consideremos prejudiciais à Plataforma ou a outros usuários.
+              Você também pode excluir sua conta a qualquer momento entrando em contato conosco em{' '}
               <a
                 className="text-foreground underline hover:text-foreground/80"
                 href="mailto:support@pascal.app"
@@ -131,39 +130,41 @@ export default function TermsPage() {
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">8. Isenção de garantias</h2>
             <p className="text-foreground/90 leading-relaxed">
-              THE PLATFORM IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT
-              WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-              IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-              NON-INFRINGEMENT.
+              A PLATAFORMA É FORNECIDA “NO ESTADO EM QUE SE ENCONTRA” E “CONFORME DISPONÍVEL”, SEM
+              GARANTIAS DE QUALQUER TIPO, EXPRESSAS OU IMPLÍCITAS, INCLUINDO, SEM LIMITAÇÃO,
+              GARANTIAS IMPLÍCITAS DE COMERCIABILIDADE, ADEQUAÇÃO A UMA FINALIDADE ESPECÍFICA E NÃO
+              VIOLAÇÃO DE DIREITOS.
             </p>
             <p className="text-foreground/90 leading-relaxed">
-              We do not warrant that the Platform will be uninterrupted, error-free, or free of
-              harmful components.
+              Não garantimos que a Plataforma funcionará sem interrupções, estará livre de erros ou
+              de componentes prejudiciais.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">9. Limitação de responsabilidade</h2>
             <p className="text-foreground/90 leading-relaxed">
-              TO THE MAXIMUM EXTENT PERMITTED BY LAW, PASCAL GROUP INC. SHALL NOT BE LIABLE FOR ANY
-              INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF
-              DATA, PROFITS, OR GOODWILL, ARISING FROM YOUR USE OF THE PLATFORM.
+              NA MÁXIMA EXTENSÃO PERMITIDA POR LEI, A PASCAL GROUP INC. NÃO SERÁ RESPONSÁVEL POR
+              QUAISQUER DANOS INDIRETOS, INCIDENTAIS, ESPECIAIS, CONSEQUENCIAIS OU PUNITIVOS,
+              INCLUINDO PERDA DE DADOS, LUCROS OU FUNDO DE COMÉRCIO, DECORRENTES DO SEU USO DA
+              PLATAFORMA.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">10. Alterações nos termos</h2>
             <p className="text-foreground/90 leading-relaxed">
-              We may update these Terms from time to time. We will notify you of material changes by
-              posting the updated Terms on the Platform. Your continued use of the Platform after
-              changes are posted constitutes your acceptance of the revised Terms.
+              Podemos atualizar estes Termos periodicamente. Informaremos sobre alterações
+              relevantes publicando os Termos atualizados na Plataforma. A continuidade do uso da
+              Plataforma após a publicação das alterações constitui sua aceitação dos Termos
+              revisados.
             </p>
           </section>
 
           <section className="space-y-4">
             <h2 className="font-semibold text-xl">11. Fale conosco</h2>
             <p className="text-foreground/90 leading-relaxed">
-              If you have questions about these Terms, please contact us at{' '}
+              Se você tiver dúvidas sobre estes Termos, entre em contato conosco em{' '}
               <a
                 className="text-foreground underline hover:text-foreground/80"
                 href="mailto:support@pascal.app"

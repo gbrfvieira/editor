@@ -92,7 +92,7 @@ function ZoneItem({ zone }: { zone: ZoneNode }) {
                 }}
               >
                 <Camera className="h-3.5 w-3.5" />
-                View snapshot
+                Ver captura
               </button>
             )}
             <button
@@ -116,7 +116,7 @@ function ZoneItem({ zone }: { zone: ZoneNode }) {
                 }}
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                Clear snapshot
+                Limpar captura
               </button>
             )}
           </div>
@@ -169,7 +169,7 @@ export function ZonePanel() {
   if (!currentLevelId) {
     return (
       <div className="px-3 py-4 text-muted-foreground text-sm">
-        Select a level to view and create zones
+        Selecione um nível para ver e criar ambientes
       </div>
     )
   }
@@ -178,9 +178,9 @@ export function ZonePanel() {
     <div className="py-1">
       {levelZones.length === 0 ? (
         <div className="px-3 py-4 text-muted-foreground text-sm">
-          No zones on this level.{' '}
+          Não há ambientes neste nível.{' '}
           <button className="cursor-pointer text-primary hover:underline" onClick={handleAddZone}>
-            Add one
+            Adicionar
           </button>
         </div>
       ) : (
@@ -191,21 +191,21 @@ export function ZonePanel() {
           <ActionButton
             className="w-full flex-none"
             icon={<Save className="h-4 w-4" />}
-            label="Save to catalog"
+            label="Salvar no catálogo"
             onClick={() => emitter.emit('room-preset:create', { zoneId: selectedZone.id })}
             type="button"
           />
           <ActionButton
             className="w-full flex-none"
             icon={<Trash2 className="h-4 w-4 text-red-400" />}
-            label="Delete"
+            label="Excluir"
             onClick={() => deleteSelectedZone(false)}
             type="button"
           />
           <ActionButton
             className="w-full flex-none"
             icon={<Trash2 className="h-4 w-4 text-red-400" />}
-            label="Delete with contents"
+            label="Excluir com o conteúdo"
             onClick={() => deleteSelectedZone(true)}
             type="button"
           />

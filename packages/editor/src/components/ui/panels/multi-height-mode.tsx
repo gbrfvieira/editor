@@ -145,29 +145,29 @@ export function MultiHeightModeField({
   const sliderMixed = storedHeight.kind === 'mixed' || mixedMode
   const currentLabel = Number.isFinite(liveHeight)
     ? formatLinearMeasurement(liveHeight, unit, metricNotation)
-    : 'Mixed'
+    : 'Misto'
 
   return (
     <>
       {nodeType === 'wall' && (
         <div className="px-1 font-medium text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-          Top
+          Topo
         </div>
       )}
       <SegmentedControl
         mixed={mixedMode}
         onChange={applyMode}
         options={[
-          { label: 'Follows level', value: 'storey' },
-          { label: 'Custom height', value: 'custom' },
+          { label: 'Acompanha o nível', value: 'storey' },
+          { label: 'Altura personalizada', value: 'custom' },
         ]}
         value={mode.kind === 'same' ? mode.value : 'storey'}
       />
       {isFollows ? (
-        <div className="px-1 text-[11px] text-muted-foreground">Currently {currentLabel}</div>
+        <div className="px-1 text-[11px] text-muted-foreground">Atualmente {currentLabel}</div>
       ) : isCustom ? (
         <SliderControl
-          label="Height"
+          label="Altura"
           max={max}
           min={min}
           mixed={sliderMixed}

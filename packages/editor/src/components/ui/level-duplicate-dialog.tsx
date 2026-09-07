@@ -21,7 +21,7 @@ const DUPLICATE_PRESETS: Array<{
 }> = [
   {
     id: 'everything',
-    label: 'Everything',
+    label: 'Tudo',
     description: 'Estrutura, materiais, móveis e referências.',
   },
   {
@@ -70,7 +70,7 @@ export function LevelDuplicateDialog({
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Duplicar nível</DialogTitle>
-          <DialogDescription>Choose what to copy from {getLevelLabel(level)}.</DialogDescription>
+          <DialogDescription>Escolha o que copiar de {getLevelLabel(level)}.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-2">
@@ -98,14 +98,14 @@ export function LevelDuplicateDialog({
             onClick={() => onOpenChange(false)}
             type="button"
           >
-            Cancel
+            Cancelar
           </button>
           <button
             className="cursor-pointer rounded-md bg-primary px-4 py-2 text-primary-foreground text-sm transition-opacity hover:opacity-90"
             onClick={() => onConfirm(preset)}
             type="button"
           >
-            Duplicate
+            Duplicar
           </button>
         </DialogFooter>
       </DialogContent>

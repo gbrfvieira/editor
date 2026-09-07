@@ -39,9 +39,9 @@ export default function PrivacyPage() {
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">1. Introdução</h2>
             <p className="text-foreground/90 leading-relaxed">
-              Pascal Group Inc. (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the
-              Pascal Editor and Platform at pascal.app. This Privacy Policy explains how we collect,
-              use, and protect your information when you use our services.
+              A Pascal Group Inc. (“nós” ou “nosso”) opera o Pascal Editor e a plataforma em
+              pascal.app. Esta Política de Privacidade explica como coletamos, usamos e protegemos
+              suas informações quando você utiliza nossos serviços.
             </p>
           </section>
 
@@ -50,105 +50,107 @@ export default function PrivacyPage() {
 
             <h3 className="mt-4 font-medium text-lg">Informações da conta</h3>
             <p className="text-foreground/90 leading-relaxed">
-              When you create an account, we collect:
+              Quando você cria uma conta, coletamos:
             </p>
             <ul className="list-disc space-y-2 pl-6 text-foreground/90">
-              <li>Email address</li>
-              <li>Name</li>
-              <li>Profile picture/avatar</li>
-              <li>OAuth provider data (from Google when you sign in with Google)</li>
+              <li>Endereço de e-mail</li>
+              <li>Nome</li>
+              <li>Foto de perfil/avatar</li>
+              <li>Dados do provedor OAuth (do Google quando você entra com sua conta Google)</li>
             </ul>
 
             <h3 className="mt-4 font-medium text-lg">Dados do projeto</h3>
             <p className="text-foreground/90 leading-relaxed">
-              When you use the Platform, we store your projects, including 3D building designs,
-              floor plans, and associated metadata.
+              Quando você utiliza a Plataforma, armazenamos seus projetos, incluindo modelos 3D de
+              edificações, plantas baixas e metadados associados.
             </p>
 
             <h3 className="mt-4 font-medium text-lg">Análises de uso</h3>
             <p className="text-foreground/90 leading-relaxed">
-              We use Vercel Analytics and Speed Insights to collect anonymized usage data, including
-              page views, performance metrics, and general usage patterns. This helps us improve the
-              Platform.
+              Usamos Vercel Analytics e Speed Insights para coletar dados de uso anonimizados,
+              incluindo visualizações de páginas, métricas de desempenho e padrões gerais de uso.
+              Isso nos ajuda a melhorar a Plataforma.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">3. Como usamos suas informações</h2>
-            <p className="text-foreground/90 leading-relaxed">We use your information to:</p>
+            <p className="text-foreground/90 leading-relaxed">Usamos suas informações para:</p>
             <ul className="list-disc space-y-2 pl-6 text-foreground/90">
-              <li>Provide and maintain your account</li>
-              <li>Store and sync your projects across devices</li>
-              <li>Improve our services based on usage patterns</li>
+              <li>Disponibilizar e manter sua conta</li>
+              <li>Armazenar e sincronizar seus projetos entre dispositivos</li>
+              <li>Melhorar nossos serviços com base nos padrões de uso</li>
               <li>
-                Send optional email notifications about new features and updates (you can opt out in
-                settings)
+                Enviar notificações opcionais por e-mail sobre novos recursos e atualizações (você
+                pode desativá-las nas configurações)
               </li>
-              <li>Respond to support requests</li>
-              <li>Ensure platform security and prevent abuse</li>
+              <li>Responder a solicitações de suporte</li>
+              <li>Garantir a segurança da plataforma e prevenir abusos</li>
             </ul>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">4. Armazenamento de dados</h2>
             <p className="text-foreground/90 leading-relaxed">
-              Your data is stored using Supabase (PostgreSQL database) on secure cloud
-              infrastructure. We implement appropriate technical and organizational measures to
-              protect your data.
+              Seus dados são armazenados no Supabase (banco de dados PostgreSQL), em infraestrutura
+              de nuvem segura. Implementamos medidas técnicas e organizacionais adequadas para
+              proteger seus dados.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">5. Serviços de terceiros</h2>
             <p className="text-foreground/90 leading-relaxed">
-              We use the following third-party services to operate the Platform:
+              Usamos os seguintes serviços de terceiros para operar a Plataforma:
             </p>
             <ul className="list-disc space-y-2 pl-6 text-foreground/90">
               <li>
-                <strong>Google</strong> - OAuth authentication for sign-in
+                <strong>Google</strong> - Autenticação OAuth para acesso
               </li>
               <li>
-                <strong>Vercel</strong> - Application hosting, analytics, and performance monitoring
+                <strong>Vercel</strong> - Hospedagem do aplicativo, análises e monitoramento de
+                desempenho
               </li>
               <li>
-                <strong>Supabase</strong> - Database hosting and authentication infrastructure
+                <strong>Supabase</strong> - Hospedagem de banco de dados e infraestrutura de
+                autenticação
               </li>
             </ul>
             <p className="mt-4 text-foreground/90 leading-relaxed">
-              Each of these services has their own privacy policies governing their handling of your
-              data.
+              Cada um desses serviços possui suas próprias políticas de privacidade, que regem o
+              tratamento dos seus dados.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">6. Cookies</h2>
             <p className="text-foreground/90 leading-relaxed">
-              We use minimal cookies necessary for the Platform to function:
+              Usamos o mínimo de cookies necessário para o funcionamento da Plataforma:
             </p>
             <ul className="list-disc space-y-2 pl-6 text-foreground/90">
               <li>
-                <strong>Session cookies</strong> - Essential for authentication and keeping you
-                signed in
+                <strong>Cookies de sessão</strong> - Essenciais para autenticação e para manter sua
+                sessão ativa
               </li>
               <li>
-                <strong>Analytics cookies</strong> - Used by Vercel Analytics to collect anonymized
-                usage data
+                <strong>Cookies de análise</strong> - Usados pelo Vercel Analytics para coletar
+                dados de uso anonimizados
               </li>
             </ul>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">7. Seus direitos</h2>
-            <p className="text-foreground/90 leading-relaxed">You have the right to:</p>
+            <p className="text-foreground/90 leading-relaxed">Você tem o direito de:</p>
             <ul className="list-disc space-y-2 pl-6 text-foreground/90">
-              <li>Access the personal data we hold about you</li>
-              <li>Request correction of inaccurate data</li>
-              <li>Request deletion of your data</li>
-              <li>Export your project data</li>
-              <li>Opt out of marketing communications</li>
+              <li>Acessar os dados pessoais que mantemos sobre você</li>
+              <li>Solicitar a correção de dados incorretos</li>
+              <li>Solicitar a exclusão dos seus dados</li>
+              <li>Exportar os dados dos seus projetos</li>
+              <li>Recusar comunicações de marketing</li>
             </ul>
             <p className="mt-4 text-foreground/90 leading-relaxed">
-              To exercise any of these rights, please contact us at{' '}
+              Para exercer qualquer um desses direitos, entre em contato conosco em{' '}
               <a
                 className="text-foreground underline hover:text-foreground/80"
                 href="mailto:support@pascal.app"
@@ -162,35 +164,36 @@ export default function PrivacyPage() {
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">8. Retenção de dados</h2>
             <p className="text-foreground/90 leading-relaxed">
-              We retain your data for as long as your account is active. If you delete your account,
-              we will delete your personal data and project data within 30 days, except where we are
-              required by law to retain certain information.
+              Mantemos seus dados enquanto sua conta estiver ativa. Se você excluir sua conta,
+              excluiremos seus dados pessoais e de projetos em até 30 dias, exceto quando a lei
+              exigir a retenção de determinadas informações.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">9. Privacidade infantil</h2>
             <p className="text-foreground/90 leading-relaxed">
-              The Platform is not intended for children under 13. We do not knowingly collect
-              personal information from children under 13. If you believe we have collected such
-              information, please contact us immediately.
+              A Plataforma não se destina a crianças menores de 13 anos. Não coletamos
+              intencionalmente informações pessoais de crianças menores de 13 anos. Se você
+              acreditar que coletamos essas informações, entre em contato conosco imediatamente.
             </p>
           </section>
 
           <section className="mb-8 space-y-4">
             <h2 className="font-semibold text-xl">10. Alterações nesta política</h2>
             <p className="text-foreground/90 leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of material
-              changes by posting the updated policy on the Platform. Your continued use of the
-              Platform after changes are posted constitutes your acceptance of the revised policy.
+              Podemos atualizar esta Política de Privacidade periodicamente. Informaremos sobre
+              alterações relevantes publicando a política atualizada na Plataforma. A continuidade
+              do uso da Plataforma após a publicação das alterações constitui sua aceitação da
+              política revisada.
             </p>
           </section>
 
           <section className="space-y-4">
             <h2 className="font-semibold text-xl">11. Fale conosco</h2>
             <p className="text-foreground/90 leading-relaxed">
-              If you have questions about this Privacy Policy or how we handle your data, please
-              contact us at{' '}
+              Se você tiver dúvidas sobre esta Política de Privacidade ou sobre como tratamos seus
+              dados, entre em contato conosco em{' '}
               <a
                 className="text-foreground underline hover:text-foreground/80"
                 href="mailto:support@pascal.app"

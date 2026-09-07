@@ -124,9 +124,9 @@ const HUD_CHIP_CLASS =
   'flex flex-col gap-px rounded-lg border border-white/10 bg-neutral-950/85 px-3 py-1.5'
 
 const CROP_LABELS: Record<CropMode, string> = {
-  standard: 'Standard',
-  viewport: 'Viewport',
-  area: 'Area',
+  standard: 'Padrão',
+  viewport: 'Área de visualização',
+  area: 'Área',
 }
 
 // Dark-HUD skin for the shared slider, which is themed for the light editor chrome.
@@ -622,8 +622,8 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <span className="rounded-full border border-white/10 bg-neutral-950/80 px-4 py-2 text-sm text-white">
                 {cameraOwnsPointer
-                  ? 'Switch back to orbit to drag a capture area'
-                  : 'Drag the area you want to capture'}
+                  ? 'Volte ao modo Orbitar para arrastar uma área de captura'
+                  : 'Arraste a área que deseja capturar'}
               </span>
             </div>
           )}
@@ -684,15 +684,15 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
         <div className="pointer-events-none absolute top-4 left-1/2 flex -translate-x-1/2 gap-2">
           <div className={HUD_CHIP_CLASS}>
             <span className="font-mono text-[8.5px] text-white/50 uppercase tracking-[0.14em]">
-              Crop
+              Recortar
             </span>
             <span className="font-semibold text-white text-xs">
-              {isPreset ? 'Preset · square' : CROP_LABELS[mode]}
+              {isPreset ? 'Predefinição · quadrado' : CROP_LABELS[mode]}
             </span>
           </div>
           <div className={HUD_CHIP_CLASS}>
             <span className="font-mono text-[8.5px] text-white/50 uppercase tracking-[0.14em]">
-              Format
+              Formato
             </span>
             <span className="font-semibold text-white text-xs tabular-nums">
               {resolution ? `${resolution.w} × ${resolution.h}` : '—'}
@@ -704,7 +704,7 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
       {/* Top-right dismiss button (icon-only on mobile) */}
       <div className="pointer-events-auto absolute top-4 right-4">
         <button
-          aria-label="Close capture mode"
+          aria-label="Fechar modo de captura"
           className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-neutral-950/85 px-3 py-1.5 text-white/80 text-xs transition-colors hover:bg-neutral-950 hover:text-white"
           onClick={dismiss}
           type="button"
@@ -728,13 +728,13 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
                 <ModeButton
                   active={cameraNav === 'orbit'}
                   icon={<Orbit className="h-3.5 w-3.5" />}
-                  label="Orbit"
+                  label="Orbitar"
                   onClick={() => setCameraNav('orbit')}
                 />
                 <ModeButton
                   active={cameraNav === 'walk'}
                   icon={<Footprints className="h-3.5 w-3.5" />}
-                  label="Walk"
+                  label="Caminhar"
                   onClick={() => setCameraNav('walk')}
                 />
                 <ModeButton
@@ -748,10 +748,10 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
             {fovValue !== null && (
               <div className="flex items-center gap-2.5 rounded-full border border-white/10 bg-neutral-950/85 py-1.5 pr-1.5 pl-3 shadow-xl">
                 <span className="font-mono text-[8.5px] text-white/50 uppercase tracking-[0.14em]">
-                  Lens
+                  Lente
                 </span>
                 <Slider
-                  aria-label="Field of view"
+                  aria-label="Campo de visão"
                   className={FOV_SLIDER_CLASS}
                   max={CAPTURE_FOV_MAX}
                   min={CAPTURE_FOV_MIN}
@@ -765,7 +765,7 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
                   {fovValue}°
                 </span>
                 <button
-                  aria-label="Reset field of view"
+                  aria-label="Redefinir campo de visão"
                   className="grid h-6 w-6 place-items-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-white/50"
                   disabled={captureFovBaseline === null || fovValue === captureFovBaseline}
                   onClick={() => {
@@ -787,7 +787,7 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
               active={mode === 'standard'}
               badge={standardAspect}
               icon={<Monitor className="h-3.5 w-3.5" />}
-              label={isMobile ? undefined : 'Standard'}
+              label={isMobile ? undefined : 'Padrão'}
               onClick={() => {
                 if (mode === 'standard') setAspectMenuOpen((v) => !v)
                 else setAspectMenuOpen(false)
@@ -819,7 +819,7 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
             <ModeButton
               active={mode === 'viewport'}
               icon={<Maximize2 className="h-3.5 w-3.5" />}
-              label={isMobile ? undefined : 'Viewport'}
+              label={isMobile ? undefined : 'Área de visualização'}
               onClick={() => {
                 setMode('viewport')
                 setDrag(null)
@@ -829,7 +829,7 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
             <ModeButton
               active={mode === 'area'}
               icon={<Crop className="h-3.5 w-3.5" />}
-              label={isMobile ? undefined : 'Area'}
+              label={isMobile ? undefined : 'Área'}
               onClick={() => {
                 setMode('area')
                 setAspectMenuOpen(false)
@@ -867,8 +867,10 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
             </div>
           ) : (
             <span className="pointer-events-none max-w-90 rounded-lg border border-white/10 bg-neutral-950/85 px-3.5 py-1.5 text-center text-[11.5px] text-white/85 leading-relaxed">
-              A <b className="font-semibold text-white">snapshot</b>
-              {' freezes this exact camera angle as a reusable reference for renders & videos.'}
+              A <b className="font-semibold text-white">captura</b>
+              {
+                ' salva este ângulo exato da câmera como referência reutilizável para renderizações e vídeos.'
+              }
             </span>
           ))}
 
@@ -896,9 +898,9 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
         </button>
         <span className="pointer-events-none font-mono text-[10.5px] text-white uppercase tracking-[0.12em] drop-shadow">
           {captureState === 'capturing'
-            ? 'Capturing…'
+            ? 'Capturando…'
             : captureState === 'saved'
-              ? 'Saved'
+              ? 'Salvo'
               : isPreset
                 ? 'Capturar'
                 : 'Tirar captura'}

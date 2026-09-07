@@ -34,17 +34,17 @@ export function buildRoomFloorplanSchedule(args: {
 
   return {
     id: 'rooms',
-    title: 'ROOM SCHEDULE',
+    title: 'QUADRO DE AMBIENTES',
     columns: [
-      { key: 'number', label: 'NO.', weight: 0.7 },
-      { key: 'name', label: 'ROOM NAME', weight: 1.35 },
-      { key: 'area', label: 'AREA', weight: 0.9 },
-      { key: 'floorFinish', label: 'FLOOR FINISH', weight: 1.15 },
-      { key: 'wallFinish', label: 'WALL FINISH', weight: 1.15 },
-      { key: 'ceilingFinish', label: 'CEILING FINISH', weight: 1.15 },
-      { key: 'ceilingHeight', label: 'CLG. HT.', weight: 0.9 },
-      { key: 'occupancy', label: 'OCCUPANCY / USE', weight: 1.25 },
-      { key: 'enclosure', label: 'ENCLOSURE', weight: 0.9 },
+      { key: 'number', label: 'Nº', weight: 0.7 },
+      { key: 'name', label: 'NOME DO AMBIENTE', weight: 1.35 },
+      { key: 'area', label: 'ÁREA', weight: 0.9 },
+      { key: 'floorFinish', label: 'ACABAMENTO DO PISO', weight: 1.15 },
+      { key: 'wallFinish', label: 'ACABAMENTO DA PAREDE', weight: 1.15 },
+      { key: 'ceilingFinish', label: 'ACABAMENTO DO TETO', weight: 1.15 },
+      { key: 'ceilingHeight', label: 'ALTURA DO TETO', weight: 0.9 },
+      { key: 'occupancy', label: 'OCUPAÇÃO / USO', weight: 1.25 },
+      { key: 'enclosure', label: 'FECHAMENTO', weight: 0.9 },
     ],
     rows: rooms.map(({ zone, report }) => ({
       id: zone.id,

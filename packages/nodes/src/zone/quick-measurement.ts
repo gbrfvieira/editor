@@ -19,19 +19,19 @@ export function zoneQuickMeasurement(
 
   return {
     title: node.name,
-    kindLabel: 'Zone',
+    kindLabel: 'Ambiente',
     anchor: polygonReportAnchor(polygon, 0.08),
     metrics: [
       {
         key: 'area',
-        label: 'Footprint',
+        label: 'Projeção em planta',
         abbreviation: 'A',
         quantity: 'area',
         value: polygonSurfaceArea(polygon),
       },
       {
         key: 'perimeter',
-        label: 'Perimeter',
+        label: 'Perímetro',
         abbreviation: 'P',
         quantity: 'length',
         value: polygonBoundaryLength(polygon),

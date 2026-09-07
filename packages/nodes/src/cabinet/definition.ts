@@ -2457,27 +2457,27 @@ export const cabinetDefinition: NodeDefinition<typeof CabinetNode> = {
   },
   tool: () => import('./tool'),
   toolHints: [
-    { key: 'Click', label: 'Place cabinet' },
+    { key: 'Click', label: 'Posicionar armário' },
     {
       key: 'I',
-      label: 'Placement type',
+      label: 'Tipo de posicionamento',
       chip: {
         subscribe: (onChange) => useCabinetPlacementType.subscribe(onChange),
         value: () => useCabinetPlacementType.getState().type,
         cycle: () => void useCabinetPlacementType.getState().cycleType(),
-        labels: { cabinet: 'Type: Cabinet', island: 'Type: Island' },
+        labels: { cabinet: 'Tipo: armário', island: 'Tipo: ilha' },
         icons: { cabinet: 'lucide:rectangle-horizontal', island: 'lucide:table-2' },
-        tooltip: 'Placement type — click or press I to toggle',
+        tooltip: 'Tipo de posicionamento — clique ou pressione I para alternar',
       },
     },
-    { key: 'Alt', label: 'Force place' },
-    { key: 'R / T', label: 'Rotate' },
-    { key: 'Esc', label: 'Cancel run / exit' },
+    { key: 'Alt', label: 'Forçar posicionamento' },
+    { key: 'R / T', label: 'Girar' },
+    { key: 'Esc', label: 'Cancelar conjunto / sair' },
   ],
 
   presentation: {
-    label: 'Modular Cabinet',
-    description: 'A configurable parametric base cabinet.',
+    label: 'Armário modular',
+    description: 'Um armário inferior paramétrico configurável.',
     icon: { kind: 'url', src: '/icons/item.webp' },
     paletteSection: 'furnish',
     paletteOrder: 34,
@@ -2642,8 +2642,8 @@ export const cabinetModuleDefinition: NodeDefinition<typeof CabinetModuleNode> =
   },
 
   presentation: {
-    label: 'Cabinet Module',
-    description: 'An editable module inside a modular cabinet run.',
+    label: 'Módulo de armário',
+    description: 'Um módulo editável dentro de um conjunto de armários.',
     icon: { kind: 'url', src: '/icons/item.webp' },
     paletteSection: 'furnish',
     paletteOrder: 35,

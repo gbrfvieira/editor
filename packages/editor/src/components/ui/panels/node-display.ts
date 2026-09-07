@@ -7,20 +7,20 @@ export type NodeDisplay = {
 
 const TYPE_DEFAULTS: Record<string, NodeDisplay> = {
   item: { icon: '/icons/item.webp', label: 'Item' },
-  wall: { icon: '/icons/wall.webp', label: 'Wall' },
-  door: { icon: '/icons/door.webp', label: 'Door' },
-  window: { icon: '/icons/window.webp', label: 'Window' },
-  slab: { icon: '/icons/floor.webp', label: 'Slab' },
-  ceiling: { icon: '/icons/ceiling.webp', label: 'Ceiling' },
-  column: { icon: '/icons/column.webp', label: 'Column' },
-  elevator: { icon: '/icons/elevator.webp', label: 'Elevator' },
-  fence: { icon: '/icons/fence.webp', label: 'Fence' },
-  roof: { icon: '/icons/roof.webp', label: 'Roof' },
-  'roof-segment': { icon: '/icons/roof.webp', label: 'Roof segment' },
-  stair: { icon: '/icons/stairs.webp', label: 'Stair' },
-  'stair-segment': { icon: '/icons/stairs.webp', label: 'Stair segment' },
-  scan: { icon: '/icons/mesh.webp', label: '3D Scan' },
-  guide: { icon: '/icons/floorplan.webp', label: 'Guide image' },
+  wall: { icon: '/icons/wall.webp', label: 'Parede' },
+  door: { icon: '/icons/door.webp', label: 'Porta' },
+  window: { icon: '/icons/window.webp', label: 'Janela' },
+  slab: { icon: '/icons/floor.webp', label: 'Laje' },
+  ceiling: { icon: '/icons/ceiling.webp', label: 'Teto' },
+  column: { icon: '/icons/column.webp', label: 'Pilar' },
+  elevator: { icon: '/icons/elevator.webp', label: 'Elevador' },
+  fence: { icon: '/icons/fence.webp', label: 'Cerca' },
+  roof: { icon: '/icons/roof.webp', label: 'Telhado' },
+  'roof-segment': { icon: '/icons/roof.webp', label: 'Água do telhado' },
+  stair: { icon: '/icons/stairs.webp', label: 'Escada' },
+  'stair-segment': { icon: '/icons/stairs.webp', label: 'Lance de escada' },
+  scan: { icon: '/icons/mesh.webp', label: 'Escaneamento 3D' },
+  guide: { icon: '/icons/floorplan.webp', label: 'Imagem de guia' },
 }
 
 export function getTypeDisplay(type: string): NodeDisplay {
@@ -28,7 +28,7 @@ export function getTypeDisplay(type: string): NodeDisplay {
 }
 
 export function getNodeDisplay(node: AnyNode | null | undefined): NodeDisplay {
-  if (!node) return { icon: '/icons/select.webp', label: 'Selection' }
+  if (!node) return { icon: '/icons/select.webp', label: 'Seleção' }
   const fallback = TYPE_DEFAULTS[node.type] ?? { icon: '/icons/select.webp', label: node.type }
   // Item nodes carry an asset with its own thumbnail/name
   if (node.type === 'item') {

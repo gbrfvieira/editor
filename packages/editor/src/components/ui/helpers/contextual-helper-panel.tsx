@@ -161,10 +161,10 @@ const SNAPPING_MODE_ICONS = {
 } as const
 
 const SNAPPING_MODE_LABELS = {
-  grid: 'Grid',
-  lines: 'Lines',
-  angles: 'Angles',
-  off: 'Off',
+  grid: 'Grade',
+  lines: 'Linhas',
+  angles: 'Ângulos',
+  off: 'Desligado',
 } as const
 
 const GRID_SNAP_STEPS: GridSnapStep[] = [0.5, 0.25, 0.1, 0.05]
@@ -187,28 +187,28 @@ function SnappingChips({ context }: { context: SnapContext }) {
   return (
     <>
       <ChipRow
-        ariaLabel={`Snapping: ${SNAPPING_MODE_LABELS[snappingMode]}`}
+        ariaLabel={`Encaixe: ${SNAPPING_MODE_LABELS[snappingMode]}`}
         guideTarget="snap-mode"
         icon={SNAPPING_MODE_ICONS[snappingMode]}
-        label={`Snapping: ${SNAPPING_MODE_LABELS[snappingMode]}`}
+        label={`Encaixe: ${SNAPPING_MODE_LABELS[snappingMode]}`}
         onClick={() => {
           setSnappingMode(context, cycleSnappingModeIn(context, snappingMode))
           sfxEmitter.emit('sfx:grid-snap')
         }}
         shortcut="Shift"
-        tooltip="Snapping mode — click or press Shift to cycle"
+        tooltip="Modo de encaixe — clique ou pressione Shift para alternar"
       />
       {gridActive ? (
         <ChipRow
-          ariaLabel={`Grid step: ${gridSnapStep.toFixed(2)} m`}
+          ariaLabel={`Passo da grade: ${gridSnapStep.toFixed(2)} m`}
           guideTarget="snap-grid-step"
-          label={`Grid: ${gridSnapStep.toFixed(2)} m`}
+          label={`Grade: ${gridSnapStep.toFixed(2)} m`}
           onClick={() => {
             setGridSnapStep(nextGridSnapStep(gridSnapStep))
             sfxEmitter.emit('sfx:grid-snap')
           }}
           shortcut="Ctrl"
-          tooltip="Grid step — click or tap Ctrl to cycle"
+          tooltip="Passo da grade — clique ou pressione Ctrl para alternar"
         />
       ) : null}
     </>
@@ -244,12 +244,12 @@ function ContinuationChip({ context }: { context: ContinuationContext }) {
 
   return (
     <ChipRow
-      ariaLabel={`Continuation: ${label}`}
+      ariaLabel={`Continuação: ${label}`}
       icon={icon}
       label={label}
       onClick={() => cycleContinuation(context)}
       shortcut="C"
-      tooltip="Continuation — click or press C to cycle"
+      tooltip="Continuação — clique ou pressione C para alternar"
     />
   )
 }
@@ -261,23 +261,23 @@ function FenceContinuationChips() {
 
   const isCurved = mode === 'curved'
   const straightMode = isCurved ? 'continuous' : mode
-  const straightLabel = straightMode === 'single' ? 'Straight: Single' : 'Straight: Continuous'
+  const straightLabel = straightMode === 'single' ? 'Reta: única' : 'Reta: contínua'
   const straightIcon = straightMode === 'single' ? 'lucide:minus' : 'lucide:waypoints'
-  const typeLabel = isCurved ? 'Type: Curved' : 'Type: Straight'
+  const typeLabel = isCurved ? 'Tipo: curva' : 'Tipo: reta'
   const typeIcon = isCurved ? 'lucide:spline' : 'lucide:minus'
 
   return (
     <>
       <ChipRow
-        ariaLabel={`Fence type: ${isCurved ? 'Curved' : 'Straight'}`}
+        ariaLabel={`Tipo de cerca: ${isCurved ? 'Curva' : 'Reta'}`}
         icon={typeIcon}
         label={typeLabel}
         onClick={() => setContinuation('fence', isCurved ? 'continuous' : 'curved')}
         shortcut="T"
-        tooltip="Fence type — click or press T to switch between straight and curved"
+        tooltip="Tipo de cerca — clique ou pressione T para alternar entre reta e curva"
       />
       <ChipRow
-        ariaLabel={`Fence continuation: ${straightLabel}`}
+        ariaLabel={`Continuação da cerca: ${straightLabel}`}
         disabled={isCurved}
         icon={straightIcon}
         label={straightLabel}
@@ -289,8 +289,8 @@ function FenceContinuationChips() {
         shortcut="C"
         tooltip={
           isCurved
-            ? 'Straight continuation is unavailable while curved fence type is active'
-            : 'Straight fence continuation — click or press C to toggle'
+            ? 'A continuação reta não está disponível enquanto o tipo de cerca curva estiver ativo'
+            : 'Continuação da cerca reta — clique ou pressione C para alternar'
         }
       />
       {/* Curved fences are committed by a closing gesture rather than per-click,
@@ -299,7 +299,7 @@ function FenceContinuationChips() {
       {isCurved && curveStarted ? (
         <ChipRow
           icon="lucide:circle-check"
-          label="Finish curve (or double-click)"
+          label="Finalizar curva (ou clique duplo)"
           shortcut="Enter"
         />
       ) : null}
@@ -329,13 +329,17 @@ function PaintScopeChip() {
   // Nothing to paint with yet (no material picked, not erasing) → the first step
   // is choosing a material, so say that before anything about scope or hovering.
   if (!(paintEraser || hasActivePaintMaterial(activePaintMaterial))) {
-    return <ChipRow icon="lucide:palette" label="Select a material to paint" />
+    return <ChipRow icon="lucide:palette" label="Selecione um material para pintar" />
   }
 
   // Not over anything paintable → guide the user to hover, still teaching Shift.
   if (!paintHover) {
     return (
-      <ChipRow icon="lucide:mouse-pointer-click" label="Hover a surface to paint" shortcut="Shift" />
+      <ChipRow
+        icon="lucide:mouse-pointer-click"
+        label="Passe o cursor sobre uma superfície para pintar"
+        shortcut="Shift"
+      />
     )
   }
 
@@ -350,19 +354,19 @@ function PaintScopeChip() {
     return (
       <ChipRow
         icon={PAINT_SCOPE_ICONS[effective]}
-        label={`Paint: ${paintScopeLabel(effective, paintHover)}`}
+        label={`Pintar: ${paintScopeLabel(effective, paintHover)}`}
       />
     )
   }
 
   return (
     <ChipRow
-      ariaLabel={`Paint scope: ${paintScopeLabel(effective, paintHover)}`}
+      ariaLabel={`Alcance da pintura: ${paintScopeLabel(effective, paintHover)}`}
       icon={PAINT_SCOPE_ICONS[effective]}
-      label={`Paint: ${paintScopeLabel(effective, paintHover)}`}
+      label={`Pintar: ${paintScopeLabel(effective, paintHover)}`}
       onClick={() => cyclePaintScope()}
       shortcut="Shift"
-      tooltip="Paint scope — click or press Shift to cycle"
+      tooltip="Alcance da pintura — clique ou pressione Shift para alternar"
     />
   )
 }

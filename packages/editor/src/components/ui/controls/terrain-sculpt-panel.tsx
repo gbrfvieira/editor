@@ -15,10 +15,10 @@ import { SegmentedControl } from './segmented-control'
 import { SliderControl } from './slider-control'
 
 const VERB_OPTIONS: Array<{ value: TerrainVerb; iconSrc: string; hint: string }> = [
-  { value: 'raise', iconSrc: '/icons/terrain-raise.webp', hint: 'Raise' },
-  { value: 'lower', iconSrc: '/icons/terrain-lower.webp', hint: 'Lower' },
-  { value: 'flatten', iconSrc: '/icons/terrain-flatten.webp', hint: 'Flatten' },
-  { value: 'smooth', iconSrc: '/icons/terrain-smooth.webp', hint: 'Smooth' },
+  { value: 'raise', iconSrc: '/icons/terrain-raise.webp', hint: 'Elevar' },
+  { value: 'lower', iconSrc: '/icons/terrain-lower.webp', hint: 'Inferior' },
+  { value: 'flatten', iconSrc: '/icons/terrain-flatten.webp', hint: 'Nivelar' },
+  { value: 'smooth', iconSrc: '/icons/terrain-smooth.webp', hint: 'Suavizar' },
 ]
 
 const VERB_HINTS: Record<TerrainVerb, string> = {
@@ -92,7 +92,7 @@ export function TerrainSculptPanel() {
           under it lands between samples and paints nothing at all.
         */}
         <SliderControl
-          label="Size"
+          label="Tamanho"
           max={maxRadius}
           min={minRadius}
           onChange={(radius) => setTerrainBrush({ radius })}
@@ -102,7 +102,7 @@ export function TerrainSculptPanel() {
           value={brush.radius}
         />
         <SliderControl
-          label="Strength"
+          label="Intensidade"
           max={1}
           min={0.05}
           onChange={(strength) => setTerrainBrush({ strength })}
@@ -111,7 +111,7 @@ export function TerrainSculptPanel() {
           value={brush.strength}
         />
         <SliderControl
-          label="Softness"
+          label="Suavidade"
           max={1}
           min={0}
           onChange={(falloff) => setTerrainBrush({ falloff })}
@@ -122,8 +122,8 @@ export function TerrainSculptPanel() {
         <SegmentedControl
           onChange={(shape) => setTerrainBrush({ shape })}
           options={[
-            { value: 'round', label: 'Round' },
-            { value: 'square', label: 'Square' },
+            { value: 'round', label: 'Redondo' },
+            { value: 'square', label: 'Quadrado' },
           ]}
           value={brush.shape}
         />
@@ -134,7 +134,7 @@ export function TerrainSculptPanel() {
           <div className="flex items-center gap-2">
             <div className="min-w-0 flex-1">
               <SliderControl
-                label="Target"
+                label="Alvo"
                 max={50}
                 min={-50}
                 onChange={setTerrainFlattenTarget}
@@ -157,10 +157,10 @@ export function TerrainSculptPanel() {
           </div>
           <p className="px-0.5 text-muted-foreground text-xs">
             {sampling
-              ? 'Click the ground to pick its height as the target.'
+              ? 'Clique no chão para usar sua altura como alvo.'
               : flattenTarget === null
-                ? 'No target yet — the first click samples the ground under it.'
-                : 'Every flatten stroke levels toward this height.'}
+                ? 'Nenhum alvo definido — o primeiro clique usa a altura do chão naquele ponto.'
+                : 'Cada traço de nivelamento ajusta o terreno para esta altura.'}
           </p>
         </div>
       )}
@@ -175,7 +175,7 @@ export function TerrainSculptPanel() {
           variant="outline"
         >
           <Mountain />
-          Level lot
+          Nivelar lote
         </Button>
         <Button
           className="flex-1"
@@ -185,7 +185,7 @@ export function TerrainSculptPanel() {
           type="button"
           variant="outline"
         >
-          Clear terrain
+          Limpar terreno
         </Button>
       </div>
     </div>

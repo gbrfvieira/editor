@@ -59,7 +59,7 @@ export const zoneDefinition: NodeDefinition<typeof ZoneNode> = {
       polygonMeasurementFeatures({
         featurePrefix: 'zone',
         height: 0,
-        label: 'Zone',
+        label: 'Ambiente',
         polygon: resolveAutoZonePolygon(node, ctx.resolve),
       }),
     quickMeasure: (node, ctx) => zoneQuickMeasurement(node, ctx),
@@ -93,8 +93,9 @@ export const zoneDefinition: NodeDefinition<typeof ZoneNode> = {
   },
 
   presentation: {
-    label: 'Zone',
-    description: 'A polygonal site zone (lawn, water, paving) with a TSL gradient material.',
+    label: 'Ambiente',
+    description:
+      'Uma área poligonal do terreno (gramado, água ou pavimentação) com material TSL em degradê.',
     icon: { kind: 'url', src: '/icons/zone.webp' },
     paletteSection: 'site',
     paletteOrder: 20,

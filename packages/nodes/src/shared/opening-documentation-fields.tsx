@@ -33,7 +33,7 @@ export function OpeningDocumentationFields({
     <div className="flex flex-col gap-2 px-1 pb-1">
       <label className="flex flex-col gap-1">
         <span className="font-medium text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-          Mark
+          Identificação
         </span>
         <input
           className="h-8 rounded-lg border border-border/50 bg-[#2C2C2E] px-2.5 font-mono text-foreground text-xs outline-none transition-colors placeholder:text-muted-foreground/50 focus:border-orange-400/60"
@@ -51,13 +51,13 @@ export function OpeningDocumentationFields({
               event.currentTarget.blur()
             }
           }}
-          placeholder="Auto-assigned"
+          placeholder="Atribuído automaticamente"
         />
       </label>
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1">
           <span className="font-medium text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-            Construction
+            Construção
           </span>
           <select
             className="h-8 rounded-lg border border-border/50 bg-[#2C2C2E] px-2 text-foreground text-xs outline-none focus:border-orange-400/60"
@@ -73,13 +73,13 @@ export function OpeningDocumentationFields({
             }}
             value={constructionType}
           >
-            <option value="framed">Framed</option>
-            <option value="masonry">Masonry</option>
+            <option value="framed">Com caixilho</option>
+            <option value="masonry">Alvenaria</option>
           </select>
         </label>
         <label className="flex flex-col gap-1">
           <span className="font-medium text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-            Dimension to
+            Cotar até
           </span>
           <select
             className="h-8 rounded-lg border border-border/50 bg-[#2C2C2E] px-2 text-foreground text-xs outline-none focus:border-orange-400/60"
@@ -92,50 +92,51 @@ export function OpeningDocumentationFields({
             value={dimensionReference}
           >
             <option value="nominal">Nominal</option>
-            <option value="rough-opening">Rough opening</option>
-            <option value="masonry-opening">Masonry opening</option>
-            <option value="finish-opening">Finish opening</option>
+            <option value="rough-opening">Vão bruto</option>
+            <option value="masonry-opening">Vão de alvenaria</option>
+            <option value="finish-opening">Vão acabado</option>
           </select>
         </label>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <OptionalMeterInput
-          label="RO Width"
+          label="Largura do vão bruto"
           onChange={(value) => onChange({ roughOpeningWidth: value })}
           value={roughOpeningWidth}
         />
         <OptionalMeterInput
-          label="RO Height"
+          label="Altura do vão bruto"
           onChange={(value) => onChange({ roughOpeningHeight: value })}
           value={roughOpeningHeight}
         />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <OptionalMeterInput
-          label="MO Width"
+          label="Largura do vão de alvenaria"
           onChange={(value) => onChange({ masonryOpeningWidth: value })}
           value={masonryOpeningWidth}
         />
         <OptionalMeterInput
-          label="MO Height"
+          label="Altura do vão de alvenaria"
           onChange={(value) => onChange({ masonryOpeningHeight: value })}
           value={masonryOpeningHeight}
         />
       </div>
       <div className="grid grid-cols-2 gap-2">
         <OptionalMeterInput
-          label="FO Width"
+          label="Largura do vão acabado"
           onChange={(value) => onChange({ finishOpeningWidth: value })}
           value={finishOpeningWidth}
         />
         <OptionalMeterInput
-          label="FO Height"
+          label="Altura do vão acabado"
           onChange={(value) => onChange({ finishOpeningHeight: value })}
           value={finishOpeningHeight}
         />
       </div>
       <p className="px-0.5 text-[10px] text-muted-foreground/65 leading-4">
-        Leave RO, MO, and FO values blank until verified by the applicable manufacturer or trade.
+        Deixe os valores dos vãos bruto, de alvenaria e acabado em branco até a verificação pelo
+        fabricante ou responsável.
       </p>
     </div>
   )
@@ -182,7 +183,7 @@ function OptionalMeterInput({
             }
           }}
           onWheel={(event) => event.currentTarget.blur()}
-          placeholder="Verify"
+          placeholder="Verificar"
           step={unit === 'imperial' ? 0.01 : 0.001}
           type="number"
         />

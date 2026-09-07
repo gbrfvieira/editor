@@ -97,10 +97,10 @@ export default function SpawnPanel() {
     <PanelWrapper
       icon="/icons/spawn-point.webp"
       onClose={handleClose}
-      title="Spawn Point"
+      title="Ponto inicial"
       width={300}
     >
-      <PanelSection title="Position">
+      <PanelSection title="Posição">
         <SliderControl
           label="X"
           max={node.position[0] + 2}
@@ -139,9 +139,9 @@ export default function SpawnPanel() {
         />
       </PanelSection>
 
-      <PanelSection title="Facing">
+      <PanelSection title="Orientação">
         <SliderControl
-          label="Yaw"
+          label="Giro horizontal"
           max={storedRotationDegrees + 90}
           min={storedRotationDegrees - 90}
           onChange={handleRotationChange}
@@ -153,13 +153,13 @@ export default function SpawnPanel() {
         />
       </PanelSection>
 
-      <PanelSection title="Actions">
+      <PanelSection title="Ações">
         <ActionGroup>
-          <ActionButton icon={<Move className="h-4 w-4" />} label="Move" onClick={handleMove} />
+          <ActionButton icon={<Move className="h-4 w-4" />} label="Mover" onClick={handleMove} />
           <ActionButton
             className="border-red-500/40 text-red-200 hover:bg-red-500/15"
             icon={<Trash2 className="h-4 w-4" />}
-            label="Delete"
+            label="Excluir"
             onClick={handleDelete}
           />
         </ActionGroup>

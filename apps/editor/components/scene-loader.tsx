@@ -36,7 +36,7 @@ export interface SceneMeta {
 const SIDEBAR_TABS: (SidebarTab & { component: React.ComponentType })[] = [
   {
     id: 'site',
-    label: 'Scene',
+    label: 'Cena',
     component: () => null, // Built-in SitePanel handles this
     mobileDefaultSnap: 0.5,
     mobileIcon: <Layers className="h-5 w-5" />,
@@ -52,7 +52,7 @@ const SIDEBAR_TABS: (SidebarTab & { component: React.ComponentType })[] = [
   },
   {
     id: 'build',
-    label: 'Build',
+    label: 'Construir',
     component: BuildTab,
     mobileDefaultSnap: 0.5,
     mobileIcon: <Hammer className="h-5 w-5" />,
@@ -145,7 +145,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
           `[scene-loader] Blocked autosave: refusing to overwrite scene ${meta.id} ` +
             `(${serverNodeCountRef.current} nodes on the server) with an empty graph.`,
         )
-        setSaveError('Autosave blocked: the editor tried to save an empty scene')
+        setSaveError('Salvamento automático bloqueado: o editor tentou salvar uma cena vazia')
         return
       }
 
@@ -172,7 +172,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
             console.error(
               `[scene-loader] Server rejected an empty-graph save for scene ${meta.id}.`,
             )
-            setSaveError('Autosave blocked: the editor tried to save an empty scene')
+            setSaveError('Salvamento automático bloqueado: o editor tentou salvar uma cena vazia')
             return
           }
           setConflict(true)
@@ -180,7 +180,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
         }
 
         if (!response.ok) {
-          setSaveError(`Save failed (${response.status})`)
+          setSaveError(`Falha ao salvar (${response.status})`)
           return
         }
 
@@ -219,7 +219,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
 
     source.addEventListener('error', () => {
       if (source.readyState === EventSource.CLOSED) {
-        setSaveError('Live scene connection closed')
+        setSaveError('A conexão ao vivo com a cena foi encerrada')
       }
     })
 
@@ -244,9 +244,9 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
     <div className="relative h-screen w-screen">
       {conflict && (
         <div className="pointer-events-auto absolute top-4 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-lg border border-border bg-background p-4 shadow-xl">
-          <h2 className="font-semibold text-sm">Another session saved first — refresh?</h2>
+          <h2 className="font-semibold text-sm">Outra sessão salvou primeiro — atualizar?</h2>
           <p className="mt-1 text-muted-foreground text-xs">
-            Your changes haven&apos;t been saved. Reload to pick up the latest version.
+            Suas alterações não foram salvas. Recarregue para obter a versão mais recente.
           </p>
           <div className="mt-3 flex items-center gap-2">
             <button
@@ -254,7 +254,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
               onClick={() => router.refresh()}
               type="button"
             >
-              Reload
+              Recarregar
             </button>
             <button
               className="rounded-md border border-border bg-background px-3 py-1.5 font-medium text-xs hover:bg-accent/40"
@@ -281,16 +281,16 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
           onClick={() =>
             router.push(lightPreview ? `/scene/${meta.id}` : `/scene/${meta.id}?disable=postFx`)
           }
-          title="Skip the post-processing pipeline — lighter on the GPU, no ambient occlusion or selection outlines"
+          title="Desativar o pós-processamento — menor uso da GPU, sem oclusão ambiente ou contornos de seleção"
           type="button"
         >
-          Light preview
+          Prévia leve
         </button>
         <Link
           className="pointer-events-auto rounded-md border border-border bg-background/90 px-3 py-1.5 font-medium text-xs shadow-sm backdrop-blur hover:bg-accent/40"
           href="/scenes"
         >
-          All scenes
+          Todas as cenas
         </Link>
       </div>
       <Editor

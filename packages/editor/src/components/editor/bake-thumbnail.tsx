@@ -38,7 +38,7 @@ export function BakeThumbnail({
       try {
         const framing = computeHeroFraming()
         if (!framing) {
-          onError('scene has no framable content')
+          onError('a cena não tem conteúdo para enquadrar')
           return
         }
 
@@ -63,7 +63,7 @@ export function BakeThumbnail({
           camera,
         })
         if (!pipeline) {
-          onError('thumbnail pipeline failed to build')
+          onError('falha ao preparar a geração da miniatura')
           return
         }
 

@@ -44,7 +44,7 @@ export function FloorplanCompassButton({
           </span>
         </button>
       </TooltipTrigger>
-      <TooltipContent side="right">Align view to north</TooltipContent>
+      <TooltipContent side="right">Alinhar vista ao norte</TooltipContent>
     </Tooltip>
   )
 }

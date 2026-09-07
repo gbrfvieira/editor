@@ -167,7 +167,7 @@ function SceneMaterialRow({
 
       <div className="mt-2 flex items-center justify-between gap-2">
         <span className="text-muted-foreground text-xs">
-          Used by {usageCount} {usageCount === 1 ? 'part' : 'parts'}
+          Usado por {usageCount} {usageCount === 1 ? 'parte' : 'partes'}
         </span>
         <div className="flex items-center gap-1">
           <Tooltip>
@@ -187,7 +187,7 @@ function SceneMaterialRow({
                 <Paintbrush />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Paint with</TooltipContent>
+            <TooltipContent>Pintar com</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -202,7 +202,7 @@ function SceneMaterialRow({
                 <Pencil />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Edit</TooltipContent>
+            <TooltipContent>Editar</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>

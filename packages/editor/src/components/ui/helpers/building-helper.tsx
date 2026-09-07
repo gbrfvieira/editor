@@ -10,8 +10,8 @@ export function BuildingHelper({ showRotate }: BuildingHelperProps) {
   return (
     <ContextualHelperPanel
       hints={[
-        { keys: ['Left click'], label: 'Place building' },
-        ...(showRotate ? [{ keys: ['R', 'T'], label: 'Rotate' }] : []),
+        { keys: ['Left click'], label: 'Posicionar edificação' },
+        ...(showRotate ? [{ keys: ['R', 'T'], label: 'Girar' }] : []),
         { keys: ['Esc'], label: 'Cancelar' },
       ]}
     />

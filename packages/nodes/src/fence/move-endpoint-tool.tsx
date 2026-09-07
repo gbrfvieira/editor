@@ -277,7 +277,7 @@ export const MoveFenceEndpointTool: React.FC<{ target: MovingFenceEndpoint }> = 
                 : 'border-border/70 bg-background/90 text-foreground/80'
             }`}
           >
-            {altPressed ? 'Detach endpoint' : 'Drag endpoint'}
+            {altPressed ? 'Desvincular extremidade' : 'Arrastar extremidade'}
           </div>
         </div>
       </Html>

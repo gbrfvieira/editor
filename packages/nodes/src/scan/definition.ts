@@ -45,8 +45,8 @@ export const scanDefinition: NodeDefinition<typeof ScanNode> = {
   },
 
   presentation: {
-    label: 'Capture',
-    description: 'A captured session with optional mesh, motion, media, and sensor data.',
+    label: 'Captura',
+    description: 'Uma sessão capturada com dados opcionais de malha, movimento, mídia e sensores.',
     icon: { kind: 'url', src: '/icons/mesh.webp' },
     paletteSection: 'site',
     paletteOrder: 40,

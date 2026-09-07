@@ -362,8 +362,8 @@ export function SettingsPanel({
     <div className="flex flex-col gap-6 p-3">
       {projectId && (
         <div className="space-y-2">
-          <label className="font-medium text-muted-foreground text-xs uppercase">Project</label>
-          <div className="font-medium text-sm">Project ID</div>
+          <label className="font-medium text-muted-foreground text-xs uppercase">Projeto</label>
+          <div className="font-medium text-sm">ID do projeto</div>
           <div className="flex items-center gap-2">
             <Input
               aria-label="ID do projeto"
@@ -385,10 +385,10 @@ export function SettingsPanel({
                 <Copy className="size-3.5" />
               )}
               {projectIdCopyState === 'copied'
-                ? 'Copied'
+                ? 'Copiado'
                 : projectIdCopyState === 'error'
-                  ? 'Try again'
-                  : 'Copy'}
+                  ? 'Tentar novamente'
+                  : 'Copiar'}
             </Button>
           </div>
         </div>
@@ -397,12 +397,12 @@ export function SettingsPanel({
       {/* Visibility Section (only for cloud projects) */}
       {projectId && !isLocalProject && (
         <div className="space-y-3">
-          <label className="font-medium text-muted-foreground text-xs uppercase">Visibility</label>
+          <label className="font-medium text-muted-foreground text-xs uppercase">Visibilidade</label>
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-sm">Public</div>
+              <div className="font-medium text-sm">Público</div>
               <div className="text-muted-foreground text-xs">
-                {projectVisibility?.isPrivate ? 'Only you' : 'Anyone'} can view
+                {projectVisibility?.isPrivate ? 'Somente você' : 'Qualquer pessoa'} pode visualizar
               </div>
             </div>
             <Switch
@@ -413,7 +413,7 @@ export function SettingsPanel({
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-sm">Mostrar escaneamentos 3D</div>
-              <div className="text-muted-foreground text-xs">Visible to public viewers</div>
+              <div className="text-muted-foreground text-xs">Visível para visitantes</div>
             </div>
             <Switch
               checked={projectVisibility?.showScansPublic ?? true}
@@ -423,7 +423,7 @@ export function SettingsPanel({
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-sm">Mostrar plantas baixas</div>
-              <div className="text-muted-foreground text-xs">Visible to public viewers</div>
+              <div className="text-muted-foreground text-xs">Visível para visitantes</div>
             </div>
             <Switch
               checked={projectVisibility?.showGuidesPublic ?? true}
@@ -432,8 +432,8 @@ export function SettingsPanel({
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-sm">Shadows</div>
-              <div className="text-muted-foreground text-xs">Cast shadows from lights</div>
+              <div className="font-medium text-sm">Sombras</div>
+              <div className="text-muted-foreground text-xs">Projetar sombras das luzes</div>
             </div>
             <Switch
               checked={shadows}
@@ -448,12 +448,12 @@ export function SettingsPanel({
         <label className="font-medium text-muted-foreground text-xs uppercase">Exportar</label>
 
         <div className="space-y-2">
-          <div className="font-medium text-muted-foreground text-xs">3D model</div>
+          <div className="font-medium text-muted-foreground text-xs">Modelo 3D</div>
           <div className="flex items-center justify-between gap-4 rounded-md border p-3">
             <div>
-              <div className="font-medium text-sm">Visible nodes only</div>
+              <div className="font-medium text-sm">Somente elementos visíveis</div>
               <div className="text-muted-foreground text-xs">
-                Exclude hidden furniture and other hidden scene nodes
+                Excluir móveis e outros elementos ocultos da cena
               </div>
             </div>
             <Switch checked={exportOnlyVisible} onCheckedChange={setExportOnlyVisible} />
@@ -464,7 +464,7 @@ export function SettingsPanel({
             variant="outline"
           >
             <Download className="size-4" />
-            Export GLB
+            Exportar GLB
           </Button>
           <Button
             className="w-full justify-start gap-2"
@@ -472,7 +472,7 @@ export function SettingsPanel({
             variant="outline"
           >
             <Download className="size-4" />
-            Export STL
+            Exportar STL
           </Button>
           <Button
             className="w-full justify-start gap-2"
@@ -480,7 +480,7 @@ export function SettingsPanel({
             variant="outline"
           >
             <Download className="size-4" />
-            Export OBJ
+            Exportar OBJ
           </Button>
 
           <PrintExportButton onlyVisible={exportOnlyVisible} />
@@ -489,7 +489,7 @@ export function SettingsPanel({
         <div className="space-y-2">
           <div className="flex items-center justify-between font-medium text-muted-foreground text-xs">
             <span>Planta baixa</span>
-            <span>{floorplanMode === 'default' ? 'Default mode' : 'Expert mode'}</span>
+            <span>{floorplanMode === 'default' ? 'Modo padrão' : 'Modo avançado'}</span>
           </div>
           <Button
             className="w-full justify-start gap-2"
@@ -497,7 +497,7 @@ export function SettingsPanel({
             variant="outline"
           >
             <MapIcon className="size-4" />
-            Full floor plan
+            Planta baixa completa
           </Button>
           <Button
             className="w-full justify-start gap-2"
@@ -505,7 +505,7 @@ export function SettingsPanel({
             variant="outline"
           >
             <MapIcon className="size-4" />
-            Structure only
+            Somente estrutura
           </Button>
         </div>
       </div>
@@ -513,7 +513,7 @@ export function SettingsPanel({
       {/* Thumbnail Section (only for cloud projects) */}
       {projectId && !isLocalProject && (
         <div className="space-y-2">
-          <label className="font-medium text-muted-foreground text-xs uppercase">Thumbnail</label>
+          <label className="font-medium text-muted-foreground text-xs uppercase">Miniatura</label>
           <Button
             className="w-full justify-start gap-2"
             disabled={isGeneratingThumbnail}
@@ -521,7 +521,7 @@ export function SettingsPanel({
             variant="outline"
           >
             <Camera className="size-4" />
-            {isGeneratingThumbnail ? 'Generating...' : 'Generate Thumbnail'}
+            {isGeneratingThumbnail ? 'Gerando...' : 'Gerar miniatura'}
           </Button>
         </div>
       )}
@@ -532,7 +532,7 @@ export function SettingsPanel({
 
         <Button className="w-full justify-start gap-2" onClick={handleSaveBuild} variant="outline">
           <Save className="size-4" />
-          Save Build
+          Salvar projeto
         </Button>
 
         <Button
@@ -541,7 +541,7 @@ export function SettingsPanel({
           variant="outline"
         >
           <Upload className="size-4" />
-          Load Build
+          Carregar projeto
         </Button>
 
         <input
@@ -561,27 +561,27 @@ export function SettingsPanel({
 
       {/* Audio Section */}
       <div className="space-y-2">
-        <label className="font-medium text-muted-foreground text-xs uppercase">Audio</label>
+        <label className="font-medium text-muted-foreground text-xs uppercase">Áudio</label>
         <AudioSettingsDialog />
       </div>
 
       {/* Keyboard Section */}
       <div className="space-y-2">
-        <label className="font-medium text-muted-foreground text-xs uppercase">Keyboard</label>
+        <label className="font-medium text-muted-foreground text-xs uppercase">Teclado</label>
         <KeyboardShortcutsDialog />
       </div>
 
       {/* Scene Graph */}
       <div className="space-y-1">
-        <label className="font-medium text-muted-foreground text-xs uppercase">Scene Graph</label>
+        <label className="font-medium text-muted-foreground text-xs uppercase">Árvore da cena</label>
         <Dialog>
           <DialogTrigger asChild>
             <Button className="h-auto justify-start p-0 text-sm" variant="link">
-              Explore scene graph
+              Explorar árvore da cena
             </Button>
           </DialogTrigger>
           <DialogContent className="h-[80vh] max-w-[95vw] gap-0 overflow-hidden border-0 bg-[#1e1e1e] p-0 shadow-none sm:max-w-5xl">
-            <DialogTitle className="sr-only">Scene Graph</DialogTitle>
+            <DialogTitle className="sr-only">Árvore da cena</DialogTitle>
             <div
               className="flex h-full min-h-0 w-full min-w-0 *:h-full *:w-full *:overflow-y-auto"
               onContextMenuCapture={blockSceneGraphMutations}
@@ -599,7 +599,7 @@ export function SettingsPanel({
 
       {/* Danger Zone */}
       <div className="space-y-2">
-        <label className="font-medium text-destructive text-xs uppercase">Danger Zone</label>
+        <label className="font-medium text-destructive text-xs uppercase">Zona de risco</label>
 
         <Button
           className="w-full justify-start gap-2"
@@ -607,7 +607,7 @@ export function SettingsPanel({
           variant="destructive"
         >
           <Trash2 className="size-4" />
-          Clear & Start New
+          Limpar e começar de novo
         </Button>
       </div>
     </div>

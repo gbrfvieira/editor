@@ -75,7 +75,7 @@ const LastAction = () => {
   if (!latest) return null
   return (
     <div style={section}>
-      <div style={{ ...label, opacity: 0.7 }}>last action</div>
+      <div style={{ ...label, opacity: 0.7 }}>última ação</div>
       <div style={grid}>
         <span style={{ ...value, textAlign: 'left', ...clip }}>
           {latest.detail ? `${latest.name} ${latest.detail}` : latest.name}
@@ -87,7 +87,7 @@ const LastAction = () => {
         </span>
       </div>
       <div style={{ ...label, ...clip }}>
-        {`drag ${latest.dragMs.toFixed(0)} / settle ${latest.settleMs.toFixed(0)} (${latest.settleFrames} frames)`}
+        {`arraste ${latest.dragMs.toFixed(0)} / estabilização ${latest.settleMs.toFixed(0)} (${latest.settleFrames} quadros)`}
       </div>
       {latest.tracks.slice(0, ACTION_TRACK_LINES).map((track) => (
         <div key={track.name} style={grid}>
@@ -178,7 +178,7 @@ export const PerfPanel = () => {
         }}
         type="button"
       >
-        {stats ? `${stats.fps} fps` : 'perf'}
+        {stats ? `${stats.fps} fps` : 'desempenho'}
       </button>,
       document.body,
     )
@@ -221,12 +221,12 @@ export const PerfPanel = () => {
           touchAction: 'none',
         }}
       >
-        <span style={{ fontWeight: 600, letterSpacing: 0.2 }}>Performance</span>
+        <span style={{ fontWeight: 600, letterSpacing: 0.2 }}>Desempenho</span>
         <span style={{ marginLeft: 'auto', color: stats ? fpsColor(stats.fps) : '#8b90a0' }}>
           {stats ? `${stats.fps} fps` : '—'}
         </span>
         <button
-          aria-label="Dock panel to the side"
+          aria-label="Fixar painel na lateral"
           onClick={dock}
           onPointerDown={(e) => e.stopPropagation()}
           style={{
@@ -249,12 +249,12 @@ export const PerfPanel = () => {
       {stats ? (
         <div style={{ padding: '8px 10px' }}>
           <div style={grid}>
-            <Row name="frame">
+            <Row name="quadro">
               {stats.frameMs > 0
                 ? `${stats.frameMs.toFixed(1)}ms cpu (max ${stats.frameMaxMs.toFixed(1)})`
                 : '—'}
             </Row>
-            <Row name="encode">
+            <Row name="codificação">
               {stats.encodeMs > 0
                 ? `${stats.encodeMs.toFixed(1)}ms (max ${stats.encodeMaxMs.toFixed(1)})`
                 : '—'}
@@ -262,30 +262,30 @@ export const PerfPanel = () => {
             <Row name="gpu">
               {stats.gpuTracked
                 ? `${stats.gpuMs.toFixed(1)}ms (max ${stats.gpuMaxMs.toFixed(1)})`
-                : 'no timestamp-query'}
+                : 'sem consulta de tempo'}
             </Row>
-            <Row name="queue">
+            <Row name="fila">
               {stats.queueMs > 0
                 ? `${stats.queueMs.toFixed(1)}ms (max ${stats.queueMaxMs.toFixed(1)})`
                 : '—'}
             </Row>
-            <Row name="draw">{stats.drawCalls}</Row>
+            <Row name="desenhos">{stats.drawCalls}</Row>
             {stats.batch.containers > 0 && (
-              <Row name="batch">
-                {`${stats.batch.items} items · ${stats.batch.instances} inst · ${stats.batch.containers} mesh`}
+              <Row name="lotes">
+                {`${stats.batch.items} itens · ${stats.batch.instances} instâncias · ${stats.batch.containers} malhas`}
               </Row>
             )}
-            <Row name="tri">{`${(stats.triangles / 1000).toFixed(1)}k`}</Row>
-            <Row name="mem">
+            <Row name="triângulos">{`${(stats.triangles / 1000).toFixed(1)}k`}</Row>
+            <Row name="memória">
               {`${stats.geometries} geo  ${stats.textures} tex  ${mb(stats.gpuBytes)}`}
             </Row>
             <Row name="heap">{stats.heapBytes > 0 ? mb(stats.heapBytes) : '—'}</Row>
-            <Row name="dirty">
+            <Row name="pendentes">
               {stats.dirty}
               {stats.dirtyDetail ? ` (${stats.dirtyDetail})` : ''}
             </Row>
-            <Row name="visible">
-              {`${stats.meshes} mesh  ${stats.lines} line  ${stats.lights} light`}
+            <Row name="visíveis">
+              {`${stats.meshes} malhas  ${stats.lines} linhas  ${stats.lights} luzes`}
             </Row>
           </div>
           <LastAction />
@@ -303,7 +303,7 @@ export const PerfPanel = () => {
           )}
         </div>
       ) : (
-        <div style={{ padding: '8px 10px', color: '#8b90a0' }}>waiting for samples…</div>
+        <div style={{ padding: '8px 10px', color: '#8b90a0' }}>aguardando amostras…</div>
       )}
     </div>,
     document.body,

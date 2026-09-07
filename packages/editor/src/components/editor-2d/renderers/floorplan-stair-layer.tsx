@@ -489,7 +489,7 @@ export const FloorplanStairLayer = memo(function FloorplanStairLayer({
                 vectorEffect="non-scaling-stroke"
               />
             ))}
-            <title>{stair.name || 'Staircase'}</title>
+            <title>{stair.name || 'Escada'}</title>
             {stairSymbol}
           </g>
         )

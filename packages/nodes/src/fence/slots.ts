@@ -19,14 +19,14 @@ export const FENCE_SLOT_DEFAULTS: Record<FenceSlotId, string> = {
 
 export function fenceSlots(node: FenceNode): SlotDeclaration[] {
   const slots: SlotDeclaration[] = [
-    { slotId: 'posts', label: 'Posts', default: FENCE_POSTS_SLOT_DEFAULT },
+    { slotId: 'posts', label: 'Montantes', default: FENCE_POSTS_SLOT_DEFAULT },
   ]
   if (node.showInfill !== false) {
-    slots.push({ slotId: 'infill', label: 'Infill', default: FENCE_INFILL_SLOT_DEFAULT })
+    slots.push({ slotId: 'infill', label: 'Preenchimento', default: FENCE_INFILL_SLOT_DEFAULT })
   }
   if (node.baseStyle !== 'floating') {
     slots.push({ slotId: 'base', label: 'Base', default: FENCE_BASE_SLOT_DEFAULT })
   }
-  slots.push({ slotId: 'rail', label: 'Rail', default: FENCE_RAIL_SLOT_DEFAULT })
+  slots.push({ slotId: 'rail', label: 'Trilho', default: FENCE_RAIL_SLOT_DEFAULT })
   return slots
 }

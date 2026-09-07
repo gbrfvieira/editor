@@ -881,7 +881,7 @@ export function FloorplanPreview({
         className={className}
         style={{ display: 'grid', placeItems: 'center', background: '#f8fafc', color: '#64748b' }}
       >
-        No floor plans are available for this scene.
+        Não há plantas baixas disponíveis para esta cena.
       </div>
     )
   }
@@ -981,7 +981,7 @@ export function FloorplanPreview({
             fontWeight: 600,
           }}
         >
-          Floor
+          Piso
           <select
             aria-label="Piso"
             onChange={(event) => chooseLevel(event.target.value)}

@@ -235,7 +235,8 @@ function EditorSceneCrashFallback() {
       <div className="w-full max-w-md rounded-2xl border border-border/60 bg-background p-6 shadow-xl">
         <h2 className="font-semibold text-lg">Falha ao renderizar a cena do editor</h2>
         <p className="mt-2 text-muted-foreground text-sm">
-          You can retry the scene or return home without reloading the whole app shell.
+          Você pode tentar carregar a cena novamente ou voltar ao início sem recarregar todo o
+          aplicativo.
         </p>
         <div className="mt-4 flex items-center gap-2">
           <button
@@ -243,13 +244,13 @@ function EditorSceneCrashFallback() {
             onClick={() => window.location.reload()}
             type="button"
           >
-            Reload editor
+            Recarregar editor
           </button>
           <a
             className="rounded-md border border-border bg-background px-3 py-2 font-medium text-sm hover:bg-accent/40"
             href="/"
           >
-            Back to home
+            Voltar ao início
           </a>
         </div>
       </div>
@@ -418,23 +419,23 @@ const PREVIEW_CAMERA_CONTROL_HINTS: CameraControlHint[] = [
 const CAMERA_SHORTCUT_KEY_META: Record<string, { icon?: string; label: string; text?: string }> = {
   'Left click': {
     icon: 'ph:mouse-left-click-fill',
-    label: 'Left click',
+    label: 'Clique esquerdo',
   },
   'Middle click': {
     icon: 'qlementine-icons:mouse-middle-button-16',
-    label: 'Middle click',
+    label: 'Clique central',
   },
   'Right click': {
     icon: 'ph:mouse-right-click-fill',
-    label: 'Right click',
+    label: 'Clique direito',
   },
   Scroll: {
     icon: 'qlementine-icons:mouse-middle-button-16',
-    label: 'Scroll wheel',
+    label: 'Roda do mouse',
   },
   Space: {
     icon: 'lucide:space',
-    label: 'Space',
+    label: 'Espaço',
   },
 }
 

@@ -26,10 +26,10 @@ export function DeleteConfirmationDialog() {
         showCloseButton={false}
       >
         <DialogHeader>
-          <DialogTitle>Delete {request?.count ?? 0} elements?</DialogTitle>
+          <DialogTitle>Excluir {request?.count ?? 0} elementos?</DialogTitle>
           <DialogDescription>
-            This removes every selected element. You can undo the deletion while it remains in the
-            editor history.
+            Remove todos os elementos selecionados. Você pode desfazer a exclusão enquanto ela
+            permanecer no histórico do editor.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -38,14 +38,14 @@ export function DeleteConfirmationDialog() {
             onClick={cancel}
             type="button"
           >
-            Cancel
+            Cancelar
           </button>
           <button
             className="rounded-full bg-red-600 px-4 py-2 text-sm text-white transition-colors hover:bg-red-700"
             onClick={confirm}
             type="button"
           >
-            Delete
+            Excluir
           </button>
         </DialogFooter>
       </DialogContent>

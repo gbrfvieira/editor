@@ -56,10 +56,9 @@ function renderIconRef(ref: IconRef): ReactNode {
 function PluginPanelCrashed({ label }: { label: string }) {
   return (
     <div className="flex flex-col gap-2 p-4 text-sm">
-      <p className="font-medium text-sidebar-foreground">"{label}" plugin crashed</p>
+      <p className="font-medium text-sidebar-foreground">"{label}" apresentou uma falha</p>
       <p className="text-sidebar-foreground/50 text-xs">
-        This panel hit an error and was unloaded for this session. The rest of the editor is
-        unaffected — reload to try again.
+        Este painel apresentou um erro e foi desativado nesta sessão. O restante do editor não foi afetado — recarregue para tentar novamente.
       </p>
     </div>
   )
@@ -76,7 +75,7 @@ function resolvePanelComponent(panel: EditorHostPanel): ComponentType {
   const Lazy = lazy(panel.component)
   const Wrapped: ComponentType = () => (
     <ErrorBoundary fallback={<PluginPanelCrashed label={panel.label} />}>
-      <Suspense fallback={<div className="p-4 text-sidebar-foreground/50 text-sm">Loading…</div>}>
+      <Suspense fallback={<div className="p-4 text-sidebar-foreground/50 text-sm">Carregando…</div>}>
         <Lazy />
       </Suspense>
     </ErrorBoundary>

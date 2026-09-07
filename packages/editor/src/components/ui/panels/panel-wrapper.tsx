@@ -364,7 +364,7 @@ export function PanelWrapper({
               const isActive = !collapsed && activeExtensionId === extension.id
               return (
                 <button
-                  aria-label={isActive ? `Close ${extension.title}` : `Open ${extension.title}`}
+                  aria-label={isActive ? `Fechar ${extension.title}` : `Abrir ${extension.title}`}
                   aria-pressed={isActive}
                   className={cn(
                     'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
@@ -385,7 +385,7 @@ export function PanelWrapper({
             })}
             <button
               aria-expanded={!collapsed}
-              aria-label={collapsed ? 'Expand panel' : 'Collapse panel'}
+              aria-label={collapsed ? 'Expandir painel' : 'Recolher painel'}
               className="flex h-7 w-7 items-center justify-center rounded-md bg-[#2C2C2E] text-muted-foreground transition-colors hover:bg-[#3e3e3e] hover:text-foreground"
               onClick={handleCardToggle}
               type="button"
@@ -518,7 +518,7 @@ function InspectorExtensionSection({
       <ErrorBoundary
         fallback={
           <p className="p-1 text-muted-foreground text-xs">
-            “{extension.title}” hit an error and was unloaded for this session.
+            “{extension.title}” apresentou um erro e foi desativado nesta sessão.
           </p>
         }
       >

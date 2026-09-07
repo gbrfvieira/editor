@@ -354,7 +354,7 @@ export function SliderControl({
             className="flex cursor-text items-center text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleValueClick}
           >
-            <span className="font-mono tracking-tight">Mixed</span>
+            <span className="font-mono tracking-tight">Misto</span>
           </div>
         ) : (
           <div

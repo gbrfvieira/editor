@@ -181,7 +181,7 @@ function StairSegmentTreeNode({
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (e.button !== 0) return
-      const typeLabel = node.segmentType === 'stair' ? 'Flight' : 'Landing'
+      const typeLabel = node.segmentType === 'stair' ? 'Lance' : 'Patamar'
       const label = `${typeLabel} (${node.width.toFixed(1)}×${node.length.toFixed(1)}m)`
       startDrag(node.id, node.type, node.parentId as string, label, e.clientX, e.clientY)
     },
@@ -191,7 +191,7 @@ function StairSegmentTreeNode({
   const handleStartEditing = useCallback(() => setIsEditing(true), [])
   const handleStopEditing = useCallback(() => setIsEditing(false), [])
 
-  const typeLabel = node.segmentType === 'stair' ? 'Flight' : 'Landing'
+  const typeLabel = node.segmentType === 'stair' ? 'Lance' : 'Patamar'
   const defaultName = `${typeLabel} (${node.width.toFixed(1)}×${node.length.toFixed(1)}m)`
 
   return (

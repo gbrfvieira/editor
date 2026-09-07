@@ -22,9 +22,9 @@ export type FunctionTreeNode = {
 }
 
 const SOURCE_CHIPS: Array<{ id: NonNullable<AssetInput['source']>; label: string }> = [
-  { id: 'library', label: 'Library' },
-  { id: 'community', label: 'Community' },
-  { id: 'mine', label: 'Mine' },
+  { id: 'library', label: 'Biblioteca' },
+  { id: 'community', label: 'Comunidade' },
+  { id: 'mine', label: 'Meus' },
 ]
 
 /** Every slug at or below `node`, so a non-leaf selection matches descendants. */
@@ -217,7 +217,7 @@ export function FunctionTreePanel({
               onClick={() => setActiveChildSlug(null)}
               type="button"
             >
-              All
+              Todos
             </button>
             {activeRoot.children.map((child) => {
               const isActive = activeChildSlug === child.slug
@@ -250,7 +250,7 @@ export function FunctionTreePanel({
         ) : isServerSearch && search && searchResults?.length === 0 ? (
           (emptyState ?? (
             <div className="flex h-full items-center justify-center text-muted-foreground text-xs">
-              No results for &ldquo;{search}&rdquo;
+              Nenhum resultado para “{search}&rdquo;
             </div>
           ))
         ) : (

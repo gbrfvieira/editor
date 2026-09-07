@@ -57,8 +57,8 @@ export const levelDefinition: NodeDefinition<typeof LevelNode> = {
   },
 
   presentation: {
-    label: 'Level',
-    description: 'A single floor of a building, holding walls / slabs / ceilings / items.',
+    label: 'Nível',
+    description: 'Um pavimento de uma edificação, contendo paredes, lajes, forros e itens.',
     icon: { kind: 'url', src: '/icons/level.webp' },
     paletteSection: 'site',
     paletteOrder: 7,

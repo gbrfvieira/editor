@@ -259,30 +259,30 @@ export function SlabPanel() {
   const elevationPresets =
     unit === 'imperial'
       ? [
-          { label: 'Sunken (6")', elevation: -0.1524 },
-          { label: 'Thin (1")', elevation: 0.0254 },
-          { label: 'Standard (2")', elevation: 0.0508 },
-          { label: 'Thick (6")', elevation: 0.1524 },
+          { label: 'Rebaixada (6")', elevation: -0.1524 },
+          { label: 'Fina (1")', elevation: 0.0254 },
+          { label: 'Padrão (2")', elevation: 0.0508 },
+          { label: 'Espessa (6")', elevation: 0.1524 },
         ]
       : [
-          { label: 'Sunken (15cm)', elevation: -0.15 },
-          { label: 'Thin (2cm)', elevation: 0.02 },
-          { label: 'Standard (5cm)', elevation: 0.05 },
-          { label: 'Thick (15cm)', elevation: 0.15 },
+          { label: 'Rebaixada (15 cm)', elevation: -0.15 },
+          { label: 'Fina (2 cm)', elevation: 0.02 },
+          { label: 'Padrão (5 cm)', elevation: 0.05 },
+          { label: 'Espessa (15 cm)', elevation: 0.15 },
         ]
 
   return (
     <PanelWrapper
       icon="/icons/floor.webp"
       onClose={handleClose}
-      title={node.name || 'Slab'}
+      title={node.name || 'Laje'}
       width={320}
     >
-      <PanelSection title="Elevation">
+      <PanelSection title="Elevação">
         {/* Range mirrors the 20 m storey cap; `clampSlabElevation` in the
             write path stays the real bound against the level. */}
         <SliderControl
-          label={node.recessed ? 'Floor' : 'Surface'}
+          label={node.recessed ? 'Piso' : 'Superfície'}
           max={20}
           min={-3}
           onChange={handleElevationChange}
@@ -293,7 +293,7 @@ export function SlabPanel() {
         />
 
         <SliderControl
-          label={node.recessed ? 'Rim' : 'Base'}
+          label={node.recessed ? 'Borda' : 'Base'}
           max={20}
           min={-3}
           onChange={handleAnchorChange}
@@ -305,7 +305,7 @@ export function SlabPanel() {
 
         {node.recessed ? (
           <SliderControl
-            label="Depth"
+            label="Profundidade"
             max={1000}
             min={MIN_SLAB_THICKNESS}
             onChange={handleRecessDepthChange}
@@ -316,7 +316,7 @@ export function SlabPanel() {
           />
         ) : (
           <SliderControl
-            label="Thickness"
+            label="Espessura"
             max={1000}
             min={MIN_SLAB_THICKNESS}
             onChange={handleThicknessChange}
@@ -330,20 +330,20 @@ export function SlabPanel() {
         {!node.recessed && (
           <>
             <div className="px-1 font-medium text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-              Foundation
+              Fundação
             </div>
             <SegmentedControl
               onChange={handleTerrainModeChange}
               options={[
-                { label: 'Fixed', value: 'fixed' },
-                { label: 'Follows terrain', value: 'terrain' },
+                { label: 'Fixo', value: 'fixed' },
+                { label: 'Acompanha o terreno', value: 'terrain' },
               ]}
               value={node.fillToTerrain ? 'terrain' : 'fixed'}
             />
             {node.fillToTerrain && (
               <div className="px-1 text-[11px] text-muted-foreground">
-                Extends the perimeter down to terrain. The flat surface, base, and thickness stay
-                unchanged.
+                Estende o perímetro até o terreno. A superfície plana, a base e a espessura
+                permanecem iguais.
               </div>
             )}
           </>
@@ -360,14 +360,14 @@ export function SlabPanel() {
         </div>
       </PanelSection>
 
-      <PanelSection title="Info">
+      <PanelSection title="Informações">
         <div className="flex items-center justify-between px-2 py-1 text-muted-foreground text-sm">
-          <span>Area</span>
+          <span>Área</span>
           <span className="font-mono text-white">{area.toFixed(2)} m²</span>
         </div>
       </PanelSection>
 
-      <PanelSection title="Holes">
+      <PanelSection title="Aberturas">
         {node.holes && node.holes.length > 0 ? (
           <div className="flex flex-col gap-1 pb-2">
             {node.holes.map((hole, index) => {
@@ -376,7 +376,10 @@ export function SlabPanel() {
                 editingHole?.nodeId === selectedId && editingHole?.holeIndex === index
               const source = node.holeMetadata?.[index]?.source ?? 'manual'
               const isAutoHole = source !== 'manual'
-              const autoLabel = source === 'elevator' ? 'Auto elevator cutout' : 'Auto stair cutout'
+              const autoLabel =
+                source === 'elevator'
+                  ? 'Abertura automática de elevador'
+                  : 'Abertura automática de escada'
               return (
                 <div
                   className={`flex items-center justify-between rounded-lg border p-2 transition-colors ${
@@ -390,7 +393,7 @@ export function SlabPanel() {
                     <p
                       className={`font-medium text-xs ${isEditing ? 'text-primary' : 'text-white'}`}
                     >
-                      Hole {index + 1} {isEditing && '(Editing)'}
+                      Furo {index + 1} {isEditing && '(Editing)'}
                     </p>
                     <p className="text-[10px] text-muted-foreground">
                       {holeArea.toFixed(2)} m² · {hole.length} pts ·{' '}
@@ -401,7 +404,7 @@ export function SlabPanel() {
                     {isEditing ? (
                       <ActionButton
                         className="h-7 bg-primary text-primary-foreground hover:bg-primary/90"
-                        label="Done"
+                        label="Concluir"
                         onClick={() =>
                           useInteractionScope
                             .getState()
@@ -412,7 +415,7 @@ export function SlabPanel() {
                       />
                     ) : isAutoHole ? (
                       <div className="rounded-md bg-[#2C2C2E] px-2 py-1 text-[10px] text-muted-foreground">
-                        Auto
+                        Automático
                       </div>
                     ) : (
                       <>
@@ -438,7 +441,7 @@ export function SlabPanel() {
             })}
           </div>
         ) : (
-          <div className="px-2 py-3 text-center text-muted-foreground text-xs">No holes</div>
+          <div className="px-2 py-3 text-center text-muted-foreground text-xs">Sem aberturas</div>
         )}
 
         <div className="px-1 pt-1 pb-1">
@@ -446,13 +449,13 @@ export function SlabPanel() {
             className="w-full"
             disabled={editingHole?.nodeId === selectedId}
             icon={<Plus className="h-3.5 w-3.5" />}
-            label="Add Hole"
+            label="Adicionar abertura"
             onClick={handleAddHole}
           />
         </div>
       </PanelSection>
       <ActionGroup>
-        <ActionButton icon={<Move className="h-3.5 w-3.5" />} label="Move" onClick={handleMove} />
+        <ActionButton icon={<Move className="h-3.5 w-3.5" />} label="Mover" onClick={handleMove} />
       </ActionGroup>
     </PanelWrapper>
   )

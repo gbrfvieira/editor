@@ -227,15 +227,16 @@ export const windowDefinition: NodeDefinition<typeof WindowNode> = {
   },
 
   toolHints: [
-    { key: 'Left click', label: 'Place window on wall' },
-    { key: 'R', label: 'Flip side' },
-    { key: 'Alt', label: 'Force place' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Posicionar janela na parede' },
+    { key: 'R', label: 'Inverter lado' },
+    { key: 'Alt', label: 'Forçar posicionamento' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
-    label: 'Window',
-    description: 'A window cut into a wall. Animated open/close for opening windows.',
+    label: 'Janela',
+    description:
+      'Uma janela inserida na parede, com animação de abertura e fechamento nas janelas móveis.',
     icon: { kind: 'url', src: '/icons/window.webp' },
     paletteSection: 'structure',
     paletteOrder: 60,

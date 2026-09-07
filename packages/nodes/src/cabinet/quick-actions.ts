@@ -142,8 +142,8 @@ export function cabinetQuickActions({
   const pushSideAction = (side: 'left' | 'right', disabled: boolean) => {
     actions.push({
       id: `cabinet:add-${side}`,
-      label: side === 'left' ? 'Left' : 'Right',
-      title: side === 'left' ? 'Add cabinet to the left' : 'Add cabinet to the right',
+      label: side === 'left' ? 'Esquerda' : 'Direita',
+      title: side === 'left' ? 'Adicionar armário à esquerda' : 'Adicionar armário à direita',
       icon: side === 'left' ? 'add-left' : 'add-right',
       disabled,
       history: 'single',
@@ -166,8 +166,9 @@ export function cabinetQuickActions({
   ) => {
     actions.push({
       id: `cabinet:add-corner-${endSide}`,
-      label: endSide === 'left' ? 'L Left' : 'L Right',
-      title: endSide === 'left' ? 'Turn an L corner to the left' : 'Turn an L corner to the right',
+      label: endSide === 'left' ? 'L à esquerda' : 'L à direita',
+      title:
+        endSide === 'left' ? 'Formar um canto em L à esquerda' : 'Formar um canto em L à direita',
       icon: endSide === 'left' ? cornerTurnLeftIcon : cornerTurnRightIcon,
       disabled,
       history: 'single',
@@ -192,12 +193,12 @@ export function cabinetQuickActions({
     if (standardModule && selectedCabinetType === 'base') {
       actions.push({
         id: 'cabinet:add-wall',
-        label: 'Wall',
+        label: 'Parede',
         title: hasWallCabinet
-          ? 'A wall cabinet already exists above this cabinet'
+          ? 'Já existe um armário aéreo acima deste armário'
           : wallAdditionBlocked
-            ? 'No space above—overlaps an existing wall cabinet'
-            : 'Add wall cabinet above',
+            ? 'Sem espaço acima — sobreposição com um armário aéreo existente'
+            : 'Adicionar armário aéreo acima',
         icon: cabinetWallIcon,
         disabled: hasWallCabinet || wallAdditionBlocked,
         blockedFeedback: !hasWallCabinet && wallAdditionBlocked ? true : undefined,
@@ -213,8 +214,8 @@ export function cabinetQuickActions({
       })
       actions.push({
         id: 'cabinet:to-tall',
-        label: 'Tall',
-        title: 'Switch to tall cabinet',
+        label: 'Alto',
+        title: 'Trocar para armário alto',
         icon: cabinetTallIcon,
         run: ({ sceneApi }) =>
           switchCabinetToTall({
@@ -229,7 +230,7 @@ export function cabinetQuickActions({
       actions.push({
         id: 'cabinet:to-base',
         label: 'Base',
-        title: 'Switch to base cabinet',
+        title: 'Trocar para armário inferior',
         icon: cabinetBaseIcon,
         run: ({ sceneApi }) =>
           switchCabinetToBase({

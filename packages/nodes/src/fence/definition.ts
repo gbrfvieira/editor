@@ -384,13 +384,13 @@ export const fenceDefinition: NodeDefinition<typeof FenceNode> = {
   },
 
   toolHints: [
-    { key: 'Left click', label: 'Set fence start / end' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Definir início / fim da cerca' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
-    label: 'Fence',
-    description: 'A straight or curved fence segment with configurable posts and infill.',
+    label: 'Cerca',
+    description: 'Um trecho reto ou curvo de cerca, com postes e fechamento configuráveis.',
     icon: { kind: 'url', src: '/icons/fence.webp' },
     paletteSection: 'structure',
     paletteOrder: 20,

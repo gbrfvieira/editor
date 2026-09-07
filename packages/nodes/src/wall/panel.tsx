@@ -66,25 +66,25 @@ const WALL_TRIM_PROFILE_OPTIONS: Record<
   Array<{ label: string; value: WallTrimProfile }>
 > = {
   skirting: [
-    { label: 'Flat', value: 'flat' },
-    { label: 'Modern', value: 'base-modern' },
+    { label: 'Plano', value: 'flat' },
+    { label: 'Moderno', value: 'base-modern' },
     { label: 'Colonial', value: 'base-colonial' },
-    { label: 'Shoe', value: 'base-shoe' },
-    { label: 'Ogee', value: 'base-ogee' },
+    { label: 'Meia-cana', value: 'base-shoe' },
+    { label: 'Perfil em S', value: 'base-ogee' },
   ],
   crown: [
-    { label: 'Flat', value: 'flat' },
-    { label: 'Cove', value: 'crown-cove' },
-    { label: 'Ogee', value: 'crown-ogee' },
-    { label: 'Craft', value: 'crown-craftsman' },
-    { label: 'Layered', value: 'crown-layered' },
+    { label: 'Plano', value: 'flat' },
+    { label: 'Côncavo', value: 'crown-cove' },
+    { label: 'Perfil em S', value: 'crown-ogee' },
+    { label: 'Artesanal', value: 'crown-craftsman' },
+    { label: 'Em camadas', value: 'crown-layered' },
   ],
   chairRail: [
-    { label: 'Flat', value: 'flat' },
-    { label: 'Round', value: 'rail-rounded' },
-    { label: 'Ogee', value: 'rail-ogee' },
-    { label: 'Picture', value: 'rail-picture' },
-    { label: 'Step', value: 'rail-stepped' },
+    { label: 'Plano', value: 'flat' },
+    { label: 'Redondo', value: 'rail-rounded' },
+    { label: 'Perfil em S', value: 'rail-ogee' },
+    { label: 'Moldura', value: 'rail-picture' },
+    { label: 'Degrau', value: 'rail-stepped' },
   ],
 }
 
@@ -248,12 +248,12 @@ export default function WallPanel() {
     <PanelWrapper
       icon="/icons/wall.webp"
       onClose={handleClose}
-      title={node.name || 'Wall'}
+      title={node.name || 'Parede'}
       width={280}
     >
-      <PanelSection title="Dimensions">
+      <PanelSection title="Dimensões">
         <SliderControl
-          label="Length"
+          label="Comprimento"
           max={metersToLinearUnit(1000, unit)}
           min={metersToLinearUnit(0.1, unit)}
           onChange={(value) =>
@@ -267,23 +267,23 @@ export default function WallPanel() {
           value={displayLength}
         />
         <div className="px-1 font-medium text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-          Top
+          Topo
         </div>
         <SegmentedControl
           onChange={handleTopModeChange}
           options={[
-            { label: 'Follows level', value: 'storey' },
-            { label: 'Custom height', value: 'custom' },
+            { label: 'Acompanha o nível', value: 'storey' },
+            { label: 'Altura personalizada', value: 'custom' },
           ]}
           value={isPlaneBound ? 'storey' : 'custom'}
         />
         {isPlaneBound ? (
           <div className="px-1 text-[11px] text-muted-foreground">
-            Currently {formatLinearMeasurement(height, unit)}
+            Atualmente {formatLinearMeasurement(height, unit)}
           </div>
         ) : (
           <SliderControl
-            label="Height"
+            label="Altura"
             max={metersToLinearUnit(1000, unit)}
             min={metersToLinearUnit(0.1, unit)}
             onChange={(v) =>
@@ -298,23 +298,23 @@ export default function WallPanel() {
           />
         )}
         <div className="px-1 font-medium text-[10px] text-muted-foreground/80 uppercase tracking-wider">
-          Bottom
+          Base inferior
         </div>
         <SegmentedControl
           onChange={handleInfillChange}
           options={[
-            { label: 'Auto', value: 'auto' },
-            { label: 'Fill to terrain', value: 'terrain' },
+            { label: 'Automático', value: 'auto' },
+            { label: 'Preencher até o terreno', value: 'terrain' },
           ]}
           value={followsTerrain ? 'terrain' : 'auto'}
         />
         {followsTerrain && (
           <div className="px-1 text-[11px] text-muted-foreground">
-            Extends downward to meet the terrain. Height and top stay unchanged.
+            Estende para baixo até o terreno. A altura e o topo permanecem iguais.
           </div>
         )}
         <SliderControl
-          label="Thickness"
+          label="Espessura"
           max={metersToLinearUnit(1000, unit)}
           min={metersToLinearUnit(0.05, unit)}
           onChange={(v) =>
@@ -332,7 +332,7 @@ export default function WallPanel() {
         />
         {!hasWallChildrenBlockingCurve && (
           <SliderControl
-            label="Curve"
+            label="Curva"
             max={Math.max(metersToLinearUnit(0.01, unit), displayMaxCurveOffset)}
             min={-Math.max(metersToLinearUnit(0.01, unit), displayMaxCurveOffset)}
             onChange={(v) =>
@@ -365,7 +365,7 @@ export default function WallPanel() {
       <WallTrimSection
         node={node}
         onUpdate={handleUpdate}
-        title="Skirting"
+        title="Rodapé"
         trimKey="skirting"
         trimValue={skirting}
         unit={unit}
@@ -375,7 +375,7 @@ export default function WallPanel() {
       <WallTrimSection
         node={node}
         onUpdate={handleUpdate}
-        title="Crown molding"
+        title="Sanca"
         trimKey="crown"
         trimValue={crown}
         unit={unit}
@@ -385,7 +385,7 @@ export default function WallPanel() {
       <WallTrimSection
         node={node}
         onUpdate={handleUpdate}
-        title="Chair rail"
+        title="Roda-meio"
         trimKey="chairRail"
         trimValue={chairRail}
         unit={unit}
@@ -394,11 +394,11 @@ export default function WallPanel() {
       />
 
       {!hasWallChildrenBlockingCurve && (
-        <PanelSection title="Actions">
+        <PanelSection title="Ações">
           <ActionGroup>
             <ActionButton
               icon={<Spline className="h-3.5 w-3.5" />}
-              label="Curve"
+              label="Curva"
               onClick={handleCurve}
             />
           </ActionGroup>
@@ -438,9 +438,9 @@ function WallFaceBandSection({
     })
 
   return (
-    <PanelSection title="Wall bands">
+    <PanelSection title="Faixas da parede">
       <SliderControl
-        label="Bands"
+        label="Faixas"
         max={4}
         min={1}
         onChange={(value) => onUpdate(buildWallFaceBandCountPatch(node, Math.round(value)))}
@@ -450,7 +450,7 @@ function WallFaceBandSection({
       />
       {bandCount >= 2 && (
         <SliderControl
-          label="Lower"
+          label="Inferior"
           max={metersToLinearUnit(wallHeightMeters, unit)}
           min={metersToLinearUnit(0, unit)}
           onChange={(value) =>
@@ -469,7 +469,7 @@ function WallFaceBandSection({
       )}
       {bandCount >= 3 && (
         <SliderControl
-          label="Middle"
+          label="Intermediário"
           max={metersToLinearUnit(Math.max(0, wallHeightMeters - lowerHeight), unit)}
           min={metersToLinearUnit(0, unit)}
           onChange={(value) =>
@@ -488,7 +488,7 @@ function WallFaceBandSection({
       )}
       {bandCount >= 4 && (
         <SliderControl
-          label="Upper"
+          label="Superior"
           max={metersToLinearUnit(Math.max(0, wallHeightMeters - lowerHeight - middleHeight), unit)}
           min={metersToLinearUnit(0, unit)}
           onChange={(value) =>
@@ -544,7 +544,9 @@ function WallTrimSection({
     <PanelSection title={title}>
       <ActionGroup>
         <ActionButton
-          label={trimValue.enabled ? `Hide ${title.toLowerCase()}` : `Show ${title.toLowerCase()}`}
+          label={
+            trimValue.enabled ? `Ocultar ${title.toLowerCase()}` : `Mostrar ${title.toLowerCase()}`
+          }
           onClick={() => updateTrim({ enabled: !trimValue.enabled })}
         />
       </ActionGroup>
@@ -555,7 +557,7 @@ function WallTrimSection({
             options={[
               { label: 'Interior', value: 'interior' },
               { label: 'Exterior', value: 'exterior' },
-              { label: 'Both', value: 'both' },
+              { label: 'Ambos', value: 'both' },
             ]}
             value={trimValue.sides}
           />
@@ -565,7 +567,7 @@ function WallTrimSection({
             value={selectedProfile}
           />
           <SliderControl
-            label="Height"
+            label="Altura"
             max={metersToLinearUnit(Math.max(0.05, wallHeightMeters), unit)}
             min={metersToLinearUnit(0.01, unit)}
             onChange={(value) =>
@@ -582,7 +584,7 @@ function WallTrimSection({
             value={metersToLinearUnit(trimValue.height, unit)}
           />
           <SliderControl
-            label="Proud"
+            label="Saliente"
             max={metersToLinearUnit(0.2, unit)}
             min={metersToLinearUnit(0.001, unit)}
             onChange={(value) =>
@@ -600,7 +602,7 @@ function WallTrimSection({
           />
           {trimKey === 'chairRail' && (
             <SliderControl
-              label="Offset"
+              label="Afastamento"
               max={metersToLinearUnit(Math.max(0.05, wallHeightMeters - trimValue.height), unit)}
               min={metersToLinearUnit(0, unit)}
               onChange={(value) =>

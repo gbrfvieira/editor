@@ -123,28 +123,28 @@ function selectCabinetRunPlanningNodes(
 }
 
 const FRONT_STYLE_OPTIONS = [
-  { value: 'slab', label: 'Slab' },
+  { value: 'slab', label: 'Laje' },
   { value: 'shaker', label: 'Shaker' },
-  { value: 'raised-arch', label: 'Raised Arch' },
+  { value: 'raised-arch', label: 'Arco em relevo' },
 ] as const
 
 const FRONT_OVERLAY_OPTIONS = [
-  { value: 'full', label: 'Overlay' },
-  { value: 'inset', label: 'Inset' },
+  { value: 'full', label: 'Sobreposto' },
+  { value: 'inset', label: 'Embutido' },
 ] as const
 
 const HANDLE_STYLE_OPTIONS = [
-  { value: 'bar', label: 'Bar' },
-  { value: 'knob', label: 'Knob' },
-  { value: 'cutout', label: 'Cutout' },
-  { value: 'hole', label: 'Hole' },
-  { value: 'none', label: 'None' },
+  { value: 'bar', label: 'Barra' },
+  { value: 'knob', label: 'Botão' },
+  { value: 'cutout', label: 'Recorte' },
+  { value: 'hole', label: 'Furo' },
+  { value: 'none', label: 'Nenhum' },
 ] as const
 
 const HANDLE_POSITION_OPTIONS = [
-  { value: 'auto', label: 'Auto' },
-  { value: 'top', label: 'Top' },
-  { value: 'center', label: 'Center' },
+  { value: 'auto', label: 'Automático' },
+  { value: 'top', label: 'Topo' },
+  { value: 'center', label: 'Centro' },
 ] as const
 
 function moduleSummary(module: CabinetModuleNodeType) {
@@ -533,11 +533,11 @@ export function CabinetRunPanel({
 
   const equalizeWidthsTitle = !widthEqualization.ok
     ? widthEqualization.reason === 'not-enough-modules'
-      ? 'At least two standard base cabinets are required'
-      : 'The available run width cannot satisfy the cabinet width limits'
+      ? 'São necessários pelo menos dois armários inferiores padrão'
+      : 'A largura disponível no conjunto não comporta os limites de largura dos armários'
     : widthEqualization.changed
-      ? 'Equalize all resizeable standard base cabinets in this run'
-      : 'The resizeable cabinet widths are already equal'
+      ? 'Igualar todos os armários inferiores padrão redimensionáveis deste conjunto'
+      : 'As larguras dos armários redimensionáveis já são iguais'
 
   const duplicateAlongRun = useCallback(() => {
     if (!arraySource) return
@@ -554,11 +554,11 @@ export function CabinetRunPanel({
 
   const duplicateAlongRunTitle = !arrayPlan.ok
     ? arrayPlan.reason === 'no-source'
-      ? 'Choose a standard or appliance module as the source'
+      ? 'Escolha um módulo padrão ou de eletrodoméstico como origem'
       : arrayPlan.reason === 'invalid-options'
-        ? 'Choose a copy count from 1 to 20 and spacing from 0 to 2 m'
-        : 'There is not enough room in this run for the requested array'
-    : `Create ${arrayCopyCount} ${arraySource?.name || 'module'} cop${arrayCopyCount === 1 ? 'y' : 'ies'}`
+        ? 'Escolha de 1 a 20 cópias e espaçamento de 0 a 2 m'
+        : 'Não há espaço suficiente neste conjunto para a repetição solicitada'
+    : `Criar ${arrayCopyCount} cópia${arrayCopyCount === 1 ? '' : 's'} de ${arraySource?.name || 'módulo'}`
 
   const dimensionProfile = cabinetDimensionProfileId(node)
   const wallHeightPreset = cabinetWallHeightPresetId(node)
@@ -600,10 +600,10 @@ export function CabinetRunPanel({
     <PanelWrapper
       icon="/icons/item.webp"
       onClose={onClose}
-      title={node.name || 'Modular Cabinet'}
+      title={node.name || 'Armário modular'}
       width={320}
     >
-      <PanelSection title="Modules">
+      <PanelSection title="Módulos">
         <div className="flex flex-col gap-2 px-1 pb-2">
           {sortedModules.map((module, index) => (
             <div
@@ -616,21 +616,21 @@ export function CabinetRunPanel({
                 type="button"
               >
                 <div className="truncate text-xs font-medium text-foreground">
-                  {module.name || `Module ${index + 1}`}
+                  {module.name || `Módulo ${index + 1}`}
                 </div>
                 <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                   {moduleSummary(module)}
                 </div>
               </button>
               <button
-                aria-label={`Use ${module.name || `Module ${index + 1}`} as array source`}
+                aria-label={`Usar ${module.name || `Módulo ${index + 1}`} como origem da repetição`}
                 className="mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border/50 text-muted-foreground transition-colors hover:bg-white/8 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
                 disabled={module.moduleKind === 'corner-filler'}
                 onClick={() => setArraySourceId(module.id as AnyNodeId)}
                 title={
                   module.moduleKind === 'corner-filler'
-                    ? 'Corner fillers cannot be used as array sources'
-                    : 'Use this module as the array source'
+                    ? 'Arremates de canto não podem ser usados como origem da repetição'
+                    : 'Usar este módulo como origem da repetição'
                 }
                 type="button"
               >
@@ -651,12 +651,12 @@ export function CabinetRunPanel({
           <div className="grid grid-cols-2 gap-2">
             <ActionButton
               icon={<Plus className="h-4 w-4" />}
-              label="Add left"
+              label="Adicionar à esquerda"
               onClick={() => addModule('left')}
             />
             <ActionButton
               icon={<Plus className="h-4 w-4" />}
-              label="Add right"
+              label="Adicionar à direita"
               onClick={() => addModule('right')}
             />
           </div>
@@ -664,29 +664,30 @@ export function CabinetRunPanel({
             className="mt-2 w-full"
             disabled={!widthEqualization.ok || !widthEqualization.changed}
             icon={<EqualIcon className="h-4 w-4" />}
-            label="Equalize widths"
+            label="Igualar larguras"
             onClick={equalizeWidths}
             title={equalizeWidthsTitle}
           />
           <p className="px-1 pt-1 text-[10px] leading-4 text-muted-foreground">
-            Balances standard base cabinets while keeping appliance and corner-filler widths fixed.
+            Equilibra os armários inferiores padrão mantendo fixas as larguras dos eletrodomésticos
+            e arremates de canto.
           </p>
         </div>
       </PanelSection>
 
-      <PanelSection title="Duplicate along run">
+      <PanelSection title="Duplicar ao longo do conjunto">
         <div className="space-y-2 px-1 pb-2">
           <div className="rounded-lg border border-border/40 bg-[#252527] px-2 py-2">
             <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-              Source module
+              Módulo de origem
             </div>
             <div className="truncate pt-1 text-xs font-medium text-foreground">
               {arraySource?.name ||
-                (arraySource ? moduleSummary(arraySource) : 'No eligible module')}
+                (arraySource ? moduleSummary(arraySource) : 'Nenhum módulo disponível')}
             </div>
           </div>
           <SliderControl
-            label="Copies"
+            label="Cópias"
             max={20}
             min={1}
             onChange={(value) => setArrayCopyCount(Math.round(value))}
@@ -695,7 +696,7 @@ export function CabinetRunPanel({
             value={arrayCopyCount}
           />
           <SliderControl
-            label="Spacing"
+            label="Espaçamento"
             max={2}
             min={0}
             onChange={setArraySpacing}
@@ -706,13 +707,13 @@ export function CabinetRunPanel({
           />
           <div>
             <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Direction
+              Direção
             </div>
             <SegmentedControl
               onChange={(value) => setArrayDirection(value as 'left' | 'right')}
               options={[
-                { value: 'left', label: 'Left' },
-                { value: 'right', label: 'Right' },
+                { value: 'left', label: 'Esquerda' },
+                { value: 'right', label: 'Direita' },
               ]}
               value={arrayDirection}
             />
@@ -721,22 +722,23 @@ export function CabinetRunPanel({
             className="w-full"
             disabled={!arrayPlan.ok}
             icon={<Copy className="h-4 w-4" />}
-            label="Create array"
+            label="Criar sequência"
             onClick={duplicateAlongRun}
             title={duplicateAlongRunTitle}
           />
           <p className="px-1 pt-1 text-[10px] leading-4 text-muted-foreground">
-            Copies include the source cabinet structure and any attached wall cabinet. Existing
-            modules stay fixed; the requested array must fit in the available run space.
+            As cópias incluem a estrutura do armário original e o armário aéreo vinculado. Os
+            módulos existentes permanecem fixos; a sequência deve caber no espaço disponível do
+            conjunto.
           </p>
         </div>
       </PanelSection>
 
-      <PanelSection title="Shared Plinth & Countertop">
+      <PanelSection title="Rodapé e tampo compartilhados">
         <div className="space-y-2 px-1 pb-2">
           <div>
             <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Board thickness
+              Espessura da chapa
             </div>
             <SegmentedControl
               onChange={(value) => updateRun({ boardThickness: Number(value) })}
@@ -747,13 +749,13 @@ export function CabinetRunPanel({
               value={node.boardThickness.toFixed(3)}
             />
             <p className="px-1 pt-1 text-[10px] text-muted-foreground">
-              Applies the selected MDF thickness to this run and its modules.
+              Aplica a espessura de MDF selecionada ao conjunto e seus módulos.
             </p>
           </div>
           {node.runTier === 'base' && (
             <div>
               <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                Standard dimensions
+                Dimensões padrão
               </div>
               <SegmentedControl
                 mixed={dimensionProfile === 'custom'}
@@ -765,14 +767,14 @@ export function CabinetRunPanel({
                 value={dimensionProfile === 'us-base' ? 'us-base' : 'metric-base'}
               />
               <p className="px-1 pt-1 text-[10px] leading-4 text-muted-foreground">
-                Applies depth, carcass, plinth, and countertop thickness to this run.
+                Aplica profundidade, altura da caixa, rodapé e espessura do tampo ao conjunto.
               </p>
             </div>
           )}
           {node.runTier === 'wall' && (
             <div>
               <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                Height preset
+                Altura predefinida
               </div>
               <SegmentedControl
                 mixed={wallHeightPreset === 'custom'}
@@ -789,12 +791,12 @@ export function CabinetRunPanel({
                 value={wallHeightPreset === 'custom' ? '18' : wallHeightPreset}
               />
               <p className="px-1 pt-1 text-[10px] leading-4 text-muted-foreground">
-                Common wall-cabinet heights. Use the slider below for a custom height.
+                Alturas comuns de armários aéreos. Use o controle abaixo para definir outra altura.
               </p>
             </div>
           )}
           <SliderControl
-            label="Depth"
+            label="Profundidade"
             max={1.2}
             min={0.3}
             onChange={(value) => updateRun({ depth: value })}
@@ -804,7 +806,7 @@ export function CabinetRunPanel({
             value={node.depth}
           />
           <SliderControl
-            label="Carcass height"
+            label="Altura da caixa"
             max={node.runTier === 'tall' ? 2.4 : 1.4}
             min={Math.max(0.4, ...modules.map((module) => minCabinetCarcassHeightForStack(module)))}
             onChange={(value) => updateRun({ carcassHeight: value })}
@@ -815,12 +817,12 @@ export function CabinetRunPanel({
           />
           <ToggleControl
             checked={node.showPlinth}
-            label="Show plinth"
+            label="Mostrar rodapé"
             onChange={(checked) => updateRun({ showPlinth: checked })}
           />
           {node.showPlinth && (
             <SliderControl
-              label="Plinth height"
+              label="Altura do rodapé"
               max={0.3}
               min={0.02}
               onChange={(value) => updateRun({ plinthHeight: value })}
@@ -832,13 +834,13 @@ export function CabinetRunPanel({
           )}
           <ToggleControl
             checked={node.withCountertop}
-            label="Show countertop"
+            label="Mostrar tampo"
             onChange={(checked) => updateRun({ withCountertop: checked })}
           />
           {node.withCountertop && (
             <>
               <SliderControl
-                label="Countertop height"
+                label="Altura do tampo"
                 max={0.08}
                 min={0.005}
                 onChange={(value) => updateRun({ countertopThickness: value })}
@@ -848,7 +850,7 @@ export function CabinetRunPanel({
                 value={node.countertopThickness}
               />
               <SliderControl
-                label="Countertop depth"
+                label="Profundidade do tampo"
                 max={0.12}
                 min={0}
                 onChange={(value) => updateRun({ countertopOverhang: value })}
@@ -862,11 +864,11 @@ export function CabinetRunPanel({
         </div>
       </PanelSection>
 
-      <PanelSection title="Island & Bar">
+      <PanelSection title="Ilha e balcão">
         <div className="space-y-2 px-1 pb-2">
           {node.withCountertop && node.barLedge?.edge !== 'back' && (
             <SliderControl
-              label="Seating overhang"
+              label="Balanço para assentos"
               max={0.45}
               min={0}
               onChange={(value) => updateRun({ countertopBackOverhang: value })}
@@ -878,24 +880,24 @@ export function CabinetRunPanel({
           )}
           <ToggleControl
             checked={node.withFinishedBack}
-            label="Finished back"
+            label="Costas acabadas"
             onChange={(checked) => updateRun({ withFinishedBack: checked })}
           />
           <ToggleControl
             checked={node.withFinishedEnds}
-            label="Finished end panels"
+            label="Laterais de acabamento"
             onChange={(checked) => updateRun({ withFinishedEnds: checked })}
           />
           {node.withCountertop && (
             <ToggleControl
               checked={node.withWaterfall}
-              label="Waterfall ends"
+              label="Laterais em cascata"
               onChange={(checked) => updateRun({ withWaterfall: checked })}
             />
           )}
           <ToggleControl
             checked={Boolean(node.barLedge)}
-            label="Bar counter"
+            label="Balcão elevado"
             onChange={(checked) =>
               updateRun({
                 barLedge: checked ? { edge: 'back', height: 1.06, depth: 0.35 } : undefined,
@@ -911,14 +913,14 @@ export function CabinetRunPanel({
                   })
                 }
                 options={[
-                  { value: 'back', label: 'Back' },
-                  { value: 'left', label: 'Left' },
-                  { value: 'right', label: 'Right' },
+                  { value: 'back', label: 'Trás' },
+                  { value: 'left', label: 'Esquerda' },
+                  { value: 'right', label: 'Direita' },
                 ]}
                 value={node.barLedge.edge}
               />
               <SliderControl
-                label="Bar height"
+                label="Altura do balcão"
                 max={1.3}
                 min={0.9}
                 onChange={(value) => updateRun({ barLedge: { ...node.barLedge!, height: value } })}
@@ -928,7 +930,7 @@ export function CabinetRunPanel({
                 value={node.barLedge.height}
               />
               <SliderControl
-                label="Bar depth"
+                label="Profundidade do balcão"
                 max={0.5}
                 min={0.15}
                 onChange={(value) => updateRun({ barLedge: { ...node.barLedge!, depth: value } })}
@@ -942,11 +944,11 @@ export function CabinetRunPanel({
         </div>
       </PanelSection>
 
-      <PanelSection title="Fronts">
+      <PanelSection title="Frentes">
         <div className="space-y-2 px-1 pb-2">
           <div>
             <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Style
+              Estilo
             </div>
             <SegmentedControl
               onChange={(value) =>
@@ -961,7 +963,7 @@ export function CabinetRunPanel({
           </div>
           <div>
             <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Mounting
+              Montagem
             </div>
             <SegmentedControl
               onChange={(value) =>
@@ -976,7 +978,7 @@ export function CabinetRunPanel({
           </div>
           <div>
             <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Reveal gap
+              Folga entre frentes
             </div>
             <SegmentedControl
               mixed={cabinetRevealGapId(node.frontGap) === 'custom'}
@@ -999,11 +1001,11 @@ export function CabinetRunPanel({
         </div>
       </PanelSection>
 
-      <PanelSection title="Handles">
+      <PanelSection title="Puxadores">
         <div className="space-y-2 px-1 pb-2">
           <div>
             <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Style
+              Estilo
             </div>
             <SegmentedControl
               onChange={(value) =>
@@ -1019,7 +1021,7 @@ export function CabinetRunPanel({
           {(node.handleStyle === 'bar' || node.handleStyle === 'knob') && (
             <div>
               <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                Position
+                Posição
               </div>
               <SegmentedControl
                 onChange={(value) =>

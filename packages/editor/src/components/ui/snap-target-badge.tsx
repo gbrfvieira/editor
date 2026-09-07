@@ -12,9 +12,9 @@ const SNAP_TARGET_ICONS: Record<SnapTarget, string> = {
 }
 
 const SNAP_TARGET_LABELS: Record<SnapTarget, string> = {
-  wall: 'Wall attachment',
-  ceiling: 'Ceiling attachment',
-  roof: 'Roof attachment',
+  wall: 'Fixação na parede',
+  ceiling: 'Fixação no teto',
+  roof: 'Fixação no telhado',
 }
 
 const SNAP_TARGET_BADGE_SIZE_CLASSES: Record<SnapTargetBadgeSize, string> = {

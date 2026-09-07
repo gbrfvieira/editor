@@ -62,7 +62,7 @@ function reshapingHints(reshape: ReshapeKind): ContextualShortcutHint[] {
 function terrainSculptHints(verb: TerrainVerb, sampling: boolean): ContextualShortcutHint[] {
   if (sampling) {
     return [
-      { keys: ['Click'], label: 'Pick target height' },
+      { keys: ['Click'], label: 'Selecionar altura-alvo' },
       { keys: ['Esc'], label: 'Cancelar seleção' },
     ]
   }
@@ -78,7 +78,7 @@ function terrainSculptHints(verb: TerrainVerb, sampling: boolean): ContextualSho
     { keys: ['Drag'], label: action },
     // Nested, so the two render as alternatives ("[ / ]") rather than a chord —
     // a flat `['[', ']']` joins with "+" and would read as "press both".
-    { keys: [['[', ']']], label: 'Brush size' },
+    { keys: [['[', ']']], label: 'Tamanho do pincel' },
     { keys: ['Esc'], label: 'Cancelar traço' },
   ]
 }
@@ -220,7 +220,7 @@ export function HelperManager() {
   if (activeHandleDrag?.label === GROUP_MOVE_DRAG_LABEL) {
     return (
       <ContextualHelperPanel
-        hints={[{ keys: ['R / T'], label: 'Rotate the selection ±45°' }]}
+        hints={[{ keys: ['R / T'], label: 'Girar a seleção em ±45°' }]}
         snapContext={snapContext}
       />
     )
@@ -234,7 +234,7 @@ export function HelperManager() {
     return (
       <ContextualHelperPanel
         hints={[
-          { keys: ['Drag'], label: 'Resize' },
+          { keys: ['Drag'], label: 'Redimensionar' },
           { keys: ['Esc'], label: 'Cancelar' },
         ]}
         snapContext={snapContext}
@@ -299,9 +299,9 @@ export function HelperManager() {
     return (
       <ContextualHelperPanel
         hints={[
-          { keys: ['Hover'], label: 'Inspect surface dimensions' },
-          { keys: ['Click'], label: 'Pin measurement lens' },
-          { keys: ['Esc'], label: 'Exit smart measure' },
+          { keys: ['Hover'], label: 'Inspecionar dimensões da superfície' },
+          { keys: ['Click'], label: 'Fixar medição' },
+          { keys: ['Esc'], label: 'Sair da medição inteligente' },
         ]}
       />
     )

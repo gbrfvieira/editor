@@ -392,8 +392,8 @@ export const columnDefinition: NodeDefinition<typeof ColumnNode> = {
   // registry-first path mounts this and skips the legacy `<ColumnTool>`.
   tool: () => import('./tool'),
   toolHints: [
-    { key: 'Left click', label: 'Place column' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Posicionar pilar' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
   floorplan: buildColumnFloorplan,
   // 2D body move routes through this kind-specific target so the column
@@ -413,8 +413,8 @@ export const columnDefinition: NodeDefinition<typeof ColumnNode> = {
   },
 
   presentation: {
-    label: 'Column',
-    description: 'A parametric column with configurable cross-section, base, and capital.',
+    label: 'Pilar',
+    description: 'Um pilar paramétrico com seção transversal, base e capitel configuráveis.',
     icon: { kind: 'url', src: '/icons/column.webp' },
     paletteSection: 'structure',
     paletteOrder: 70,

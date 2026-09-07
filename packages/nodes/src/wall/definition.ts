@@ -166,14 +166,14 @@ export const wallDefinition: NodeDefinition<typeof WallNode> = {
   floorplanMoveTarget: wallFloorplanMoveTarget,
   floorplanSiblingOverrides: wallFloorplanSiblingOverrides,
   toolHints: [
-    { key: 'Left click', label: 'Set wall start / end' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Definir início / fim da parede' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
-    label: 'Wall',
+    label: 'Parede',
     description:
-      'A straight or curved wall segment. Hosts doors, windows, lean-to extensions, and wall-mounted items.',
+      'Um trecho reto ou curvo de parede. Recebe portas, janelas, coberturas anexas e itens fixados na parede.',
     icon: { kind: 'url', src: '/icons/wall.webp' },
     paletteSection: 'structure',
     paletteOrder: 10,

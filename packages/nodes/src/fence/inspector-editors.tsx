@@ -49,7 +49,7 @@ export function FenceLengthEditor({
 
   return (
     <SliderControl
-      label="Length"
+      label="Comprimento"
       max={50}
       min={0.1}
       onChange={handleChange}
@@ -73,7 +73,7 @@ export function FenceCurveEditor({
 
   return (
     <SliderControl
-      label="Curve"
+      label="Curva"
       max={Math.max(0.01, maxCurveOffset)}
       min={-Math.max(0.01, maxCurveOffset)}
       onChange={(value) => onUpdate({ curveOffset: normalizeWallCurveOffset(node, value) })}

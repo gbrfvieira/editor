@@ -65,7 +65,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'drawer-base',
-    label: 'Drawer Base',
+    label: 'Balcão de gavetas',
     createPatch: (run) => ({
       ...baseShared(run),
       name: 'Drawer Base',
@@ -78,7 +78,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'dishwasher',
-    label: 'Dishwasher',
+    label: 'Lava-louças',
     createPatch: (run) => ({
       ...baseShared(run),
       name: 'Dishwasher',
@@ -91,7 +91,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'cooktop-gas',
-    label: 'Gas Hob',
+    label: 'Cooktop a gás',
     createPatch: (run) => ({
       ...baseShared(run),
       name: 'Gas Hob Base',
@@ -104,7 +104,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'cooktop-induction',
-    label: 'Induction',
+    label: 'Indução',
     createPatch: (run) => ({
       ...baseShared(run),
       name: 'Induction Base',
@@ -117,7 +117,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'sink-base',
-    label: 'Sink',
+    label: 'Pia',
     createPatch: (run) => ({
       ...baseShared(run),
       name: 'Sink Base',
@@ -130,7 +130,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'tall-pantry',
-    label: 'Tall Pantry',
+    label: 'Despenseiro alto',
     createPatch: (run) => ({
       cabinetType: 'tall',
       name: 'Tall Pantry',
@@ -151,7 +151,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'oven-tower',
-    label: 'Oven Tower',
+    label: 'Torre de forno',
     createPatch: (run) => ({
       cabinetType: 'tall',
       name: 'Oven Tower',
@@ -177,7 +177,7 @@ export const CABINET_PRESETS: CabinetPreset[] = [
   },
   {
     id: 'fridge-single',
-    label: 'Single Fridge',
+    label: 'Geladeira simples',
     createPatch: (run) => ({
       cabinetType: 'tall',
       name: 'Single Door Refrigerator',

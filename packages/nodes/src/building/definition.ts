@@ -48,8 +48,8 @@ export const buildingDefinition: NodeDefinition<typeof BuildingNode> = {
   },
 
   presentation: {
-    label: 'Building',
-    description: 'A building container holding one or more levels.',
+    label: 'Edificação',
+    description: 'Uma edificação que contém um ou mais níveis.',
     icon: { kind: 'url', src: '/icons/building.webp' },
     paletteSection: 'site',
     paletteOrder: 6,

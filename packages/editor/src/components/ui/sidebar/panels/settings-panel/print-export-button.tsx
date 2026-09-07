@@ -80,7 +80,7 @@ export function PrintExportButton({ onlyVisible }: { onlyVisible: boolean }) {
       const prepared = await preparePrintExport(modelExport, onlyVisible)
       downloadArtifact(prepared.artifact)
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : '3D print export failed.')
+      setError(reason instanceof Error ? reason.message : 'Falha ao exportar para impressão 3D.')
     } finally {
       setIsExporting(false)
     }
@@ -96,7 +96,7 @@ export function PrintExportButton({ onlyVisible }: { onlyVisible: boolean }) {
         variant="outline"
       >
         <Printer className="size-4" />
-        Export 3D print files
+        Exportar arquivos de impressão 3D
       </Button>
       {error && (
         <div className="flex gap-2 text-destructive text-xs">

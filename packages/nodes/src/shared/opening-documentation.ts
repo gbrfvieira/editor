@@ -66,15 +66,15 @@ export function buildDoorFloorplanSchedule(args: {
   const marks = resolveOpeningMarks(args.siblings, args.nodes, 'door', args.levelId)
   return {
     id: 'doors',
-    title: 'DOOR SCHEDULE',
+    title: 'QUADRO DE PORTAS',
     columns: [
-      { key: 'mark', label: 'MARK', weight: 0.65 },
-      { key: 'type', label: 'TYPE', weight: 1.25 },
-      { key: 'size', label: 'NOMINAL SIZE', weight: 1.35 },
-      { key: 'roughOpening', label: 'ROUGH OPENING', weight: 1.35 },
-      { key: 'operation', label: 'OPERATION', weight: 1.35 },
-      { key: 'frame', label: 'FRAME T / D', weight: 1.25 },
-      { key: 'hardware', label: 'HARDWARE', weight: 1.35 },
+      { key: 'mark', label: 'IDENTIFICAÇÃO', weight: 0.65 },
+      { key: 'type', label: 'TIPO', weight: 1.25 },
+      { key: 'size', label: 'DIMENSÃO NOMINAL', weight: 1.35 },
+      { key: 'roughOpening', label: 'VÃO BRUTO', weight: 1.35 },
+      { key: 'operation', label: 'ABERTURA', weight: 1.35 },
+      { key: 'frame', label: 'ESP. / PROF. DO CAIXILHO', weight: 1.25 },
+      { key: 'hardware', label: 'FERRAGENS', weight: 1.35 },
     ],
     rows: args.siblings.map((door) => ({
       id: door.id,
@@ -103,15 +103,15 @@ export function buildWindowFloorplanSchedule(args: {
   const marks = resolveOpeningMarks(args.siblings, args.nodes, 'window', args.levelId)
   return {
     id: 'windows',
-    title: 'WINDOW SCHEDULE',
+    title: 'QUADRO DE JANELAS',
     columns: [
-      { key: 'mark', label: 'MARK', weight: 0.65 },
-      { key: 'type', label: 'TYPE', weight: 1.2 },
-      { key: 'size', label: 'NOMINAL SIZE', weight: 1.35 },
-      { key: 'roughOpening', label: 'ROUGH OPENING', weight: 1.35 },
-      { key: 'sill', label: 'SILL', weight: 0.9 },
-      { key: 'head', label: 'HEAD', weight: 0.9 },
-      { key: 'operation', label: 'OPERATION', weight: 1.35 },
+      { key: 'mark', label: 'IDENTIFICAÇÃO', weight: 0.65 },
+      { key: 'type', label: 'TIPO', weight: 1.2 },
+      { key: 'size', label: 'DIMENSÃO NOMINAL', weight: 1.35 },
+      { key: 'roughOpening', label: 'VÃO BRUTO', weight: 1.35 },
+      { key: 'sill', label: 'PEITORIL', weight: 0.9 },
+      { key: 'head', label: 'VERGA', weight: 0.9 },
+      { key: 'operation', label: 'ABERTURA', weight: 1.35 },
     ],
     rows: args.siblings.map((window) => ({
       id: window.id,

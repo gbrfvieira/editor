@@ -14,22 +14,22 @@ export function wallQuickMeasurement(node: WallNode): QuickMeasurementReport {
   const frame = getWallCurveFrameAt(node, 0.5)
 
   return {
-    title: node.name ?? 'Wall',
-    kindLabel: 'Wall',
+    title: node.name ?? 'Parede',
+    kindLabel: 'Parede',
     anchor: [frame.point.x, height * 0.55, frame.point.y],
     metrics: [
-      { key: 'length', label: 'Length', abbreviation: 'L', quantity: 'length', value: length },
-      { key: 'height', label: 'Height', abbreviation: 'H', quantity: 'length', value: height },
+      { key: 'length', label: 'Comprimento', abbreviation: 'L', quantity: 'length', value: length },
+      { key: 'height', label: 'Altura', abbreviation: 'H', quantity: 'length', value: height },
       {
         key: 'surface',
-        label: 'Surface',
+        label: 'Superfície',
         abbreviation: 'A',
         quantity: 'area',
         value: length * height,
       },
       {
         key: 'thickness',
-        label: 'Thickness',
+        label: 'Espessura',
         abbreviation: 'T',
         quantity: 'length',
         value: getWallThickness(node),

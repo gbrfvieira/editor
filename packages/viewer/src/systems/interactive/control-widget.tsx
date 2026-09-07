@@ -39,7 +39,7 @@ export const ControlWidget = ({
           transition: 'background 0.2s',
         }}
       >
-        {control.label ?? (value ? 'On' : 'Off')}
+        {control.label ?? (value ? 'Ligado' : 'Desligado')}
       </button>
     )
   }

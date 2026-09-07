@@ -182,9 +182,9 @@ export const elevatorDefinition: NodeDefinition<typeof ElevatorNode> = {
   // snapping chip shows during placement.
   snapDraftDirectional: false,
   toolHints: [
-    { key: 'Left click', label: 'Place elevator' },
-    { key: 'R / T', label: 'Rotate' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Posicionar elevador' },
+    { key: 'R / T', label: 'Girar' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
   surfaceRole: 'joinery',
 
@@ -271,8 +271,8 @@ export const elevatorDefinition: NodeDefinition<typeof ElevatorNode> = {
   },
 
   presentation: {
-    label: 'Elevator',
-    description: 'A multi-level elevator shaft with configurable openings per level.',
+    label: 'Elevador',
+    description: 'Um poço de elevador com aberturas configuráveis em cada nível.',
     icon: { kind: 'url', src: '/icons/wallcut.webp' },
     paletteSection: 'structure',
     paletteOrder: 80,

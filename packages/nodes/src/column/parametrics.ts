@@ -12,7 +12,7 @@ import type { ColumnNode } from './schema'
 export const columnParametrics: ParametricDescriptor<ColumnNode> = {
   groups: [
     {
-      label: 'Dimensions',
+      label: 'Dimensões',
       fields: [
         { key: 'height', kind: 'number', unit: 'm', min: 0.5, max: 1000, step: 0.05 },
         { key: 'width', kind: 'number', unit: 'm', min: 0.1, max: 1000, step: 0.01 },

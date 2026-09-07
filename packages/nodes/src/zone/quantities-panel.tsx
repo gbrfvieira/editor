@@ -36,7 +36,7 @@ function ZonePlanSketch({
   if (polygon.length < 3) {
     return (
       <div className="flex h-28 items-center justify-center rounded-md border border-border/50 text-muted-foreground text-xs">
-        Zone boundary unavailable
+        Contorno do ambiente indisponível
       </div>
     )
   }
@@ -65,7 +65,7 @@ function ZonePlanSketch({
 
   return (
     <svg
-      aria-label="Top view with zone edge dimensions"
+      aria-label="Vista superior com cotas do ambiente"
       className="h-auto w-full rounded-md border border-cyan-950/20 bg-[#f8faf7]"
       role="img"
       viewBox={`0 0 ${viewWidth} ${viewHeight}`}
@@ -145,7 +145,7 @@ function QuantityRow({
         <span className="font-mono font-semibold text-cyan-600 text-[10px]">{abbreviation}</span>
         <span className="text-muted-foreground text-xs">{label}</span>
         <span className="ml-auto font-mono font-medium text-foreground text-xs tabular-nums">
-          {quantity.status === 'available' ? format(quantity.value) : 'Not proven'}
+          {quantity.status === 'available' ? format(quantity.value) : 'Não confirmado'}
         </span>
       </div>
       <div className="mt-1 text-[10px] text-muted-foreground leading-snug">
@@ -236,58 +236,58 @@ function RoomDocumentationPanel({ zone }: { zone: ZoneNode }) {
   const isRoom = zone.spaceRole === 'room'
 
   return (
-    <PanelSection title="Room documentation">
+    <PanelSection title="Documentação do ambiente">
       <ToggleControl
         checked={isRoom}
-        label="Architectural room"
+        label="Ambiente arquitetônico"
         onChange={(checked) => update({ spaceRole: checked ? 'room' : 'generic' })}
       />
       {isRoom ? (
         <>
           <RoomTextField
-            label="Room name"
+            label="Nome do ambiente"
             onCommit={(name) => update({ name })}
             value={zone.name}
           />
           <RoomTextField
-            label="Room number"
+            label="Número do ambiente"
             onCommit={(roomNumber) => update({ roomNumber })}
             value={zone.roomNumber}
           />
           <RoomSelect
-            label="Enclosure"
+            label="Fechamento"
             onChange={(enclosureStatus) =>
               update({ enclosureStatus: enclosureStatus as ZoneNode['enclosureStatus'] })
             }
             options={[
-              { label: 'Auto-detect', value: 'auto' },
-              { label: 'Enclosed', value: 'enclosed' },
-              { label: 'Open', value: 'open' },
+              { label: 'Detectar automaticamente', value: 'auto' },
+              { label: 'Fechado', value: 'enclosed' },
+              { label: 'Abrir', value: 'open' },
             ]}
             value={zone.enclosureStatus}
           />
           <RoomTextField
-            label="Occupancy / use"
+            label="Ocupação / uso"
             onCommit={(occupancy) => update({ occupancy })}
             value={zone.occupancy}
           />
           <RoomTextField
-            label="Floor finish"
+            label="Acabamento do piso"
             onCommit={(floorFinish) => update({ floorFinish })}
             value={zone.floorFinish}
           />
           <RoomTextField
-            label="Wall finish"
+            label="Acabamento da parede"
             onCommit={(wallFinish) => update({ wallFinish })}
             value={zone.wallFinish}
           />
           <RoomTextField
-            label="Ceiling finish"
+            label="Acabamento do teto"
             onCommit={(ceilingFinish) => update({ ceilingFinish })}
             value={zone.ceilingFinish}
           />
           <MetricControl
-            label="Ceiling height"
+            label="Altura do teto"
             max={20}
             min={0.1}
             onChange={(ceilingHeight) => update({ ceilingHeight })}
@@ -297,16 +297,16 @@ function RoomDocumentationPanel({ zone }: { zone: ZoneNode }) {
             value={zone.ceilingHeight}
           />
           <RoomSelect
-            label="Clear dimensions"
+            label="Dimensões livres"
             onChange={(clearDimensionPolicy) =>
               update({
                 clearDimensionPolicy: clearDimensionPolicy as ZoneNode['clearDimensionPolicy'],
               })
             }
             options={[
-              { label: 'None', value: 'none' },
-              { label: 'Inside faces', value: 'inside-faces' },
-              { label: 'Finish faces', value: 'finish-faces' },
+              { label: 'Nenhum', value: 'none' },
+              { label: 'Faces internas', value: 'inside-faces' },
+              { label: 'Faces acabadas', value: 'finish-faces' },
             ]}
             value={zone.clearDimensionPolicy}
           />
@@ -362,13 +362,17 @@ export default function ZoneQuantitiesPanel() {
     <>
       <RoomDocumentationPanel zone={effectiveZone} />
       <PanelSection
-        title={effectiveZone.spaceRole === 'room' ? 'Room quantities' : 'Zone quantities'}
+        title={
+          effectiveZone.spaceRole === 'room' ? 'Quantitativos do ambiente' : 'Quantitativos da zona'
+        }
       >
         <div className="overflow-hidden rounded-md border border-cyan-950/20 bg-[#f8faf7] text-slate-950">
           <div className="flex items-center border-cyan-950/15 border-b px-2.5 py-2">
             <span className="font-semibold text-[11px]">{effectiveZone.name}</span>
             <span className="ml-auto rounded-full border border-cyan-800/25 bg-cyan-50 px-2 py-0.5 text-cyan-900 text-[9px]">
-              {report.classification === 'enclosed-room' ? 'Enclosed room' : 'Footprint only'}
+              {report.classification === 'enclosed-room'
+                ? 'Ambiente fechado'
+                : 'Somente projeção em planta'}
             </span>
           </div>
           <div className="flex items-baseline gap-2 px-2.5 py-2 font-mono text-[10px]">
@@ -390,13 +394,13 @@ export default function ZoneQuantitiesPanel() {
           <QuantityRow
             abbreviation="Aw"
             format={(value) => formatAreaLabel(value, unit, 2)}
-            label="Wall surface"
+            label="Superfície da parede"
             quantity={report.wallSurface}
           />
           <QuantityRow
             abbreviation="Af"
             format={(value) => formatAreaLabel(value, unit, 2)}
-            label="Floor surface"
+            label="Superfície do piso"
             quantity={report.floorSurface}
           />
           <QuantityRow

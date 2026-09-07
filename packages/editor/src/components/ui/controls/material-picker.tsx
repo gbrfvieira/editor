@@ -32,9 +32,9 @@ export type MaterialPickerProps = {
 // to the Pascal library — the combined list buried the curated set.
 const SOURCE_FILTERS: { id: MaterialSourceFilter; label: string }[] = [
   { id: 'pascal', label: 'Pascal' },
-  { id: 'mine', label: 'Mine' },
-  { id: 'workspace', label: 'Workspace' },
-  { id: 'community', label: 'Community' },
+  { id: 'mine', label: 'Meus' },
+  { id: 'workspace', label: 'Espaço de trabalho' },
+  { id: 'community', label: 'Comunidade' },
 ]
 
 function getCategoryLabel(category: (typeof MATERIAL_CATEGORIES)[number]) {
@@ -161,7 +161,7 @@ export function MaterialPicker({
               <Plus className="size-5 text-muted-foreground group-hover:text-foreground" />
             </div>
             <span className="truncate px-0.5 text-left font-medium text-[11px] text-muted-foreground group-hover:text-foreground">
-              New material
+              Novo material
             </span>
           </button>
         ) : null}

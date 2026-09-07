@@ -33,51 +33,51 @@ import { useShallow } from 'zustand/react/shallow'
 
 const MODE_LABELS: Record<ConstructionDimensionNode['mode'], string> = {
   linear: 'Linear',
-  radius: 'Radius',
-  diameter: 'Diameter',
-  'center-mark': 'Center mark',
-  chord: 'Chord',
-  'arc-length': 'Arc length',
+  radius: 'Raio',
+  diameter: 'Diâmetro',
+  'center-mark': 'Marca de centro',
+  chord: 'Corda',
+  'arc-length': 'Comprimento do arco',
   angular: 'Angular',
-  coordinate: 'Coordinate',
+  coordinate: 'Coordenada',
 }
 
 const DATUM_POLICY_OPTIONS: Array<{ label: string; value: ConstructionDimensionDatumPolicy }> = [
-  { label: 'Centerline', value: 'centerline' },
-  { label: 'Wall face', value: 'wall-face' },
-  { label: 'Structural face', value: 'structural-face' },
-  { label: 'Finish face', value: 'finish-face' },
+  { label: 'Eixo central', value: 'centerline' },
+  { label: 'Face da parede', value: 'wall-face' },
+  { label: 'Face estrutural', value: 'structural-face' },
+  { label: 'Face acabada', value: 'finish-face' },
 ]
 
 const TERMINATOR_OPTIONS: Array<{ label: string; value: ConstructionDimensionTerminator }> = [
-  { label: 'Architectural tick', value: 'architectural-tick' },
-  { label: 'Filled arrow', value: 'filled-arrow' },
-  { label: 'Open arrow', value: 'open-arrow' },
-  { label: 'Dot', value: 'dot' },
+  { label: 'Traço arquitetônico', value: 'architectural-tick' },
+  { label: 'Seta preenchida', value: 'filled-arrow' },
+  { label: 'Seta aberta', value: 'open-arrow' },
+  { label: 'Ponto', value: 'dot' },
 ]
 
 const TEXT_POSITION_OPTIONS: Array<{ label: string; value: ConstructionDimensionTextPosition }> = [
-  { label: 'Above line', value: 'above' },
-  { label: 'Centered on line', value: 'centered' },
+  { label: 'Acima da linha', value: 'above' },
+  { label: 'Centralizado na linha', value: 'centered' },
 ]
 
 const IMPERIAL_PRECISION_OPTIONS: Array<{
   label: string
   value: ConstructionDimensionImperialPrecision
 }> = [
-  { label: 'Nearest inch', value: '1' },
-  { label: 'Nearest 1/2 inch', value: '1/2' },
-  { label: 'Nearest 1/4 inch', value: '1/4' },
-  { label: 'Nearest 1/8 inch', value: '1/8' },
-  { label: 'Nearest 1/16 inch', value: '1/16' },
+  { label: 'Arredondar para polegada', value: '1' },
+  { label: 'Arredondar para 1/2 polegada', value: '1/2' },
+  { label: 'Arredondar para 1/4 polegada', value: '1/4' },
+  { label: 'Arredondar para 1/8 polegada', value: '1/8' },
+  { label: 'Arredondar para 1/16 polegada', value: '1/16' },
 ]
 
 const METRIC_NOTATION_OPTIONS: Array<{
   label: string
   value: ConstructionDimensionMetricNotation
 }> = [
-  { label: 'Meters', value: 'meters' },
-  { label: 'Millimeters', value: 'millimeters' },
+  { label: 'Metros', value: 'meters' },
+  { label: 'Milímetros', value: 'millimeters' },
 ]
 
 export default function ConstructionDimensionPanel() {
@@ -97,7 +97,7 @@ export default function ConstructionDimensionPanel() {
     dimension.mode,
   )
   const activeDrawingLabel =
-    DRAWING_TYPE_OPTIONS.find((option) => option.id === activeDrawingType)?.label ?? 'Floor plan'
+    DRAWING_TYPE_OPTIONS.find((option) => option.id === activeDrawingType)?.label ?? 'Planta baixa'
   const activePresentation = resolveConstructionDimensionDrawingPresentation(
     dimension,
     activeDrawingType,
@@ -143,16 +143,16 @@ export default function ConstructionDimensionPanel() {
     <PanelWrapper
       icon="/icons/blueprint.webp"
       onClose={() => setSelection({ selectedIds: [] })}
-      title="Construction Dimension"
+      title="Cota construtiva"
       width={320}
     >
-      <PanelSection title="Dimension">
+      <PanelSection title="Cota">
         <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="text-muted-foreground">Mode</span>
+          <span className="text-muted-foreground">Modo</span>
           <span className="font-medium text-foreground">{MODE_LABELS[dimension.mode]}</span>
         </div>
         <SliderControl
-          label="Feature count"
+          label="Quantidade de referências"
           max={999}
           min={1}
           onChange={(featureCount) => update({ featureCount })}
@@ -162,7 +162,7 @@ export default function ConstructionDimensionPanel() {
         />
         {supportsCenterMark ? (
           <label className="flex items-center justify-between gap-3 text-sm">
-            <span className="text-muted-foreground">Center mark</span>
+            <span className="text-muted-foreground">Marca de centro</span>
             <input
               checked={dimension.showCenterMark}
               onChange={(event) => update({ showCenterMark: event.target.checked })}
@@ -172,9 +172,9 @@ export default function ConstructionDimensionPanel() {
         ) : null}
       </PanelSection>
 
-      <PanelSection title="Drawing coordination">
+      <PanelSection title="Coordenação dos desenhos">
         <SelectField
-          label="Primary drawing"
+          label="Desenho principal"
           onChange={(drawingType) =>
             update({ drawingType: drawingType as ConstructionDrawingType })
           }
@@ -185,7 +185,7 @@ export default function ConstructionDimensionPanel() {
           value={dimension.drawingType}
         />
         <SelectField
-          label={`${activeDrawingLabel} presentation`}
+          label={`Apresentação de ${activeDrawingLabel}`}
           onChange={(presentation) =>
             updateDrawingPresentation(
               activeDrawingType,
@@ -193,10 +193,10 @@ export default function ConstructionDimensionPanel() {
             )
           }
           options={[
-            { label: 'Shown', value: 'shown' },
-            { label: 'Omitted', value: 'omit' },
+            { label: 'Exibido', value: 'shown' },
+            { label: 'Omitido', value: 'omit' },
             ...(activeDrawingType === 'floor-plan'
-              ? [{ label: 'Controlled by foundation', value: 'controlled' }]
+              ? [{ label: 'Controlado pela fundação', value: 'controlled' }]
               : []),
           ]}
           value={activePresentation}
@@ -213,41 +213,42 @@ export default function ConstructionDimensionPanel() {
           />
         ) : null}
         <p className="text-muted-foreground text-xs">
-          Linked dimensions reuse the controller's associative anchors and update with it.
+          As cotas vinculadas reutilizam as referências associativas da cota controladora e são
+          atualizadas junto com ela.
         </p>
         <TextField
-          label={`${activeDrawingLabel} suppressed segments`}
+          label={`Segmentos ocultados de ${activeDrawingLabel}`}
           onCommit={updateSuppressedSegments}
-          placeholder="e.g. 2, 4"
+          placeholder="ex.: 2, 4"
           value={suppressedSegmentsText}
         />
         <p className="text-muted-foreground text-xs">
-          Segment numbers are one-based and apply only in this drawing view.
+          A numeração dos segmentos começa em 1 e vale apenas nesta vista.
         </p>
       </PanelSection>
 
-      <PanelSection title="Notation">
+      <PanelSection title="Notação">
         <TextField
-          label="Prefix"
+          label="Prefixo"
           onCommit={(prefix) => update({ prefix })}
           value={dimension.prefix}
         />
         <TextField
-          label="Suffix"
+          label="Sufixo"
           onCommit={(suffix) => update({ suffix })}
           value={dimension.suffix}
         />
         <TextField
-          label="Text override"
+          label="Texto personalizado"
           onCommit={(textOverride) => update({ textOverride: textOverride || null })}
-          placeholder="Use measured value"
+          placeholder="Usar valor medido"
           value={dimension.textOverride ?? ''}
         />
       </PanelSection>
 
-      <PanelSection title="Standards">
+      <PanelSection title="Normas">
         <SelectField
-          label="Datum policy"
+          label="Referência de medição"
           onChange={(datumPolicy) =>
             update({ datumPolicy: datumPolicy as ConstructionDimensionDatumPolicy })
           }
@@ -255,7 +256,7 @@ export default function ConstructionDimensionPanel() {
           value={dimension.datumPolicy}
         />
         <SelectField
-          label="Terminator"
+          label="Extremidade da cota"
           onChange={(terminator) =>
             update({ terminator: terminator as ConstructionDimensionTerminator })
           }
@@ -263,7 +264,7 @@ export default function ConstructionDimensionPanel() {
           value={dimension.terminator}
         />
         <SelectField
-          label="Text position"
+          label="Posição do texto"
           onChange={(textPosition) =>
             update({ textPosition: textPosition as ConstructionDimensionTextPosition })
           }
@@ -271,7 +272,7 @@ export default function ConstructionDimensionPanel() {
           value={dimension.textPosition}
         />
         <SelectField
-          label="Imperial precision"
+          label="Precisão imperial"
           onChange={(imperialPrecision) =>
             update({
               imperialPrecision: imperialPrecision as ConstructionDimensionImperialPrecision,
@@ -281,7 +282,7 @@ export default function ConstructionDimensionPanel() {
           value={dimension.imperialPrecision}
         />
         <SelectField
-          label="Metric notation"
+          label="Notação métrica"
           onChange={(metricNotation) =>
             update({ metricNotation: metricNotation as ConstructionDimensionMetricNotation })
           }
@@ -289,7 +290,7 @@ export default function ConstructionDimensionPanel() {
           value={dimension.metricNotation}
         />
         <SliderControl
-          label="Extension gap"
+          label="Folga da linha de chamada"
           max={0.5}
           min={0}
           onChange={(extensionStartGap) => update({ extensionStartGap })}
@@ -298,7 +299,7 @@ export default function ConstructionDimensionPanel() {
           value={dimension.extensionStartGap}
         />
         <SliderControl
-          label="Extension overshoot"
+          label="Prolongamento da linha de chamada"
           max={0.5}
           min={0}
           onChange={(extensionOvershoot) => update({ extensionOvershoot })}
@@ -308,12 +309,12 @@ export default function ConstructionDimensionPanel() {
         />
       </PanelSection>
 
-      <PanelSection title="Actions">
+      <PanelSection title="Ações">
         <ActionGroup>
           <ActionButton
             className="border-red-500/40 text-red-200 hover:bg-red-500/15"
             icon={<Trash2 className="h-4 w-4" />}
-            label="Delete"
+            label="Excluir"
             onClick={() => {
               triggerSFX('sfx:structure-delete')
               deleteNode(dimension.id)
@@ -353,7 +354,7 @@ function FoundationControllerField({
   return (
     <SelectField
       disabled={foundationControllers.length === 0}
-      label="Foundation controller"
+      label="Cota controladora da fundação"
       onChange={(controllingDimensionId) =>
         onChange(
           controllingDimensionId as NonNullable<
@@ -362,10 +363,10 @@ function FoundationControllerField({
         )
       }
       options={foundationControllers.map((controller) => ({
-        label: controller.name || 'Foundation dimension',
+        label: controller.name || 'Cota de fundação',
         value: controller.id,
       }))}
-      placeholder="No foundation dimensions"
+      placeholder="Sem cotas de fundação"
       value={value}
     />
   )

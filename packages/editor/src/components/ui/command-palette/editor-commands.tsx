@@ -78,63 +78,63 @@ export function EditorCommands() {
       {
         id: 'editor.tool.wall',
         label: 'Ferramenta parede',
-        group: 'Scene',
+        group: 'Cena',
         icon: <Square className="h-4 w-4" />,
         keywords: ['draw', 'build', 'structure'],
         execute: () => activateTool('wall'),
       },
       {
         id: 'editor.tool.slab',
-        label: 'Slab Tool',
-        group: 'Scene',
+        label: 'Ferramenta laje',
+        group: 'Cena',
         icon: <Layers className="h-4 w-4" />,
         keywords: ['floor', 'build'],
         execute: () => activateTool('slab'),
       },
       {
         id: 'editor.tool.ceiling',
-        label: 'Ceiling Tool',
-        group: 'Scene',
+        label: 'Ferramenta forro',
+        group: 'Cena',
         icon: <Grid3X3 className="h-4 w-4" />,
         keywords: ['top', 'build'],
         execute: () => activateTool('ceiling'),
       },
       {
         id: 'editor.tool.door',
-        label: 'Door Tool',
-        group: 'Scene',
+        label: 'Ferramenta porta',
+        group: 'Cena',
         icon: <DoorOpen className="h-4 w-4" />,
         keywords: ['opening', 'entrance'],
         execute: () => activateTool('door'),
       },
       {
         id: 'editor.tool.window',
-        label: 'Window Tool',
-        group: 'Scene',
+        label: 'Ferramenta janela',
+        group: 'Cena',
         icon: <AppWindow className="h-4 w-4" />,
         keywords: ['opening', 'glass'],
         execute: () => activateTool('window'),
       },
       {
         id: 'editor.tool.item',
-        label: 'Item Tool',
-        group: 'Scene',
+        label: 'Ferramenta item',
+        group: 'Cena',
         icon: <Package className="h-4 w-4" />,
         keywords: ['furniture', 'object', 'asset', 'furnish'],
         execute: () => activateTool('item'),
       },
       {
         id: 'editor.tool.stair',
-        label: 'Stair Tool',
-        group: 'Scene',
+        label: 'Ferramenta escada',
+        group: 'Cena',
         icon: <ArrowRight className="h-4 w-4" />,
         keywords: ['stairs', 'staircase', 'flight', 'landing', 'steps'],
         execute: () => activateTool('stair'),
       },
       {
         id: 'editor.tool.zone',
-        label: 'Zone Tool',
-        group: 'Scene',
+        label: 'Ferramenta ambiente',
+        group: 'Cena',
         icon: <Hexagon className="h-4 w-4" />,
         keywords: ['area', 'room', 'space'],
         execute: () => activateTool('zone'),
@@ -142,7 +142,7 @@ export function EditorCommands() {
       {
         id: 'editor.delete-selection',
         label: 'Excluir seleção',
-        group: 'Scene',
+        group: 'Cena',
         icon: <Trash2 className="h-4 w-4" />,
         keywords: ['remove', 'erase'],
         shortcut: ['⌫'],
@@ -155,8 +155,8 @@ export function EditorCommands() {
       },
       {
         id: 'editor.mode.material-paint',
-        label: 'Material Paint',
-        group: 'Scene',
+        label: 'Pintar material',
+        group: 'Cena',
         icon: <PaintBucket className="h-4 w-4" />,
         keywords: ['paint', 'material', 'texture', 'bucket', 'surface'],
         shortcut: ['P'],
@@ -169,8 +169,8 @@ export function EditorCommands() {
       },
       {
         id: 'editor.mode.terrain-sculpt',
-        label: 'Sculpt Terrain',
-        group: 'Scene',
+        label: 'Esculpir terreno',
+        group: 'Cena',
         icon: <Mountain className="h-4 w-4" />,
         keywords: ['terrain', 'ground', 'elevation', 'sculpt', 'hill', 'slope', 'grade', 'dig'],
         shortcut: ['G'],
@@ -181,7 +181,7 @@ export function EditorCommands() {
       // ── Levels ───────────────────────────────────────────────────────────
       {
         id: 'editor.level.goto',
-        label: 'Go to Level',
+        label: 'Ir para o nível',
         group: 'Níveis',
         icon: <ArrowRight className="h-4 w-4" />,
         keywords: ['level', 'floor', 'go', 'navigate', 'switch', 'select'],
@@ -215,7 +215,7 @@ export function EditorCommands() {
       },
       {
         id: 'editor.level.rename',
-        label: 'Rename Level',
+        label: 'Renomear nível',
         group: 'Níveis',
         icon: <PencilLine className="h-4 w-4" />,
         keywords: ['level', 'floor', 'rename', 'name'],
@@ -253,12 +253,17 @@ export function EditorCommands() {
       {
         id: 'editor.viewer.wall-mode',
         label: 'Modo parede',
-        group: 'Viewer Controls',
+        group: 'Controles do visualizador',
         icon: <Layers className="h-4 w-4" />,
         keywords: ['wall', 'cutaway', 'up', 'down', 'translucent', 'view'],
         badge: () => {
           const mode = useViewer.getState().wallMode
-          return { cutaway: 'Cutaway', up: 'Up', down: 'Down', translucent: 'Translucent' }[mode]
+          return {
+            cutaway: 'Em corte',
+            up: 'Altura total',
+            down: 'Baixas',
+            translucent: 'Translúcidas',
+          }[mode]
         },
         navigate: true,
         execute: () => navigateTo('wall-mode'),
@@ -266,12 +271,17 @@ export function EditorCommands() {
       {
         id: 'editor.viewer.level-mode',
         label: 'Modo nível',
-        group: 'Viewer Controls',
+        group: 'Controles do visualizador',
         icon: <SquareStack className="h-4 w-4" />,
         keywords: ['level', 'floor', 'exploded', 'stacked', 'solo'],
         badge: () => {
           const mode = useViewer.getState().levelMode
-          return { manual: 'Manual', stacked: 'Stacked', exploded: 'Exploded', solo: 'Solo' }[mode]
+          return {
+            manual: 'Manual',
+            stacked: 'Empilhados',
+            exploded: 'Separados',
+            solo: 'Isolado',
+          }[mode]
         },
         navigate: true,
         execute: () => navigateTo('level-mode'),
@@ -280,9 +290,9 @@ export function EditorCommands() {
         id: 'editor.viewer.camera-mode',
         label: () => {
           const mode = useViewer.getState().cameraMode
-          return `Camera: Switch to ${mode === 'perspective' ? 'Orthographic' : 'Perspective'}`
+          return `Câmera: alternar para ${mode === 'perspective' ? 'ortográfica' : 'perspectiva'}`
         },
-        group: 'Viewer Controls',
+        group: 'Controles do visualizador',
         icon: <Video className="h-4 w-4" />,
         keywords: ['camera', 'ortho', 'perspective', '2d', '3d', 'view'],
         execute: () =>
@@ -293,16 +303,16 @@ export function EditorCommands() {
       },
       {
         id: 'editor.viewer.shading-solid',
-        label: 'Switch to Solid',
-        group: 'Viewer Controls',
+        label: 'Alternar para sólido',
+        group: 'Controles do visualizador',
         icon: <Box className="h-4 w-4" />,
         keywords: ['solid', 'shading', 'render', 'mode', 'performance'],
         execute: () => run(() => useViewer.getState().setShading('solid')),
       },
       {
         id: 'editor.viewer.shading-rendered',
-        label: 'Switch to Rendered',
-        group: 'Viewer Controls',
+        label: 'Alternar para renderizado',
+        group: 'Controles do visualizador',
         icon: <Sparkles className="h-4 w-4" />,
         keywords: ['rendered', 'shading', 'render', 'mode', 'quality'],
         execute: () => run(() => useViewer.getState().setShading('rendered')),
@@ -310,7 +320,7 @@ export function EditorCommands() {
       {
         id: 'editor.viewer.camera-snapshot',
         label: 'Tirar captura',
-        group: 'Viewer Controls',
+        group: 'Controles do visualizador',
         icon: <Camera className="h-4 w-4" />,
         keywords: ['camera', 'snapshot', 'capture', 'save', 'view', 'bookmark'],
         execute: () => {
@@ -323,15 +333,15 @@ export function EditorCommands() {
       {
         id: 'editor.view.preview',
         label: () => (isPreviewMode ? 'Sair da pré-visualização' : 'Entrar na pré-visualização'),
-        group: 'View',
+        group: 'Visualização',
         icon: isPreviewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />,
         keywords: ['preview', 'view', 'read-only', 'present'],
         execute: () => run(() => setPreviewMode(!isPreviewMode)),
       },
       {
         id: 'editor.view.fullscreen',
-        label: 'Toggle Fullscreen',
-        group: 'View',
+        label: 'Alternar tela cheia',
+        group: 'Visualização',
         icon: <Maximize2 className="h-4 w-4" />,
         keywords: ['fullscreen', 'maximize', 'expand', 'window'],
         execute: () =>
@@ -345,7 +355,7 @@ export function EditorCommands() {
       {
         id: 'editor.history.undo',
         label: 'Desfazer',
-        group: 'History',
+        group: 'Histórico',
         icon: <Undo2 className="h-4 w-4" />,
         keywords: ['undo', 'revert', 'back'],
         when: () => getHistoryCommandState().canUndo,
@@ -354,7 +364,7 @@ export function EditorCommands() {
       {
         id: 'editor.history.redo',
         label: 'Refazer',
-        group: 'History',
+        group: 'Histórico',
         icon: <Redo2 className="h-4 w-4" />,
         keywords: ['redo', 'forward', 'repeat'],
         when: () => getHistoryCommandState().canRedo,

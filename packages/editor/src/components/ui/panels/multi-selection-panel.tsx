@@ -37,7 +37,7 @@ export function MultiSelectionActions() {
       {showGroup && (
         <ActionButton
           icon={<Group className="h-4 w-4" />}
-          label="Group"
+          label="Agrupar"
           onClick={() => groupCurrentSelection()}
           title="Agrupar (Ctrl/Cmd+G)"
         />
@@ -45,20 +45,20 @@ export function MultiSelectionActions() {
       {showUngroup && (
         <ActionButton
           icon={<Ungroup className="h-4 w-4" />}
-          label="Ungroup"
+          label="Desagrupar"
           onClick={() => ungroupCurrentSelection()}
           title="Desagrupar (Ctrl/Cmd+Shift+G)"
         />
       )}
       <ActionButton
         icon={<Copy className="h-4 w-4" />}
-        label="Duplicate"
+        label="Duplicar"
         onClick={() => duplicateSelectionAndPickUp()}
       />
       <ActionButton
         className="border-red-500/40 text-red-200 hover:bg-red-500/15"
         icon={<Trash2 className="h-4 w-4 text-red-400" />}
-        label="Delete"
+        label="Excluir"
         onClick={() => deleteSelection()}
       />
     </ActionGroup>
@@ -90,15 +90,14 @@ export function MultiSelectionPanel({ footer }: { footer?: React.ReactNode }) {
       title={
         matchedGroup
           ? `${matchedGroup.label} · ${selectedIds.length}`
-          : `${selectedIds.length} selected`
+          : `${selectedIds.length} selecionados`
       }
       width={320}
     >
       {breakdown && <div className="px-3 py-3 text-muted-foreground text-xs">{breakdown}</div>}
       {matchedGroup && (
         <div className="border-border/50 border-t px-3 py-2 text-muted-foreground text-xs">
-          {matchedGroup.label} (session only). Plain click reselects all members. Not saved with the
-          project.
+          {matchedGroup.label} (somente nesta sessão). Um clique simples seleciona todos os membros novamente. Não é salvo com o projeto.
         </div>
       )}
       <div className="border-border/50 border-t p-3">

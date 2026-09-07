@@ -330,16 +330,16 @@ export const itemDefinition: NodeDefinition<typeof ItemNode> = {
   floorplanMoveTarget: itemFloorplanMoveTarget,
 
   toolHints: [
-    { key: 'Left click', label: 'Place item' },
-    { key: 'R / T', label: 'Rotate' },
+    { key: 'Left click', label: 'Posicionar item' },
+    { key: 'R / T', label: 'Girar' },
     { key: 'Shift', label: 'Cycle snapping mode' },
-    { key: 'Alt', label: 'Force place' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Alt', label: 'Forçar posicionamento' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
     label: 'Item',
-    description: 'A catalog-backed item (furniture, fixtures, decorations).',
+    description: 'Um item do catálogo (mobiliário, equipamentos ou decoração).',
     icon: { kind: 'url', src: '/icons/item.webp' },
     paletteSection: 'furnish',
     paletteOrder: 10,

@@ -34,13 +34,13 @@ export function CreateSceneButton({ label = 'Create new scene' }: { label?: stri
         body: JSON.stringify({ name: 'Untitled scene', graph: EMPTY_GRAPH }),
       })
       if (!response.ok) {
-        setError(`Failed to create scene (${response.status})`)
+        setError(`Falha ao criar cena (${response.status})`)
         return
       }
       const meta = (await response.json()) as { id: string }
       router.push(`/scene/${meta.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create scene')
+      setError(err instanceof Error ? err.message : 'Falha ao criar cena')
     } finally {
       setIsCreating(false)
     }
@@ -55,7 +55,7 @@ export function CreateSceneButton({ label = 'Create new scene' }: { label?: stri
         onClick={handleCreate}
         type="button"
       >
-        {isCreating ? 'Creating…' : label}
+        {isCreating ? 'Criando…' : label}
       </button>
     </div>
   )
@@ -74,7 +74,7 @@ export function SaveButton({ sceneId, name, version, getGraph }: SaveButtonProps
   const handleSave = useCallback(async () => {
     const graph = getGraph()
     if (!graph) {
-      setStatus('No scene to save')
+      setStatus('Nenhuma cena para salvar')
       return
     }
     setIsSaving(true)
@@ -89,7 +89,7 @@ export function SaveButton({ sceneId, name, version, getGraph }: SaveButtonProps
         body: JSON.stringify({ name, graph }),
       })
       if (response.status === 409) {
-        setStatus('Conflict — reload to continue')
+        setStatus('Conflito — recarregue para continuar')
         return
       }
       if (!response.ok) {
@@ -107,7 +107,7 @@ export function SaveButton({ sceneId, name, version, getGraph }: SaveButtonProps
   const handleSaveAs = useCallback(async () => {
     const graph = getGraph()
     if (!graph) {
-      setStatus('No scene to save')
+      setStatus('Nenhuma cena para salvar')
       return
     }
     const newName = typeof window !== 'undefined' ? window.prompt('New scene name', name) : null

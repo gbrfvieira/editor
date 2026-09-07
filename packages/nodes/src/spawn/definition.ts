@@ -100,14 +100,14 @@ export const spawnDefinition: NodeDefinition<typeof SpawnNode> = {
   },
   tool: () => import('./tool'),
   toolHints: [
-    { key: 'Left click', label: 'Place spawn point' },
-    { key: 'R / T', label: 'Rotate spawn point' },
-    { key: 'Esc', label: 'Cancel' },
+    { key: 'Left click', label: 'Posicionar ponto inicial' },
+    { key: 'R / T', label: 'Girar ponto inicial' },
+    { key: 'Esc', label: 'Cancelar' },
   ],
 
   presentation: {
-    label: 'Spawn Point',
-    description: 'Player or camera origin within a level. One per level.',
+    label: 'Ponto inicial',
+    description: 'Posição inicial do visitante ou da câmera em um nível. Uma por nível.',
     icon: { kind: 'url', src: '/icons/spawn-point.webp' },
     paletteSection: 'structure',
     paletteOrder: 90, // bottom of structure list — matches legacy palette order

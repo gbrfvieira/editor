@@ -1788,19 +1788,19 @@ const CabinetTool = () => {
     0,
   )
   const placementLabel = placement.insertionFailure
-    ? 'No space in this run to insert this cabinet'
+    ? 'Não há espaço neste conjunto para inserir este armário'
     : stretch
       ? placement.valid
-        ? `${draftSegments.length + 1} leg${draftSegments.length + 1 === 1 ? '' : 's'} · ${stretch.modules.length} module${stretch.modules.length === 1 ? '' : 's'} · Click to continue · Double-click/Esc to finish`
+        ? `${draftSegments.length + 1} trecho${draftSegments.length + 1 === 1 ? '' : 's'} · ${stretch.modules.length} módulo${stretch.modules.length === 1 ? '' : 's'} · Clique para continuar · Clique duplo/Esc para finalizar`
         : null
       : !placement.valid
         ? null
         : placement.snappedToWall
           ? placement.snapReason === 'cabinet-edge'
-            ? 'Edge snap'
+            ? 'Encaixe na borda'
             : placement.snapReason === 'corner'
-              ? 'Corner snap'
-              : 'Wall snap'
+              ? 'Encaixe no canto'
+              : 'Encaixe na parede'
           : null
   const labelPosition = stretch
     ? runLocalToPlan({ position: placement.position, rotation: placement.yaw }, [

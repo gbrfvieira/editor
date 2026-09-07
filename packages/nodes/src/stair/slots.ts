@@ -8,12 +8,12 @@ export const STAIR_RAILING_SLOT_DEFAULT = 'library:metal-steel'
 
 export function stairSlots(node: StairNode): SlotDeclaration[] {
   const slots: SlotDeclaration[] = [
-    { slotId: 'treads', label: 'Treads', default: STAIR_TREADS_SLOT_DEFAULT },
-    { slotId: 'body', label: 'Body', default: STAIR_BODY_SLOT_DEFAULT },
+    { slotId: 'treads', label: 'Pisos dos degraus', default: STAIR_TREADS_SLOT_DEFAULT },
+    { slotId: 'body', label: 'Corpo', default: STAIR_BODY_SLOT_DEFAULT },
   ]
 
   if (node.railingMode && node.railingMode !== 'none') {
-    slots.push({ slotId: 'railing', label: 'Railing', default: STAIR_RAILING_SLOT_DEFAULT })
+    slots.push({ slotId: 'railing', label: 'Guarda-corpo', default: STAIR_RAILING_SLOT_DEFAULT })
   }
 
   return slots

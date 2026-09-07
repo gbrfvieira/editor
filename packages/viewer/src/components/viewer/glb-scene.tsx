@@ -910,7 +910,7 @@ export function GlbScene({
       if (node && extras?.openable && extras.clips?.length) {
         doorNode = node
         doorId = extras.pascalId as string
-        door = { label: extras.label ?? 'Door', isOpen: openIds.current.has(doorId) }
+        door = { label: extras.label ?? 'Porta', isOpen: openIds.current.has(doorId) }
       }
     }
     walkDoorRef.current = doorNode

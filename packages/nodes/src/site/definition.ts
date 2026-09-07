@@ -36,7 +36,7 @@ export const siteDefinition: NodeDefinition<typeof SiteNode> = {
       polygonMeasurementFeatures({
         featurePrefix: 'site',
         height: 0,
-        label: 'Property',
+        label: 'Propriedade',
         polygon: node.polygon.points,
       }),
   },
@@ -49,8 +49,8 @@ export const siteDefinition: NodeDefinition<typeof SiteNode> = {
   },
 
   presentation: {
-    label: 'Site',
-    description: 'The top-level container holding buildings, zones, and the property boundary.',
+    label: 'Terreno',
+    description: 'O terreno que reúne edificações, ambientes e o limite do lote.',
     icon: { kind: 'url', src: '/icons/site-flag.webp' },
     paletteSection: 'site',
     paletteOrder: 5,
