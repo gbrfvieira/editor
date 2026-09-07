@@ -86,3 +86,5 @@ export function calculateQuote(
     total: subtotal * (prices.laborMultiplier ?? 1),
   }
 }
+
+export { toQuoteText } from './text'

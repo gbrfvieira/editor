@@ -10,3 +10,6 @@ Fita de borda e ferragens são somadas do cutlist. `laborMultiplier`, quando
 informado, é aplicado sobre o subtotal final (por exemplo, `1.3` acrescenta
 30%). A tabela de preços e as medidas da chapa são responsabilidade do
 chamador.
+
+`toQuoteText(report)` gera uma representação textual simples com cada item,
+quantidade, preço unitário, total da linha, subtotal e total final.
