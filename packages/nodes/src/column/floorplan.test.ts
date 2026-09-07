@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
-import { ColumnNode, type GeometryContext, StructuralGridNode } from '@pascal-app/core'
+import { ColumnNode, type GeometryContext } from '@pascal-app/core'
 import { readFloorplanGeometryMetadata } from '@pascal-app/editor'
-import { buildColumnFloorplan, computeColumnFloorplanLevelData } from './floorplan'
+import { buildColumnFloorplan } from './floorplan'
 
 const context = {
   resolve: () => undefined,
@@ -51,46 +51,5 @@ describe('buildColumnFloorplan', () => {
         .filter((child) => child.kind === 'line')
         .every((child) => readFloorplanGeometryMetadata(child).annotationRole === 'column-center'),
     ).toBe(true)
-  })
-
-  test('labels a column with its associative structural-grid reference', () => {
-    const column = ColumnNode.parse({
-      id: 'column_main',
-      parentId: 'level_main',
-      position: [2, 0, 3],
-      crossSection: 'square',
-      width: 0.4,
-      depth: 0.4,
-    })
-    const vertical = StructuralGridNode.parse({
-      id: 'structural-grid_2',
-      parentId: 'level_main',
-      start: [2, 0],
-      end: [2, 6],
-      label: '2',
-    })
-    const horizontal = StructuralGridNode.parse({
-      id: 'structural-grid_b',
-      parentId: 'level_main',
-      start: [0, 3],
-      end: [6, 3],
-      label: 'B',
-    })
-    const levelData = computeColumnFloorplanLevelData({
-      siblings: [column],
-      nodes: {
-        [column.id]: column,
-        [vertical.id]: vertical,
-        [horizontal.id]: horizontal,
-      },
-    })
-
-    const geometry = buildColumnFloorplan(column, { ...context, levelData })
-    expect(geometry?.kind).toBe('group')
-    if (geometry?.kind !== 'group') return
-
-    const label = geometry.children.find((child) => child.kind === 'text' && child.text === 'B-2')
-    expect(label).toMatchObject({ kind: 'text', text: 'B-2', upright: true })
-    expect(label && readFloorplanGeometryMetadata(label).annotationRole).toBe('column-center')
   })
 })

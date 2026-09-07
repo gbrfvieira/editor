@@ -1,16 +1,10 @@
 import {
   ColumnNode as ColumnNodeSchema,
   type ColumnNode as ColumnNodeType,
-  type GroupMoveSnapArgs,
-  type GroupMoveSnapResult,
   type HandleDescriptor,
   type NodeDefinition,
 } from '@pascal-app/core'
-import {
-  collectStructuralGridAxes,
-  resolveStructuralGridSnap,
-} from '../structural-grid/coordination'
-import { buildColumnFloorplan, computeColumnFloorplanLevelData } from './floorplan'
+import { buildColumnFloorplan } from './floorplan'
 import { columnResizeAffordance, columnRotateAffordance } from './floorplan-affordances'
 import { columnFloorplanMoveTarget } from './floorplan-move'
 import { columnPaint } from './paint'
@@ -318,18 +312,6 @@ function columnHandles(node: ColumnNodeType): HandleDescriptor<ColumnNodeType>[]
   return handles
 }
 
-function resolveColumnStructuralGridMoveSnap({
-  candidatePosition,
-  nodes,
-  levelId,
-}: GroupMoveSnapArgs): GroupMoveSnapResult | null {
-  const snap = resolveStructuralGridSnap(
-    [candidatePosition[0], candidatePosition[2]],
-    collectStructuralGridAxes(nodes, levelId),
-  )
-  return snap ? { position: [snap.point[0], candidatePosition[1], snap.point[1]] } : null
-}
-
 /**
  * Column — Stage A registration. Wrap-export of the legacy
  * `ColumnRenderer` (no system — column geometry is computed inline in
@@ -373,7 +355,6 @@ export const columnDefinition: NodeDefinition<typeof ColumnNode> = {
     movable: {
       axes: ['x', 'z'],
       gridSnap: true,
-      groupMoveSnapPose: resolveColumnStructuralGridMoveSnap,
     },
     slots: (node) => columnSlots(node as ColumnNodeType),
     paint: columnPaint,
@@ -414,8 +395,6 @@ export const columnDefinition: NodeDefinition<typeof ColumnNode> = {
     { key: 'Left click', label: 'Place column' },
     { key: 'Esc', label: 'Cancel' },
   ],
-  computeFloorplanLevelData: computeColumnFloorplanLevelData,
-  floorplanDependsOnSiblings: true,
   floorplan: buildColumnFloorplan,
   // 2D body move routes through this kind-specific target so the column
   // aligns by its footprint *edges* (and snaps flush to wall faces) instead

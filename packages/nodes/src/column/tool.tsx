@@ -36,10 +36,6 @@ import {
   stopPlacementCommitPropagation,
   subscribeFloorPlacementClicks,
 } from '../shared/floor-placement'
-import {
-  collectStructuralGridAxes,
-  resolveStructuralGridSnap,
-} from '../structural-grid/coordination'
 import { ColumnPreview } from './renderer'
 
 const DEFAULT_COLUMN_PRESET_ID = 'basicPillar' satisfies ColumnPresetId
@@ -144,20 +140,9 @@ const ColumnTool = () => {
         applyAlignmentSnap: isMagneticSnapActive(),
         bypassGrid: !isGridSnapActive(),
       })
-      const structuralSnap =
-        isGridSnapActive() || isMagneticSnapActive()
-          ? resolveStructuralGridSnap(
-              [alignedPosition[0], alignedPosition[2]],
-              collectStructuralGridAxes(useScene.getState().nodes, activeLevelId),
-            )
-          : null
-      const planPosition: [number, number, number] = structuralSnap
-        ? [structuralSnap.point[0], alignedPosition[1], structuralSnap.point[1]]
-        : alignedPosition
-      const { patch } = resolveColumnPlacement(planPosition, pointed)
+      const { patch } = resolveColumnPlacement(alignedPosition, pointed)
       const position = patch.position
-      if (structuralSnap) useAlignmentGuides.getState().clear()
-      else useAlignmentGuides.getState().set(guides)
+      useAlignmentGuides.getState().set(guides)
 
       const visualPosition = getFloorStackPreviewPosition({
         node: { ...previewNode, ...patch },
@@ -205,16 +190,11 @@ const ColumnTool = () => {
           useEditor.getState().gridSnapStep,
           !isGridSnapActive(),
         )
-      const structuralSnap =
-        isGridSnapActive() || isMagneticSnapActive()
-          ? resolveStructuralGridSnap(
-              [fallbackPosition[0], fallbackPosition[2]],
-              collectStructuralGridAxes(useScene.getState().nodes, activeLevelId),
-            )
-          : null
-      const planPosition: [number, number, number] = structuralSnap
-        ? [structuralSnap.point[0], 0, structuralSnap.point[1]]
-        : [fallbackPosition[0], 0, fallbackPosition[2]]
+      const planPosition: [number, number, number] = [
+        fallbackPosition[0],
+        0,
+        fallbackPosition[2],
+      ]
       const { column, patch } = resolveColumnPlacement(planPosition, pointed)
       const committedColumn = ColumnNode.parse({
         ...column,

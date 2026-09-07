@@ -14,7 +14,6 @@ import type { ShelfNode } from './shelf'
 import type { SlabNode } from './slab'
 import type { SpawnNode } from './spawn'
 import type { StairNode } from './stair'
-import type { StructuralGridNode } from './structural-grid'
 import type { WallNode } from './wall'
 import type { ZoneNode } from './zone'
 
@@ -24,7 +23,6 @@ type CoreLevelChildId =
   | ColumnNode['id']
   | ConstructionDimensionNode['id']
   | BlockNode['id']
-  | StructuralGridNode['id']
   | ItemNode['id']
   | ZoneNode['id']
   | SlabNode['id']

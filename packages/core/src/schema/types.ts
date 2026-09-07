@@ -19,7 +19,6 @@ import { SlabNode } from './nodes/slab'
 import { SpawnNode } from './nodes/spawn'
 import { StairNode } from './nodes/stair'
 import { StairSegmentNode } from './nodes/stair-segment'
-import { StructuralGridNode } from './nodes/structural-grid'
 import { WallNode } from './nodes/wall'
 import { WindowNode } from './nodes/window'
 import { ZoneNode } from './nodes/zone'
@@ -65,7 +64,6 @@ export const AnyNode = nodeUnion([
   ColumnNode,
   ConstructionDimensionNode,
   BlockNode,
-  StructuralGridNode,
   WallNode,
   FenceNode,
   CabinetNode,

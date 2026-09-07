@@ -19,7 +19,6 @@ import { slabDefinition } from './slab'
 import { spawnDefinition } from './spawn'
 import { stairDefinition } from './stair'
 import { stairSegmentDefinition } from './stair-segment'
-import { structuralGridDefinition } from './structural-grid'
 import { wallDefinition } from './wall'
 import { windowDefinition } from './window'
 import { zoneDefinition } from './zone'
@@ -71,7 +70,6 @@ export const builtinPlugin: Plugin = {
     scanDefinition as unknown as AnyNodeDefinition,
     measurementDefinition as unknown as AnyNodeDefinition,
     constructionDimensionDefinition as unknown as AnyNodeDefinition,
-    structuralGridDefinition as unknown as AnyNodeDefinition,
   ],
 }
 
@@ -118,7 +116,6 @@ export { slabDefinition } from './slab'
 export { spawnDefinition } from './spawn'
 export { stairDefinition } from './stair'
 export { stairSegmentDefinition } from './stair-segment'
-export { structuralGridDefinition } from './structural-grid'
 export { wallDefinition } from './wall'
 export { windowDefinition } from './window'
 export { zoneDefinition } from './zone'

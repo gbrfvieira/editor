@@ -23,7 +23,6 @@ import type {
   SpawnNode,
   StairNode,
   StairSegmentNode,
-  StructuralGridNode,
   WallNode,
   WindowNode,
   ZoneNode,
@@ -86,7 +85,6 @@ export type ConstructionDimensionEvent = NodeEvent<ConstructionDimensionNode>
 export type BlockEvent = NodeEvent<BlockNode>
 export type StairEvent = NodeEvent<StairNode>
 export type StairSegmentEvent = NodeEvent<StairSegmentNode>
-export type StructuralGridEvent = NodeEvent<StructuralGridNode>
 export type WindowEvent = NodeEvent<WindowNode>
 export type DoorEvent = NodeEvent<DoorNode>
 export type ElevatorEvent = NodeEvent<ElevatorNode>
@@ -271,7 +269,6 @@ type EditorEvents = GridEvents &
   NodeEvents<'block', BlockEvent> &
   NodeEvents<'stair', StairEvent> &
   NodeEvents<'stair-segment', StairSegmentEvent> &
-  NodeEvents<'structural-grid', StructuralGridEvent> &
   NodeEvents<'window', WindowEvent> &
   NodeEvents<'door', DoorEvent> &
   NodeEvents<'scan', ScanEvent> &
