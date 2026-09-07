@@ -282,13 +282,13 @@ function snapWallEndpoints(walls: Wall[], tolerance: number): void {
   })
 }
 
-interface MergeOptions {
+export interface WallMergeOptions {
   angleToleranceRad: number
   offsetToleranceM: number
   gapToleranceM: number
 }
 
-function mergeWallPair(first: Wall, second: Wall, options: MergeOptions): Wall | undefined {
+function mergeWallPair(first: Wall, second: Wall, options: WallMergeOptions): Wall | undefined {
   const firstInfo = normalizedDirection(first)
   const secondInfo = normalizedDirection(second)
   if (!firstInfo || !secondInfo) {
@@ -336,17 +336,21 @@ function mergeWallPair(first: Wall, second: Wall, options: MergeOptions): Wall |
     start: add(scale(direction, startProjection), scale(normal, normalProjection)),
     end: add(scale(direction, endProjection), scale(normal, normalProjection)),
     thickness:
-      (first.thickness * firstInfo.length + second.thickness * secondInfo.length) /
-      (firstInfo.length + secondInfo.length),
+      first.confidence === second.confidence
+        ? (first.thickness * firstInfo.length + second.thickness * secondInfo.length) /
+          (firstInfo.length + secondInfo.length)
+        : first.confidence > second.confidence
+          ? first.thickness
+          : second.thickness,
     confidence: Math.max(first.confidence, second.confidence),
   }
 }
 
 export function mergeNearlyDuplicateWalls(
   walls: Wall[],
-  options: Partial<MergeOptions> = {},
+  options: Partial<WallMergeOptions> = {},
 ): Wall[] {
-  const configured: MergeOptions = {
+  const configured: WallMergeOptions = {
     angleToleranceRad: options.angleToleranceRad ?? DEFAULT_MERGE_ANGLE_TOLERANCE,
     offsetToleranceM: options.offsetToleranceM ?? DEFAULT_MERGE_OFFSET_TOLERANCE,
     gapToleranceM: options.gapToleranceM ?? DEFAULT_MERGE_GAP_TOLERANCE,

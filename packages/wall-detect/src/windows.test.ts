@@ -88,7 +88,11 @@ test('rejects missing gaps, implausible jambs and degenerate input', () => {
       baseWalls,
     ),
   ).toEqual([])
+  expect(
+    detectWindowOpenings(jambs, [{ ...baseWalls[0], thickness: Number.NaN }, baseWalls[1]]),
+  ).toEqual([])
   expect(() => detectWindowOpenings(jambs, baseWalls, { metersPerUnit: 0 })).toThrow()
+  expect(() => detectWindowOpenings(jambs, baseWalls, { thicknessRatioRange: [0, 1] })).toThrow()
 })
 
 test('filters trivial segments and merges near-collinear overlapping walls', () => {

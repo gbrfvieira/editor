@@ -79,7 +79,24 @@ export function detectWindowOpenings(
   const minThicknessRatio = Math.min(configuredMinRatio, configuredMaxRatio)
   const maxThicknessRatio = Math.max(configuredMinRatio, configuredMaxRatio)
 
-  if (!(metersPerUnit > 0) || tolerance < 0 || minWidth < 0 || maxWidth < minWidth) {
+  if (
+    ![
+      metersPerUnit,
+      tolerance,
+      minWidth,
+      maxWidth,
+      angleTolerance,
+      minThicknessRatio,
+      maxThicknessRatio,
+    ].every(Number.isFinite) ||
+    metersPerUnit <= 0 ||
+    tolerance < 0 ||
+    minWidth < 0 ||
+    maxWidth < minWidth ||
+    angleTolerance < 0 ||
+    angleTolerance >= Math.PI / 2 ||
+    minThicknessRatio <= 0
+  ) {
     throw new RangeError('Window detection options must contain valid positive measurements')
   }
 
@@ -139,6 +156,9 @@ export function detectWindowOpenings(
       }
 
       const thickness = (first.thickness + second.thickness) / 2
+      if (!Number.isFinite(thickness) || thickness <= 0) {
+        continue
+      }
       const matchingSegments = scaledSegments.filter((segment) => {
         const segmentDirection = direction(segment.start, segment.end)
         if (!segmentDirection) {
