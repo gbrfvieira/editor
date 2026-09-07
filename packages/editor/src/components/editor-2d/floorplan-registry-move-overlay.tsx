@@ -765,35 +765,6 @@ export function FloorplanRegistryMoveOverlay() {
         return
       }
       let selectedId = movingNode.id as AnyNodeId
-      if (originalPath) {
-        // Polyline kinds: shift every point by the committed delta and
-        // write `path`. Strip the fresh-placement flags on first drop.
-        const dx = sx - originalPosition[0]
-        const dz = sz - originalPosition[2]
-        const nextPath = originalPath.map(
-          ([x, y, z]) => [x + dx, y, z + dz] as [number, number, number],
-        )
-        useScene.getState().updateNode(
-          movingNode.id as AnyNodeId,
-          (isFreshPlacement
-            ? {
-                path: nextPath,
-                metadata: stripPlacementMetadataFlags(
-                  (movingNode as { metadata?: unknown }).metadata,
-                ),
-                visible: true,
-              }
-            : { path: nextPath }) as Partial<AnyNode>,
-        )
-        useViewer.getState().setSelection({ selectedIds: [movingNode.id as AnyNodeId] })
-        for (const relatedEntry of relatedEntries) {
-          relatedEntry.removeAttribute('transform')
-        }
-        useAlignmentGuides.getState().clear()
-        setMovingNode(null)
-        swallowNextClick()
-        return
-      }
       if (isFreshPlacement) {
         selectedId =
           commitFreshPlacementSubtree(

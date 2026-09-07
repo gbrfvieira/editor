@@ -25,5 +25,4 @@ export const tools: ToolConfig[] = [
   { id: 'zone', iconSrc: '/icons/zone.webp', label: 'Zone' },
   { id: 'spawn', iconSrc: '/icons/spawn-point.webp', label: 'Spawn Point' },
   { id: 'shelf', iconSrc: '/icons/shelf.webp', label: 'Shelf' },
-  { id: 'lineset', iconSrc: '/icons/lineset.webp', label: 'Lineset' },
 ]

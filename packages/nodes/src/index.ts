@@ -11,7 +11,6 @@ import { fenceDefinition } from './fence'
 import { guideDefinition } from './guide'
 import { itemDefinition } from './item'
 import { levelDefinition } from './level'
-import { linesetDefinition } from './lineset'
 import { measurementDefinition } from './measurement'
 import { scanDefinition } from './scan'
 import { shelfDefinition } from './shelf'
@@ -73,7 +72,6 @@ export const builtinPlugin: Plugin = {
     measurementDefinition as unknown as AnyNodeDefinition,
     constructionDimensionDefinition as unknown as AnyNodeDefinition,
     structuralGridDefinition as unknown as AnyNodeDefinition,
-    linesetDefinition as unknown as AnyNodeDefinition,
   ],
 }
 
@@ -112,7 +110,6 @@ export { fenceDefinition } from './fence'
 export { guideDefinition } from './guide'
 export { itemDefinition } from './item'
 export { levelDefinition } from './level'
-export { linesetDefinition } from './lineset'
 export { measurementDefinition } from './measurement'
 export { scanDefinition } from './scan'
 export { shelfDefinition } from './shelf'

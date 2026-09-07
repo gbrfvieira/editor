@@ -23,31 +23,17 @@ import {
 } from '@/components/toolbar-tooltip'
 import { cn } from '@/lib/utils'
 
-/**
- * MEP (mechanical / plumbing) tool kinds surfaced under the Build tab's "MEP"
- * group tile — its own sub-grid.
- */
-type MepToolKind = 'lineset'
-
 type BuildType = {
   /** Selection id — equals `kind` for tool types, with dedicated ids for modes and groups. */
   id: string
   label: string
   /** Raster asset tile (legacy Build sidebar artwork). */
   iconSrc: string
-  /** Present for structure-tool types (absent for paint mode and the MEP group). */
+  /** Present for structure-tool types (absent for paint mode). */
   kind?: string
   paletteOrder?: number
   /** Non-placement special mode. */
   mode?: 'material-paint' | 'terrain-sculpt'
-}
-
-type MepItem = {
-  /** Selection id — equals `kind`. */
-  id: string
-  label: string
-  iconSrc: string
-  kind: MepToolKind
 }
 
 // Same icons + ordering as the community Build sidebar, minus presets.
@@ -64,8 +50,6 @@ const BASE_BUILD_TYPES: BuildType[] = [
   { id: 'shelf', label: 'Shelf', iconSrc: '/icons/shelf.webp', kind: 'shelf' },
   { id: 'spawn', label: 'Spawn Point', iconSrc: '/icons/spawn-point.webp', kind: 'spawn' },
   { id: 'kitchen', label: 'Kitchen', iconSrc: '/icons/kitchen.webp' },
-  // Group tile — no tool of its own; opens the MEP sub-grid below.
-  { id: 'mep', label: 'MEP', iconSrc: '/icons/HVAC.webp' },
   { id: 'painting', label: 'Painting', iconSrc: '/icons/paint.webp', mode: 'material-paint' },
   { id: 'terrain', label: 'Terrain', iconSrc: '/icons/mesh.webp', mode: 'terrain-sculpt' },
 ]
@@ -103,12 +87,6 @@ function collectBuildTypes(floorplanMode: FloorplanMode): BuildType[] {
   tools.sort((left, right) => (left.paletteOrder ?? 0) - (right.paletteOrder ?? 0))
   return [...tools, ...BASE_BUILD_TYPES.filter((type) => !type.kind)]
 }
-
-// MEP sub-grid surfaced under the "MEP" tile — same icons + ordering the MEP
-// tools had in the community Build sidebar.
-const MEP_ITEMS: MepItem[] = [
-  { id: 'lineset', label: 'Lineset', iconSrc: '/icons/lineset.webp', kind: 'lineset' },
-]
 
 const MODULAR_CABINET_CATALOG_ITEM = CATALOG_ITEMS.find((item) => item.id === 'cabinet')
 const MODULAR_CABINET_ICON = MODULAR_CABINET_CATALOG_ITEM?.thumbnail ?? '/icons/item.webp'
@@ -170,10 +148,6 @@ function activateTerrainSculptMode(): void {
  * with the kind's own `def.defaults()`. The "Painting" type swaps in the
  * material-paint panel.
  */
-// MEP tool kinds that, when active, mean the MEP group tile (and its sub-grid)
-// is what the user is working in.
-const MEP_TOOL_KINDS = new Set<string>(MEP_ITEMS.map((item) => item.kind))
-
 export function BuildTab() {
   const activeTool = useEditor((s) => s.tool)
   const mode = useEditor((s) => s.mode)
@@ -186,17 +160,13 @@ export function BuildTab() {
   )
   const buildTypes = registryReady ? collectBuildTypes(floorplanMode) : BASE_BUILD_TYPES
 
-  const isMepItemActive = (item: MepItem) => mode === 'build' && activeTool === item.kind
-
   // Tile highlight derives from the single source of truth (the active tool /
   // mode), never a separate local selection — so keyboard shortcuts and panel
   // clicks always agree on which tile is lit.
-  const isMepActive = mode === 'build' && !!activeTool && MEP_TOOL_KINDS.has(activeTool)
   const isKitchenActive = mode === 'build' && activeTool === 'cabinet'
 
   const isTypeActive = (type: BuildType) => {
     if (type.mode) return mode === type.mode
-    if (type.id === 'mep') return isMepActive
     if (type.id === 'kitchen') return isKitchenActive
     return mode === 'build' && activeTool === type.kind
   }
@@ -206,10 +176,6 @@ export function BuildTab() {
       activatePaintMode()
     } else if (type.mode === 'terrain-sculpt') {
       activateTerrainSculptMode()
-    } else if (type.id === 'mep') {
-      // MEP is a group tile: arm its first tool so a usable tool is active
-      // (and we leave any prior paint mode), then reveal the MEP sub-grid.
-      activateBuildTool('lineset')
     } else if (type.id === 'kitchen') {
       activateModularCabinetTool()
     } else if (type.kind) {
@@ -315,51 +281,6 @@ export function BuildTab() {
                   Modular Cabinet
                 </TooltipContent>
               </Tooltip>
-            </div>
-          </TooltipProvider>
-        </div>
-      ) : isMepActive ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-          <div className="px-0.5 pt-1 font-medium text-muted-foreground text-xs">MEP</div>
-          <TooltipProvider delayDuration={0} disableHoverableContent>
-            <div
-              className="grid gap-1.5 px-0.5"
-              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(56px, 1fr))' }}
-            >
-              {MEP_ITEMS.map((item) => {
-                const active = isMepItemActive(item)
-                return (
-                  <Tooltip key={item.id}>
-                    <TooltipTrigger asChild>
-                      <button
-                        className={cn(
-                          'group relative flex aspect-square items-center justify-center rounded-xl transition-all duration-200',
-                          active
-                            ? 'bg-primary/10 ring-1 ring-primary/50'
-                            : 'bg-muted/40 opacity-70 grayscale hover:bg-muted hover:opacity-100 hover:grayscale-0',
-                        )}
-                        onClick={() => {
-                          triggerSFX('sfx:menu-click')
-                          activateBuildTool(item.kind)
-                        }}
-                        onMouseEnter={() => triggerSFX('sfx:menu-hover')}
-                        type="button"
-                      >
-                        <Image
-                          alt={item.label}
-                          className="size-full object-contain transition-transform duration-200 group-hover:scale-110"
-                          height={48}
-                          src={item.iconSrc}
-                          width={48}
-                        />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="pointer-events-none" side="top">
-                      {item.label}
-                    </TooltipContent>
-                  </Tooltip>
-                )
-              })}
             </div>
           </TooltipProvider>
         </div>

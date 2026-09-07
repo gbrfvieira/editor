@@ -29,12 +29,6 @@ export const NODE_REQUIRED_FIELDS: Record<string, Record<string, unknown>> = {
       src: 'asset://chair.glb',
     },
   },
-  lineset: {
-    path: [
-      [0, 0, 0],
-      [1, 0, 0],
-    ],
-  },
   measurement: {
     measurement: {
       kind: 'distance',

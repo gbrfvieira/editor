@@ -573,14 +573,6 @@ export function FloatingActionMenu() {
           // item without clicking" bug. (Item has its own
           // draft-committing move tool, so it must skip the generic
           // registry auto-create branch below.)
-        } else if (duplicate.type === 'lineset') {
-          // Refrigerant linesets use pure drag-to-place: NO node is inserted
-          // into the scene until the commit click. `setMovingNode` below
-          // hands the clone (with `metadata.isNew`) to its ghost tool
-          // (`MoveLinesetTool`), which previews a translucent copy inside a
-          // footprint bounding box on the cursor and calls `createNode` on
-          // the drop click. Pre-creating here would drop a copy before any
-          // click — the "auto-places it" bug.
         } else if (nodeRegistry.has(duplicate.type)) {
           // Registry-driven kinds: offset slightly so the duplicate doesn't
           // overlap exactly, then create + hand to the move tool. Mirrors the

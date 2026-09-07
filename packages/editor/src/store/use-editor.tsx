@@ -161,7 +161,6 @@ type BuiltInStructureTool =
   | 'dormer'
   | 'gutter'
   | 'downspout'
-  | 'lineset'
 
 /** Registry node kinds are valid build tools without central union edits. */
 export type StructureTool = BuiltInStructureTool | (string & {})

@@ -15,7 +15,6 @@ import type {
   GuideNode,
   ItemNode,
   LevelNode,
-  LinesetNode,
   MeasurementNode,
   ScanNode,
   ShelfNode,
@@ -93,7 +92,6 @@ export type DoorEvent = NodeEvent<DoorNode>
 export type ElevatorEvent = NodeEvent<ElevatorNode>
 export type ScanEvent = NodeEvent<ScanNode>
 export type GuideEvent = NodeEvent<GuideNode>
-export type LinesetEvent = NodeEvent<LinesetNode>
 export type MeasurementEvent = NodeEvent<MeasurementNode>
 
 // Event suffixes - exported for use in hooks
@@ -278,7 +276,6 @@ type EditorEvents = GridEvents &
   NodeEvents<'door', DoorEvent> &
   NodeEvents<'scan', ScanEvent> &
   NodeEvents<'guide', GuideEvent> &
-  NodeEvents<'lineset', LinesetEvent> &
   NodeEvents<'measurement', MeasurementEvent> &
   CameraControlEvents &
   ToolEvents &

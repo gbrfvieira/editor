@@ -123,7 +123,6 @@ export {
   LOW_PROFILE_ITEM_SURFACE_MAX_HEIGHT,
 } from './nodes/item'
 export { LevelNode } from './nodes/level'
-export { LinesetNode } from './nodes/lineset'
 export {
   AngleMeasurement,
   AreaMeasurement,

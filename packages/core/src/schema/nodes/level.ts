@@ -8,7 +8,6 @@ import type { ConstructionDimensionNode } from './construction-dimension'
 import type { FenceNode } from './fence'
 import type { GuideNode } from './guide'
 import type { ItemNode } from './item'
-import type { LinesetNode } from './lineset'
 import type { MeasurementNode } from './measurement'
 import type { ScanNode } from './scan'
 import type { ShelfNode } from './shelf'
@@ -36,7 +35,6 @@ type CoreLevelChildId =
   | MeasurementNode['id']
   | SpawnNode['id']
   | ShelfNode['id']
-  | LinesetNode['id']
 
 const LevelChildId = z.string().transform((id) => id as CoreLevelChildId)
 

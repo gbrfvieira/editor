@@ -11,7 +11,6 @@ import { FenceNode } from './nodes/fence'
 import { GuideNode } from './nodes/guide'
 import { ItemNode } from './nodes/item'
 import { LevelNode } from './nodes/level'
-import { LinesetNode } from './nodes/lineset'
 import { MeasurementNode } from './nodes/measurement'
 import { ScanNode } from './nodes/scan'
 import { ShelfNode } from './nodes/shelf'
@@ -84,7 +83,6 @@ export const AnyNode = nodeUnion([
   SpawnNode,
   WindowNode,
   DoorNode,
-  LinesetNode,
 ])
 
 export type AnyNode = z.infer<typeof AnyNode>
