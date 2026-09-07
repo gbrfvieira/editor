@@ -1,10 +1,16 @@
-import { afterEach, expect, mock, test } from 'bun:test'
+import { afterEach, beforeEach, expect, mock, test } from 'bun:test'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const temp = join(process.cwd(), '.dwg-convert-test')
-mkdirSync(temp, { recursive: true })
 const original = process.env.ODA_FILE_CONVERTER_PATH
+
+// afterEach removes `temp` for isolation, so each test needs it recreated —
+// a module-level mkdirSync only ran once, before the first test's cleanup
+// deleted it out from under every test after it.
+beforeEach(() => {
+  mkdirSync(temp, { recursive: true })
+})
 
 afterEach(() => {
   if (original === undefined) delete process.env.ODA_FILE_CONVERTER_PATH

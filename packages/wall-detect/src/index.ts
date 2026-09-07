@@ -41,6 +41,14 @@ function scale(point: Point, factor: number): Point {
   return [point[0] * factor, point[1] * factor]
 }
 
+// Endpoint snapping averages 2-3 float coordinates together, which lands on
+// values like 1.0150000000000001 instead of 1.015 — well below any real
+// wall-geometry tolerance, but it breaks exact-equality comparisons and
+// scene persistence. Round to micrometer precision to discard the noise.
+function roundPoint(point: Point): Point {
+  return [Math.round(point[0] * 1e6) / 1e6, Math.round(point[1] * 1e6) / 1e6]
+}
+
 function dot(left: Point, right: Point): number {
   return left[0] * right[0] + left[1] * right[1]
 }
@@ -162,7 +170,7 @@ function snapWallEndpoints(walls: Wall[], tolerance: number): void {
   const snapped = new Map<number, Point>()
   for (const [root, group] of groups) {
     const center = group.reduce((sum, point) => add(sum, point), [0, 0] as Point)
-    snapped.set(root, scale(center, 1 / group.length))
+    snapped.set(root, roundPoint(scale(center, 1 / group.length)))
   }
   endpoints.forEach((_, index) => {
     const point = snapped.get(find(index))
