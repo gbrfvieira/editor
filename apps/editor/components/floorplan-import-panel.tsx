@@ -40,6 +40,36 @@ function toEditableWalls(source: DetectedWall[]): EditableWall[] {
   }))
 }
 
+/**
+ * Real CAD files are usually drawn far from (0,0) — survey coordinates, or
+ * just wherever the drawing happened to sit in the original file. Importing
+ * at those raw coordinates puts the walls thousands of meters from where the
+ * camera starts (they're technically there, but invisible and unreachable)
+ * and risks Three.js float-precision jitter at that distance from the
+ * origin. Recenter on the bounding-box center of the extracted segments
+ * before anything is previewed or created.
+ */
+function boundingBoxCenter(segments: { start: [number, number]; end: [number, number] }[]): [
+  number,
+  number,
+] {
+  let minX = Number.POSITIVE_INFINITY
+  let minY = Number.POSITIVE_INFINITY
+  let maxX = Number.NEGATIVE_INFINITY
+  let maxY = Number.NEGATIVE_INFINITY
+  for (const segment of segments) {
+    for (const [x, y] of [segment.start, segment.end]) {
+      if (x < minX) minX = x
+      if (x > maxX) maxX = x
+      if (y < minY) minY = y
+      if (y > maxY) maxY = y
+    }
+  }
+  return Number.isFinite(minX) && Number.isFinite(maxX)
+    ? [(minX + maxX) / 2, (minY + maxY) / 2]
+    : [0, 0]
+}
+
 function updatePoint(
   wall: EditableWall,
   point: 'start' | 'end',
@@ -88,29 +118,7 @@ export function FloorplanImportPanel() {
         })),
       )
 
-      // Real CAD files are usually drawn far from (0,0) — survey coordinates,
-      // or just wherever the drawing happened to sit in the original file.
-      // Importing at those raw coordinates puts the walls thousands of
-      // meters from where the camera starts (they're technically there, but
-      // invisible and unreachable) and risks Three.js float-precision jitter
-      // at that distance from the origin. Recenter the whole import on its
-      // own bounding-box center before anything is previewed or created.
-      let minX = Number.POSITIVE_INFINITY
-      let minY = Number.POSITIVE_INFINITY
-      let maxX = Number.NEGATIVE_INFINITY
-      let maxY = Number.NEGATIVE_INFINITY
-      for (const segment of segments) {
-        for (const [x, y] of [segment.start, segment.end]) {
-          if (x < minX) minX = x
-          if (x > maxX) maxX = x
-          if (y < minY) minY = y
-          if (y > maxY) maxY = y
-        }
-      }
-      const offset: [number, number] =
-        Number.isFinite(minX) && Number.isFinite(maxX)
-          ? [(minX + maxX) / 2, (minY + maxY) / 2]
-          : [0, 0]
+      const offset = boundingBoxCenter(segments)
       const recenter = (point: [number, number]): [number, number] => [
         point[0] - offset[0],
         point[1] - offset[1],
@@ -227,12 +235,23 @@ export function FloorplanImportPanel() {
             )
             return
           }
-          const detected = detectWalls(segments, {
+          const offset = boundingBoxCenter(segments)
+          const recenteredSegments = segments.map((segment) => ({
+            ...segment,
+            start: [segment.start[0] - offset[0], segment.start[1] - offset[1]] as [
+              number,
+              number,
+            ],
+            end: [segment.end[0] - offset[0], segment.end[1] - offset[1]] as [number, number],
+          }))
+          const detected = detectWalls(recenteredSegments, {
             preferLayerContaining: 'PAREDE',
             snapToleranceM: snapTolerance,
           }).walls
           setWalls(toEditableWalls(detected))
-          setStatus(`${detected.length} parede(s) detectada(s). Revise e confirme.`)
+          setStatus(
+            `${detected.length} parede(s) detectada(s) (recentralizado na origem). Revise e confirme.`,
+          )
           return
         }
         processDxfText(await file.text(), unitScale)
