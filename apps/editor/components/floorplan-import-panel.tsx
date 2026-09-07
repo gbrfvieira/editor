@@ -329,7 +329,7 @@ export function FloorplanImportPanel() {
             id: wall.id,
             start: wall.start,
             end: wall.end,
-            thickness: wall.thickness,
+            thickness: wall.thickness ?? 0.2,
           })
         },
       },
