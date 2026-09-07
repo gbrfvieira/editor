@@ -13,3 +13,12 @@ test('summarizes lengths, confidence and review candidates', () => {
   expect(summary.averageConfidence).toBeCloseTo(0.675)
   expect(summary.needsReview).toEqual([walls[1]])
 })
+
+test('returns neutral values for an empty import', () => {
+  expect(summarizeImport([])).toEqual({
+    totalWalls: 0,
+    totalLengthM: 0,
+    averageConfidence: 0,
+    needsReview: [],
+  })
+})
