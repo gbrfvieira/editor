@@ -189,3 +189,6 @@ export function toCsv(report: CutListReport): string {
     rows.push([item.cabinetId, item.panel, item.lengthMm].map(csvCell).join(','))
   return rows.join('\n')
 }
+
+export type { CutPanel, NestingPlacement, NestingResult, SheetSize } from './nesting'
+export { nestPanels } from './nesting'
