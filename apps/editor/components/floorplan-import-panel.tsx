@@ -48,6 +48,36 @@ function toEditableWalls(source: DetectedWall[]): EditableWall[] {
   }))
 }
 
+const PDF_POINTS_TO_METERS = 0.0254 / 72
+// Common architectural plot/print scales (1:N). A PDF plotted at, say,
+// 1:100 on paper needs the physical points-to-meters conversion multiplied
+// by 100 to recover the depicted building's real-world size — the PDF
+// itself carries no reliable signal for which scale was used, so this
+// tries each candidate and keeps whichever makes wall-layer segment
+// lengths land in a plausible 0.3-15m range, the same scoring approach
+// already used for the DXF/DWG unit heuristic.
+const PDF_PLOT_SCALE_CANDIDATES = [1, 20, 25, 50, 75, 100, 125, 150, 200, 250, 300]
+
+function suggestPdfPlotScale(segments: { start: [number, number]; end: [number, number] }[]): {
+  scale: number
+  confident: boolean
+} {
+  const lengths = segments
+    .map((segment) => Math.hypot(segment.end[0] - segment.start[0], segment.end[1] - segment.start[1]))
+    .filter((length) => Number.isFinite(length) && length > 0)
+  if (lengths.length < 3) return { scale: 1, confident: false }
+
+  let best = { scale: 1, fraction: -1 }
+  for (const candidate of PDF_PLOT_SCALE_CANDIDATES) {
+    const factor = candidate * PDF_POINTS_TO_METERS
+    const fraction =
+      lengths.filter((length) => length * factor >= 0.3 && length * factor <= 15).length /
+      lengths.length
+    if (fraction > best.fraction) best = { scale: candidate, fraction }
+  }
+  return { scale: best.scale, confident: best.fraction >= 0.3 }
+}
+
 function updatePoint(
   wall: EditableWall,
   point: 'start' | 'end',
@@ -76,6 +106,10 @@ export function FloorplanImportPanel() {
   const [snapTolerance, setSnapTolerance] = useState(0.05)
   const [unitScale, setUnitScale] = useState(1)
   const [lastDxfText, setLastDxfText] = useState<string | null>(null)
+  const [lastPdfSegments, setLastPdfSegments] = useState<
+    { start: [number, number]; end: [number, number] }[] | null
+  >(null)
+  const [pdfPlotScale, setPdfPlotScale] = useState<number | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [converterMissing, setConverterMissing] = useState(false)
   const [converting, setConverting] = useState(false)
@@ -193,6 +227,45 @@ export function FloorplanImportPanel() {
     [snapTolerance],
   )
 
+  const processPdfSegments = useCallback(
+    (
+      rawSegments: { start: [number, number]; end: [number, number] }[],
+      plotScale: number | null,
+      unitMultiplier: number,
+    ) => {
+      setLastPdfSegments(rawSegments)
+      // PDF user-space coordinates are always in points (1/72 inch) — unlike
+      // a DXF's ambiguous drawing unit, that base conversion is a hard
+      // PDF-spec fact, not a guess. But an architectural PDF is almost
+      // always plotted at a reduced scale (1:50, 1:100...), so the physical
+      // point size alone still isn't the depicted building's real-world
+      // size — without correcting for that, walls come out either
+      // "gigantesco" (no conversion at all) or shrunk to a sliver (physical
+      // conversion only, minSegmentLengthM then discards nearly everything).
+      // Try common plot scales and keep whichever makes segment lengths look
+      // like a real building, same scoring idea as the DXF/DWG unit guess.
+      const suggestion =
+        plotScale === null ? suggestPdfPlotScale(rawSegments) : { scale: plotScale, confident: true }
+      setPdfPlotScale(suggestion.scale)
+      const factor = suggestion.scale * PDF_POINTS_TO_METERS * unitMultiplier
+      const scaledSegments = rawSegments.map((segment) => ({
+        ...segment,
+        start: [segment.start[0] * factor, segment.start[1] * factor] as [number, number],
+        end: [segment.end[0] * factor, segment.end[1] * factor] as [number, number],
+      }))
+      const { segments } = recenterSegments(scaledSegments)
+      const detected = detectWalls(segments, {
+        preferLayerContaining: 'PAREDE',
+        snapToleranceM: snapTolerance,
+      }).walls
+      setWalls(toEditableWalls(detected))
+      setStatus(
+        `${detected.length} parede(s) detectada(s) (escala 1:${suggestion.scale}${suggestion.confident ? '' : ', incerta — ajuste manualmente'}, recentralizado na origem). Revise e confirme.`,
+      )
+    },
+    [snapTolerance],
+  )
+
   const handleFile = useCallback(
     async (file: File | undefined) => {
       if (!file) return
@@ -204,6 +277,7 @@ export function FloorplanImportPanel() {
       setRemovedWalls([])
       setVisibleWallCount(WALL_PREVIEW_PAGE_SIZE)
       setConverterMissing(false)
+      setLastPdfSegments(null)
       const isDwg = file.name.toLocaleLowerCase().endsWith('.dwg')
       const isPdf = file.name.toLocaleLowerCase().endsWith('.pdf')
       try {
@@ -240,35 +314,7 @@ export function FloorplanImportPanel() {
             )
             return
           }
-          // PDF user-space coordinates are always in points (1/72 inch) —
-          // unlike a DXF's ambiguous drawing unit, that conversion is a hard
-          // PDF-spec fact, not a guess. Without it a 600pt-wide sheet was
-          // being treated as 600 meters wide ("tudo gigantesco"). The
-          // "Unidade do arquivo" selector still applies on top of that base
-          // conversion, since an architectural PDF plotted at a drawing
-          // scale (1:50, 1:100...) needs further correction beyond the raw
-          // point size — same manual override as the DXF/DWG path.
-          const pointsToMeters = 0.0254 / 72
-          const scaledSegments = rawSegments.map((segment) => ({
-            ...segment,
-            start: [
-              segment.start[0] * pointsToMeters * unitScale,
-              segment.start[1] * pointsToMeters * unitScale,
-            ] as [number, number],
-            end: [
-              segment.end[0] * pointsToMeters * unitScale,
-              segment.end[1] * pointsToMeters * unitScale,
-            ] as [number, number],
-          }))
-          const { segments } = recenterSegments(scaledSegments)
-          const detected = detectWalls(segments, {
-            preferLayerContaining: 'PAREDE',
-            snapToleranceM: snapTolerance,
-          }).walls
-          setWalls(toEditableWalls(detected))
-          setStatus(
-            `${detected.length} parede(s) detectada(s) (recentralizado na origem). Revise e confirme.`,
-          )
+          processPdfSegments(rawSegments, null, unitScale)
           return
         }
         processDxfText(await file.text(), unitScale)
@@ -278,15 +324,26 @@ export function FloorplanImportPanel() {
         setError(cause instanceof Error ? cause.message : 'Não foi possível ler o arquivo.')
       }
     },
-    [processDxfText, snapTolerance, unitScale],
+    [processDxfText, processPdfSegments, unitScale],
   )
 
   const changeUnitScale = (scale: number) => {
     setUnitScale(scale)
+    if (lastPdfSegments) {
+      setRemovedWalls([])
+      processPdfSegments(lastPdfSegments, pdfPlotScale, scale)
+      return
+    }
     if (lastDxfText) {
       setRemovedWalls([])
       processDxfText(lastDxfText, scale)
     }
+  }
+
+  const changePdfPlotScale = (scale: number) => {
+    if (!lastPdfSegments) return
+    setRemovedWalls([])
+    processPdfSegments(lastPdfSegments, scale, unitScale)
   }
 
   const updateWall = (id: number, update: (wall: EditableWall) => EditableWall) => {
@@ -442,6 +499,24 @@ export function FloorplanImportPanel() {
           <option value={0.001}>Milímetros</option>
         </select>
       </label>
+
+      {lastPdfSegments ? (
+        <label className="flex items-center justify-between gap-2 text-xs">
+          <span>Escala da planta (PDF)</span>
+          <select
+            aria-label="escala da planta em pdf"
+            className="rounded border border-border/60 bg-background px-1.5 py-1"
+            onChange={(event) => changePdfPlotScale(Number(event.target.value))}
+            value={pdfPlotScale ?? 1}
+          >
+            {PDF_PLOT_SCALE_CANDIDATES.map((candidate) => (
+              <option key={candidate} value={candidate}>
+                1:{candidate}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
 
       <label className="flex items-center justify-between gap-2 text-xs">
         <span>Snap de cantos (m)</span>
