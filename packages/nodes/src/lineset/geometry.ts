@@ -1,8 +1,8 @@
 import { CylinderGeometry, Group, Mesh, MeshStandardMaterial, SphereGeometry, Vector3 } from 'three'
-import { INCHES_TO_METERS } from '../duct-segment/geometry'
 import type { LinesetNode } from './schema'
 
 const RADIAL_SEGMENTS = 16
+const INCHES_TO_METERS = 0.0254
 
 const COPPER_COLOR = '#b06b3f'
 // Light foam sleeve. Real Armaflex is black, but a light jacket reads

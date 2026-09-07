@@ -135,9 +135,6 @@ export {
   isDefaultDownspoutNode,
   usesAutomaticDownspoutLength,
 } from './nodes/downspout'
-export { DuctFittingNode } from './nodes/duct-fitting'
-export { DuctSegmentNode } from './nodes/duct-segment'
-export { DuctTerminalNode } from './nodes/duct-terminal'
 export {
   ElevatorDoorPanelStyle,
   ElevatorDoorStyle,
@@ -163,7 +160,6 @@ export {
   isAutoGutterEnabled,
   isDefaultGutterNode,
 } from './nodes/gutter'
-export { HvacEquipmentNode } from './nodes/hvac-equipment'
 export type {
   AnimationEffect,
   Asset,
@@ -192,7 +188,6 @@ export {
 } from './nodes/lean-to-extension'
 export { LevelNode } from './nodes/level'
 export { LinesetNode } from './nodes/lineset'
-export { LiquidLineNode } from './nodes/liquid-line'
 export {
   AngleMeasurement,
   AreaMeasurement,
@@ -207,9 +202,6 @@ export {
   PerimeterMeasurement,
   VolumeMeasurement,
 } from './nodes/measurement'
-export { PipeFittingNode } from './nodes/pipe-fitting'
-export { PipeSegmentNode } from './nodes/pipe-segment'
-export { PipeTrapNode } from './nodes/pipe-trap'
 // Nodes
 export {
   createDefaultRidgeVentsForSegment,

@@ -9,29 +9,21 @@ import {
   useScene,
 } from '@pascal-app/core'
 import { snapPointToGrid, type WallPlanPoint } from '@pascal-app/editor'
-import {
-  detectFittingEndpoint,
-  type FittingEndpoint,
-  planFittingEndpointReaim,
-} from './fitting-endpoint-reaim'
 
 /**
  * Shared "drag a path point" floor-plan affordance for polyline
- * distribution kinds (duct-segment / pipe-segment / lineset). It is the
- * 2D counterpart of their 3D `affordanceTools.selection` handles: one
- * draggable handle per path vertex, moved freely on the plan (XZ) with
- * grid snap (Shift bypasses). The vertex's Y (elevation / slope) is held
- * fixed — plan editing never changes height.
+ * distribution kinds (lineset). It is the 2D counterpart of its 3D
+ * `affordanceTools.selection` handles: one draggable handle per path
+ * vertex, moved freely on the plan (XZ) with grid snap (Shift bypasses).
+ * The vertex's Y (elevation / slope) is held fixed — plan editing never
+ * changes height.
  *
- * Like the 3D handles, dragging a vertex that sits on a fitting carries the
- * joint along (port connectivity): the fitting follows, connected runs stretch
- * along their own axis and translate across it, and that perpendicular slide
- * propagates down the chain. And — duct / pipe only — dragging the free end
- * of a straight run whose other end sits on an elbow re-aims that elbow to
- * follow the drag (bend angle adapts) instead of translating it rigidly. Holding
- * **Alt** detaches: the joint breaks for the drag so the vertex moves on its
- * own (no elbow re-aim, no connectivity follow). Behavioral parity with the
- * 3D selection tool.
+ * Like the 3D handles, dragging a vertex that sits on a joint carries it
+ * along (port connectivity): connected runs stretch along their own axis
+ * and translate across it, and that perpendicular slide propagates down
+ * the chain. Holding **Alt** detaches: the joint breaks for the drag so
+ * the vertex moves on its own (no connectivity follow). Behavioral parity
+ * with the 3D selection tool.
  *
  * Wired via `def.floorplanAffordances['move-path-point']`; the floor-plan
  * builders emit `endpoint-handle` primitives carrying `{ pointIndex }` so
@@ -60,30 +52,19 @@ export function createPathPointMoveAffordance<N extends PathShape & { id: AnyNod
       // Hold the dragged vertex's elevation — the plan move only shifts XZ.
       const y = target[1]
 
-      // Connectivity snapshot: which fittings / runs are mated to this run's
-      // endpoints so they follow the drag. Only endpoints (first / last vertex)
-      // bear ports; interior vertices have no joint, so skip the analysis.
+      // Connectivity snapshot: which runs are mated to this run's endpoints
+      // so they follow the drag. Only endpoints (first / last vertex) bear
+      // ports; interior vertices have no joint, so skip the analysis.
       const isEndpoint = pointIndex === 0 || pointIndex === initialPath.length - 1
 
-      // Fitting re-aim (duct / pipe): if this is a straight run whose OTHER
-      // end sits on an elbow collar (bend angle adapts) or a duct tee branch
-      // collar (branch lean adapts), the fitting swings to follow the drag —
-      // the 2D twin of the 3D selection handle's behaviour. Takes precedence
-      // over the rigid connectivity follow for this endpoint.
-      const fittingEndpoint: FittingEndpoint | null = isEndpoint
-        ? detectFittingEndpoint(kind, initialPath, pointIndex, nodes)
+      const connectivity: PortConnectivity | null = isEndpoint
+        ? analyzePortConnectivity(node as unknown as AnyNode, nodes)
         : null
-
-      const connectivity: PortConnectivity | null =
-        isEndpoint && !fittingEndpoint
-          ? analyzePortConnectivity(node as unknown as AnyNode, nodes)
-          : null
 
       // Report every node the drag may write so the dispatcher snapshots them
       // for the single-undo dance.
       const affectedIds: AnyNodeId[] = [
         node.id,
-        ...(fittingEndpoint ? [fittingEndpoint.fitting.id as AnyNodeId] : []),
         ...(connectivity?.connections.map((c) => c.nodeId) ?? []),
       ]
 
@@ -105,25 +86,10 @@ export function createPathPointMoveAffordance<N extends PathShape & { id: AnyNod
           const raw: WallPlanPoint = [planPoint[0], planPoint[1]]
           const [sx, sz] = modifiers.shiftKey ? raw : snapPointToGrid(raw)
           const dragged: [number, number, number] = [sx, y, sz]
-          // Alt = detach: break the joint for this drag — the elbow does NOT
-          // re-aim and mated fittings / runs do NOT follow; the vertex moves
-          // on its own. Mirrors the 3D selection drag and the wall corner.
+          // Alt = detach: break the joint for this drag — mated runs do NOT
+          // follow; the vertex moves on its own. Mirrors the 3D selection
+          // drag and the wall corner.
           const detached = modifiers.altKey
-          // Fitting re-aim: the fitting swings to follow the dragged end and
-          // the run rides its re-aimed collar. Out-of-range turns hold the
-          // frame.
-          if (!detached && fittingEndpoint) {
-            const plan = planFittingEndpointReaim(fittingEndpoint, pointIndex, dragged)
-            if (!plan) return
-            useScene.getState().updateNodes([
-              { id: node.id, data: { path: plan.path } as Partial<unknown> as never },
-              {
-                id: plan.fittingUpdate.id,
-                data: plan.fittingUpdate.data as Partial<unknown> as never,
-              },
-            ])
-            return
-          }
           const nextPath = initialPath.map((p, i) => (i === pointIndex ? dragged : p))
           useScene.getState().updateNodes([
             { id: node.id, data: { path: nextPath } as Partial<unknown> as never },

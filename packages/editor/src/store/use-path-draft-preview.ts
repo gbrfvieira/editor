@@ -1,7 +1,7 @@
 import type { AnyNode } from '@pascal-app/core'
 import { create } from 'zustand'
 
-export type PathDraftKind = 'duct-segment' | 'lineset' | 'liquid-line' | 'pipe-segment'
+export type PathDraftKind = 'lineset'
 export type PathDraftPoint = [number, number, number]
 export type PathDraftParameter = boolean | number | string
 export type PathDraftParameters = Record<string, PathDraftParameter>

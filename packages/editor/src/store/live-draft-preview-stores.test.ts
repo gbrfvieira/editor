@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from 'bun:test'
+import { ShelfNode } from '@pascal-app/core'
 import useFenceCurveDraft from './use-fence-curve-draft'
 import { useFloorplanDraftPreview } from './use-floorplan-draft-preview'
 import { usePathDraftPreview } from './use-path-draft-preview'
@@ -81,38 +82,13 @@ describe('live draft preview stores', () => {
     })
     const points: Array<[number, number, number]> = [[0, 1, 2]]
     const parameters = { diameter: 6, shape: 'round' }
-    const relatedNodes = [
-      {
-        angle: 90,
-        branchAngle: 90,
-        diameter: 6,
-        diameter2: 6,
-        ductMaterial: 'sheet-metal' as const,
-        fittingType: 'elbow' as const,
-        height: 8,
-        height2: 8,
-        id: 'duct-fitting_live-draft-0' as const,
-        metadata: {},
-        object: 'node' as const,
-        parentId: 'level_1' as const,
-        position: [1, 2, 3] as [number, number, number],
-        rotation: [0, 0, 0] as [number, number, number],
-        shape: 'round' as const,
-        shape2: 'round' as const,
-        slots: undefined,
-        system: 'supply' as const,
-        type: 'duct-fitting' as const,
-        visible: true,
-        width: 14,
-        width2: 14,
-      },
-    ]
+    const relatedNodes = [ShelfNode.parse({ id: 'shelf_live-draft-0', position: [1, 2, 3] })]
     usePathDraftPreview
       .getState()
-      .setDraft('duct-segment', points, [3, 4, 5], parameters, relatedNodes)
+      .setDraft('lineset', points, [3, 4, 5], parameters, relatedNodes)
     usePathDraftPreview
       .getState()
-      .setDraft('duct-segment', points, [3, 4, 5], parameters, relatedNodes)
+      .setDraft('lineset', points, [3, 4, 5], parameters, relatedNodes)
     points[0]![0] = 9
     parameters.diameter = 12
     relatedNodes[0]!.position[0] = 9
@@ -120,14 +96,14 @@ describe('live draft preview stores', () => {
     expect(changes).toBe(1)
     expect(usePathDraftPreview.getState()).toMatchObject({
       cursor: [3, 4, 5],
-      kind: 'duct-segment',
+      kind: 'lineset',
       parameters: { diameter: 6, shape: 'round' },
       points: [[0, 1, 2]],
       relatedNodes: [
         expect.objectContaining({
-          id: 'duct-fitting_live-draft-0',
+          id: 'shelf_live-draft-0',
           position: [1, 2, 3],
-          type: 'duct-fitting',
+          type: 'shelf',
         }),
       ],
     })

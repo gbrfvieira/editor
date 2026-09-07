@@ -183,20 +183,12 @@ export function HelperManager() {
     [scope, mode, tool],
   )
   const selectModeHints = useMemo(() => {
-    const single = selectedNodes.length === 1 ? selectedNodes[0] : null
-    const mepSelection =
-      single?.type === 'duct-segment' || single?.type === 'pipe-segment'
-        ? 'run'
-        : single?.type === 'duct-fitting' || single?.type === 'pipe-fitting'
-          ? 'fitting'
-          : null
     return resolveSelectModeHelpHints({
       selectedCount: selectedNodes.length,
       hasMovableSelection: selectedNodes.some((node) => canDirectMoveNode(node)),
       hasRotatableSelection: selectedNodes.some((node) => canDirectRotateNode(node)),
       commandPressed: modifiers.command,
       shiftPressed: modifiers.shift,
-      mepSelection,
     })
   }, [modifiers.command, modifiers.shift, selectedNodes])
 

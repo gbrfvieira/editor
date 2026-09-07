@@ -36,14 +36,7 @@ export function canDirectRotateNode(node: AnyNode): boolean {
   )
 }
 
-const BESPOKE_SELECTION_MOVE_KINDS = new Set([
-  'duct-segment',
-  'duct-fitting',
-  'pipe-segment',
-  'pipe-fitting',
-  'lineset',
-  'liquid-line',
-])
+const BESPOKE_SELECTION_MOVE_KINDS = new Set(['lineset'])
 
 export const EDITOR_HANDLE_HIT_AREA_USER_DATA_KEY = 'editorHandleHitArea'
 

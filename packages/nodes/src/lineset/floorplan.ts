@@ -1,9 +1,9 @@
 import type { FloorplanGeometry, FloorplanPoint, GeometryContext } from '@pascal-app/core'
-import { INCHES_TO_METERS } from '../duct-segment/geometry'
 import type { LinesetNode } from './schema'
 
 const COPPER_LINE = '#b06b3f'
 const BODY_COLOR = '#9ca3af'
+const INCHES_TO_METERS = 0.0254
 
 /**
  * Floor-plan representation of a lineset: the path drawn at the suction

@@ -90,7 +90,6 @@ import { GroupRotateHandle } from './group-rotate-handle'
 import { GroupSelectionBox3D } from './group-selection-box-3d'
 import { NodeArrowHandles } from './node-arrow-handles'
 import { QuickMeasurementHud } from './quick-measurement-hud'
-import { RiserDiagramPanel } from './riser-diagram-panel'
 import { SelectionManager } from './selection-manager'
 import { SiteEdgeLabels } from './site-edge-labels'
 import { SlabHoleHighlights } from './slab-hole-highlights'
@@ -1661,7 +1660,6 @@ function EditorContent({
             <div className="pointer-events-auto">
               <HelperManager />
             </div>
-            <RiserDiagramPanel />
             {isFirstPersonMode && (
               <FirstPersonOverlay onExit={() => useEditor.getState().setFirstPersonMode(false)} />
             )}

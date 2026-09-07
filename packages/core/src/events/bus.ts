@@ -15,24 +15,16 @@ import type {
   DoorNode,
   DormerNode,
   DownspoutNode,
-  DuctFittingNode,
-  DuctSegmentNode,
-  DuctTerminalNode,
   ElevatorNode,
   EyebrowVentNode,
   FenceNode,
   GuideNode,
   GutterNode,
-  HvacEquipmentNode,
   ItemNode,
   LeanToExtensionNode,
   LevelNode,
   LinesetNode,
-  LiquidLineNode,
   MeasurementNode,
-  PipeFittingNode,
-  PipeSegmentNode,
-  PipeTrapNode,
   RidgeVentNode,
   RoofNode,
   RoofSegmentNode,
@@ -129,15 +121,7 @@ export type SolarPanelEvent = NodeEvent<SolarPanelNode>
 export type SkylightEvent = NodeEvent<SkylightNode>
 export type DormerEvent = NodeEvent<DormerNode>
 export type DownspoutEvent = NodeEvent<DownspoutNode>
-export type DuctSegmentEvent = NodeEvent<DuctSegmentNode>
-export type DuctFittingEvent = NodeEvent<DuctFittingNode>
-export type DuctTerminalEvent = NodeEvent<DuctTerminalNode>
-export type HvacEquipmentEvent = NodeEvent<HvacEquipmentNode>
-export type PipeSegmentEvent = NodeEvent<PipeSegmentNode>
-export type PipeFittingEvent = NodeEvent<PipeFittingNode>
-export type PipeTrapEvent = NodeEvent<PipeTrapNode>
 export type LinesetEvent = NodeEvent<LinesetNode>
-export type LiquidLineEvent = NodeEvent<LiquidLineNode>
 export type MeasurementEvent = NodeEvent<MeasurementNode>
 
 // Event suffixes - exported for use in hooks
@@ -336,15 +320,7 @@ type EditorEvents = GridEvents &
   NodeEvents<'skylight', SkylightEvent> &
   NodeEvents<'dormer', DormerEvent> &
   NodeEvents<'downspout', DownspoutEvent> &
-  NodeEvents<'duct-segment', DuctSegmentEvent> &
-  NodeEvents<'duct-fitting', DuctFittingEvent> &
-  NodeEvents<'duct-terminal', DuctTerminalEvent> &
-  NodeEvents<'hvac-equipment', HvacEquipmentEvent> &
-  NodeEvents<'pipe-segment', PipeSegmentEvent> &
-  NodeEvents<'pipe-fitting', PipeFittingEvent> &
-  NodeEvents<'pipe-trap', PipeTrapEvent> &
   NodeEvents<'lineset', LinesetEvent> &
-  NodeEvents<'liquid-line', LiquidLineEvent> &
   NodeEvents<'measurement', MeasurementEvent> &
   CameraControlEvents &
   ToolEvents &

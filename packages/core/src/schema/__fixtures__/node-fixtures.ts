@@ -18,12 +18,6 @@ export const NODE_REQUIRED_FIELDS: Record<string, Record<string, unknown>> = {
       [4, 4],
     ],
   },
-  'duct-segment': {
-    path: [
-      [0, 0, 0],
-      [1, 0, 0],
-    ],
-  },
   fence: { start: [0, 0], end: [4, 0] },
   guide: { url: 'asset://guide.png' },
   item: {
@@ -41,12 +35,6 @@ export const NODE_REQUIRED_FIELDS: Record<string, Record<string, unknown>> = {
       [1, 0, 0],
     ],
   },
-  'liquid-line': {
-    path: [
-      [0, 0, 0],
-      [1, 0, 0],
-    ],
-  },
   measurement: {
     measurement: {
       kind: 'distance',
@@ -55,12 +43,6 @@ export const NODE_REQUIRED_FIELDS: Record<string, Record<string, unknown>> = {
         [1, 0, 0],
       ],
     },
-  },
-  'pipe-segment': {
-    path: [
-      [0, 0, 0],
-      [1, 0, 0],
-    ],
   },
   slab: {
     polygon: [

@@ -18,7 +18,6 @@ import {
   useEditor,
   useFloorplanMode,
 } from '@pascal-app/editor'
-import { useLiquidLineToolOptions } from '@pascal-app/nodes'
 import { useViewer } from '@pascal-app/viewer'
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
@@ -35,16 +34,7 @@ import { cn } from '@/lib/utils'
  * MEP (mechanical / plumbing) tool kinds surfaced under the Build tab's "MEP"
  * group tile — its own sub-grid, like Roof's "Features".
  */
-type MepToolKind =
-  | 'duct-segment'
-  | 'duct-fitting'
-  | 'duct-terminal'
-  | 'hvac-equipment'
-  | 'lineset'
-  | 'liquid-line'
-  | 'pipe-segment'
-  | 'pipe-fitting'
-  | 'pipe-trap'
+type MepToolKind = 'lineset'
 
 type BuildType = {
   /** Selection id — equals `kind` for tool types, with dedicated ids for modes and groups. */
@@ -126,17 +116,7 @@ function collectBuildTypes(floorplanMode: FloorplanMode): BuildType[] {
 // MEP sub-grid surfaced under the "MEP" tile — same icons + ordering the MEP
 // tools had in the community Build sidebar.
 const MEP_ITEMS: MepItem[] = [
-  { id: 'duct-segment', label: 'Duct', iconSrc: '/icons/duct.webp', kind: 'duct-segment' },
-  {
-    id: 'duct-terminal',
-    label: 'Register',
-    iconSrc: '/icons/registers.webp',
-    kind: 'duct-terminal',
-  },
-  { id: 'hvac-equipment', label: 'HVAC Unit', iconSrc: '/icons/HVAC.webp', kind: 'hvac-equipment' },
   { id: 'lineset', label: 'Lineset', iconSrc: '/icons/lineset.webp', kind: 'lineset' },
-  { id: 'liquid-line', label: 'Liquid Line', iconSrc: '/icons/lineset.webp', kind: 'liquid-line' },
-  { id: 'pipe-segment', label: 'DWV Pipe', iconSrc: '/icons/dwv-pipes.webp', kind: 'pipe-segment' },
 ]
 
 const MODULAR_CABINET_CATALOG_ITEM = CATALOG_ITEMS.find((item) => item.id === 'cabinet')
@@ -254,20 +234,13 @@ function activateRoofType(roofType: RoofType): void {
  */
 // MEP tool kinds that, when active, mean the MEP group tile (and its sub-grid)
 // is what the user is working in.
-const MEP_TOOL_KINDS = new Set<string>([
-  ...MEP_ITEMS.map((item) => item.kind),
-  'duct-fitting',
-  'pipe-fitting',
-  'pipe-trap',
-])
+const MEP_TOOL_KINDS = new Set<string>(MEP_ITEMS.map((item) => item.kind))
 
 export function BuildTab() {
   const activeTool = useEditor((s) => s.tool)
   const mode = useEditor((s) => s.mode)
   const roofDefaults = useEditor((s) => s.toolDefaults.roof)
   const floorplanMode = useFloorplanMode((s) => s.mode)
-  const follow = useLiquidLineToolOptions((s) => s.follow)
-  const toggleFollow = useLiquidLineToolOptions((s) => s.toggleFollow)
   useRegistryVersion()
   const registryReady = useSyncExternalStore(
     subscribeToClientMount,
@@ -276,24 +249,7 @@ export function BuildTab() {
   )
   const buildTypes = registryReady ? collectBuildTypes(floorplanMode) : BASE_BUILD_TYPES
 
-  // The fitting / follow tools are armed from a segment's panel, not a grid
-  // tile — keep the segment tile lit so the panel (and the way back) stays
-  // visible.
-  const ductContext =
-    mode === 'build' && (activeTool === 'duct-segment' || activeTool === 'duct-fitting')
-  const pipeContext =
-    mode === 'build' &&
-    (activeTool === 'pipe-segment' || activeTool === 'pipe-fitting' || activeTool === 'pipe-trap')
-  const liquidLineContext = mode === 'build' && activeTool === 'liquid-line'
-
-  const isMepItemActive = (item: MepItem) =>
-    item.kind === 'duct-segment'
-      ? ductContext
-      : item.kind === 'pipe-segment'
-        ? pipeContext
-        : item.kind === 'liquid-line'
-          ? liquidLineContext
-          : mode === 'build' && activeTool === item.kind
+  const isMepItemActive = (item: MepItem) => mode === 'build' && activeTool === item.kind
 
   // Read at render time (not module scope): the registry is populated by the
   // app bootstrap, so enumerating earlier would race it and see no kinds.
@@ -329,7 +285,7 @@ export function BuildTab() {
     } else if (type.id === 'mep') {
       // MEP is a group tile: arm its first tool so a usable tool is active
       // (and we leave any prior paint mode), then reveal the MEP sub-grid.
-      activateBuildTool('duct-segment')
+      activateBuildTool('lineset')
     } else if (type.id === 'kitchen') {
       activateModularCabinetTool()
     } else if (type.kind) {
@@ -577,116 +533,6 @@ export function BuildTab() {
               })}
             </div>
           </TooltipProvider>
-
-          {ductContext ? (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs">Duct</span>
-              <button
-                className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-200',
-                  activeTool === 'duct-fitting'
-                    ? 'bg-primary/10 ring-1 ring-primary/50'
-                    : 'bg-muted/40 hover:bg-muted',
-                )}
-                onClick={() => {
-                  triggerSFX('sfx:menu-click')
-                  activateBuildTool(activeTool === 'duct-fitting' ? 'duct-segment' : 'duct-fitting')
-                }}
-                onMouseEnter={() => triggerSFX('sfx:menu-hover')}
-                type="button"
-              >
-                <Image
-                  alt=""
-                  aria-hidden
-                  className="size-4 object-contain"
-                  height={16}
-                  src="/icons/duct-fitting.webp"
-                  width={16}
-                />
-                Add Fitting
-              </button>
-            </div>
-          ) : null}
-
-          {pipeContext ? (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs">DWV Pipe</span>
-              <button
-                className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-200',
-                  activeTool === 'pipe-fitting'
-                    ? 'bg-primary/10 ring-1 ring-primary/50'
-                    : 'bg-muted/40 hover:bg-muted',
-                )}
-                onClick={() => {
-                  triggerSFX('sfx:menu-click')
-                  activateBuildTool(activeTool === 'pipe-fitting' ? 'pipe-segment' : 'pipe-fitting')
-                }}
-                onMouseEnter={() => triggerSFX('sfx:menu-hover')}
-                type="button"
-              >
-                <Image
-                  alt=""
-                  aria-hidden
-                  className="size-4 object-contain"
-                  height={16}
-                  src="/icons/duct-fitting.webp"
-                  width={16}
-                />
-                Add Fitting
-              </button>
-              <button
-                className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-200',
-                  activeTool === 'pipe-trap'
-                    ? 'bg-primary/10 ring-1 ring-primary/50'
-                    : 'bg-muted/40 hover:bg-muted',
-                )}
-                onClick={() => {
-                  triggerSFX('sfx:menu-click')
-                  activateBuildTool(activeTool === 'pipe-trap' ? 'pipe-segment' : 'pipe-trap')
-                }}
-                onMouseEnter={() => triggerSFX('sfx:menu-hover')}
-                type="button"
-              >
-                <Image
-                  alt=""
-                  aria-hidden
-                  className="size-4 object-contain"
-                  height={16}
-                  src="/icons/dwv-pipes.webp"
-                  width={16}
-                />
-                Add Trap
-              </button>
-            </div>
-          ) : null}
-
-          {liquidLineContext ? (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-muted-foreground text-xs">Liquid Line</span>
-              <button
-                className={cn(
-                  'flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-all duration-200',
-                  follow ? 'bg-primary/10 ring-1 ring-primary/50' : 'bg-muted/40 hover:bg-muted',
-                )}
-                onClick={() => {
-                  triggerSFX('sfx:menu-click')
-                  toggleFollow()
-                }}
-                onMouseEnter={() => triggerSFX('sfx:menu-hover')}
-                type="button"
-              >
-                <span>Follow lineset</span>
-                <span className="text-muted-foreground text-xs">{follow ? 'On' : 'Off'}</span>
-              </button>
-              <span className="px-1 text-[11px] text-muted-foreground">
-                {follow
-                  ? 'Click a lineset to lay the line beside it.'
-                  : 'Trace a line alongside an existing lineset (F).'}
-              </span>
-            </div>
-          ) : null}
         </div>
       ) : null}
     </div>

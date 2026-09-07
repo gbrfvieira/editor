@@ -48,7 +48,10 @@ describe('nodeUnion', () => {
 
   test('keeps the descriptions the node schemas were authored with', () => {
     const described = AnyNode.options.filter((option) => option.description !== undefined)
-    expect(described.length).toBeGreaterThan(40)
+    // Most kinds carry a real .describe() — relative to the union's current
+    // size (not a fixed count) so this doesn't need touching every time a
+    // kind is added or removed.
+    expect(described.length).toBeGreaterThan(AnyNode.options.length * 0.7)
 
     for (const option of AnyNode.options) {
       const authored = authoredByKind.get(nodeKindOf(option))

@@ -6,7 +6,6 @@ import {
   analyzePortConnectivity,
   type Cursor,
   type LinesetNode,
-  type LiquidLineNode,
   type PortConnectivity,
   pauseSceneHistory,
   resolveConnectivityUpdates,
@@ -23,8 +22,8 @@ import { type Group, type Object3D, Plane, Raycaster, Vector2, Vector3 } from 't
 import { collectScenePorts, findNearestPortXZ, REFRIGERANT_PORT_SYSTEMS } from './ports'
 import { HandleCube, MoveChevron } from './selection-handles'
 
-type RefrigerantLineKind = 'lineset' | 'liquid-line'
-type RefrigerantLineNode = LinesetNode | LiquidLineNode
+type RefrigerantLineKind = 'lineset'
+type RefrigerantLineNode = LinesetNode
 type Point = [number, number, number]
 type DragKind =
   | { axis: 'y'; along?: boolean }
@@ -51,10 +50,7 @@ function snap(value: number, step: number): number {
 }
 
 function lineRadiusM(line: RefrigerantLineNode): number {
-  if (line.type === 'lineset') {
-    return (Math.max(line.suctionDiameter, line.liquidDiameter) * INCHES_TO_METERS) / 2
-  }
-  return (line.diameter * INCHES_TO_METERS) / 2
+  return (Math.max(line.suctionDiameter, line.liquidDiameter) * INCHES_TO_METERS) / 2
 }
 
 function selectedLineOfKind(
@@ -64,7 +60,6 @@ function selectedLineOfKind(
   if (!id) return null
   const node = useScene.getState().nodes[id]
   if (kind === 'lineset' && node?.type === 'lineset') return node as LinesetNode
-  if (kind === 'liquid-line' && node?.type === 'liquid-line') return node as LiquidLineNode
   return null
 }
 
