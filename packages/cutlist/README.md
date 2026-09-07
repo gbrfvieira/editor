@@ -24,3 +24,8 @@ anotar as ferragens com nomes de produto representativos. O padrão genérico
 mantém o formato original (só o item). Os presets de preço brasileiros em
 `@pascal-app/quote` são valores indicativos em BRL e devem ser substituídos
 pela tabela de preço atual do fornecedor.
+
+`toXlsx(report, quote?)` pode incluir uma aba opcional `Orcamento` no mesmo
+arquivo com painéis, ferragens e fita de borda. O editor usa esse formato na
+exportação do projeto inteiro, agregando os módulos da cena sem cobrar também
+as bancadas-pai.

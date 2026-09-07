@@ -1,7 +1,13 @@
 import ExcelJS from 'exceljs'
 import type { CutListReport } from './index'
 
-export async function toXlsx(report: CutListReport): Promise<Buffer> {
+export type XlsxQuoteReport = {
+  lineItems: { label: string; quantity: number; unitPrice: number; total: number }[]
+  subtotal: number
+  total: number
+}
+
+export async function toXlsx(report: CutListReport, quote?: XlsxQuoteReport): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook()
 
   const panels = workbook.addWorksheet('Painéis')
@@ -35,6 +41,17 @@ export async function toXlsx(report: CutListReport): Promise<Buffer> {
   edgeBanding.addRow(['cabinetId', 'panel', 'lengthMm'])
   for (const item of report.edgeBanding)
     edgeBanding.addRow([item.cabinetId, item.panel, item.lengthMm])
+
+  if (quote) {
+    const quoteSheet = workbook.addWorksheet('Orcamento')
+    quoteSheet.addRow(['item', 'quantity', 'unitPrice', 'total'])
+    for (const item of quote.lineItems) {
+      quoteSheet.addRow([item.label, item.quantity, item.unitPrice, item.total])
+    }
+    quoteSheet.addRow([])
+    quoteSheet.addRow(['Subtotal', '', '', quote.subtotal])
+    quoteSheet.addRow(['Total', '', '', quote.total])
+  }
 
   const data = await workbook.xlsx.writeBuffer()
   return Buffer.from(data)

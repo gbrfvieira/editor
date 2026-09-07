@@ -18,3 +18,7 @@ quantidade, preço unitário, total da linha, subtotal e total final.
 espessuras comuns de MDF, fita de borda e ferragem, incluindo um preço
 opcional de mão de obra por m² de painel. Os preços são configuráveis e devem
 ser substituídos por uma cotação atual de fornecedor.
+
+Os presets também expõem um preço de chapa `default`. Ele é usado quando a
+cena tem um nome de material personalizado sem chave correspondente na tabela,
+evitando que o material seja orçado silenciosamente como zero.

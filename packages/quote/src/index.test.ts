@@ -59,6 +59,30 @@ test('provides Brazilian MDF presets with per-panel labor pricing', () => {
   expect(preset.laborPricePerPanelM2).toBeGreaterThan(0)
 })
 
+test('uses the default sheet price for a scene-specific material name', () => {
+  const report = calculateQuote(
+    {
+      panels: [
+        {
+          cabinetId: 'cabinet',
+          label: 'side',
+          widthMm: 600,
+          heightMm: 800,
+          thicknessMm: 18,
+          material: 'custom-white',
+          quantity: 2,
+        },
+      ],
+      hardware: [],
+      edgeBanding: [],
+    },
+    { sheets: [], sheetCount: 1, wasteAreaM2: 0, utilizationPercent: 100 },
+    brazilianPricePreset(18),
+  )
+
+  expect(report.lineItems[0].unitPrice).toBeCloseTo(905.85, 8)
+})
+
 test('adds direct labor per square meter when configured', () => {
   const report = calculateQuote(
     cutList,

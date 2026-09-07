@@ -1,5 +1,6 @@
 'use client'
 
+import { useScene } from '@pascal-app/core'
 import {
   type CabinetLike,
   createCutList,
@@ -15,6 +16,7 @@ import {
   toQuoteText,
 } from '@pascal-app/quote'
 import { useMemo, useState } from 'react'
+import { collectProjectCabinets, type SceneCabinetCandidate } from './project-cutlist'
 
 const DEFAULT_SHEET = { widthMm: 2750, heightMm: 1830 }
 
@@ -35,10 +37,19 @@ function downloadBlob(blob: Blob, filename: string): void {
 
 export function CabinetCutlistExportActions({ cabinets }: { cabinets: CabinetLike[] }) {
   const [busy, setBusy] = useState(false)
+  const sceneNodes = useScene((state) => state.nodes)
   const report = useMemo(() => (cabinets.length > 0 ? createCutList(cabinets) : null), [cabinets])
   const nesting = useMemo(
     () => (report ? nestPanels(report.panels, DEFAULT_SHEET) : null),
     [report],
+  )
+  const projectCabinets = useMemo(
+    () => collectProjectCabinets(Object.values(sceneNodes) as unknown as SceneCabinetCandidate[]),
+    [sceneNodes],
+  )
+  const projectReport = useMemo(
+    () => (projectCabinets.length > 0 ? createCutList(projectCabinets) : null),
+    [projectCabinets],
   )
 
   if (!report || !nesting) return null
@@ -93,6 +104,24 @@ export function CabinetCutlistExportActions({ cabinets }: { cabinets: CabinetLik
     downloadBlob(new Blob([toQuoteText(quote)], { type: 'text/plain' }), 'orcamento-estimado.txt')
   }
 
+  const exportProject = async () => {
+    if (!projectReport) return
+    setBusy(true)
+    try {
+      const nesting = nestPanels(projectReport.panels, DEFAULT_SHEET)
+      const quote = calculateQuote(projectReport, nesting, brazilianPricePreset(18))
+      const buffer = await toXlsx(projectReport, quote)
+      downloadBlob(
+        new Blob([new Uint8Array(buffer)], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        }),
+        'marcenaria-projeto-completo.xlsx',
+      )
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-1.5 border-border/50 border-t px-1 pt-3">
       <div className="font-medium text-muted-foreground text-xs">Exportar marcenaria</div>
@@ -128,6 +157,15 @@ export function CabinetCutlistExportActions({ cabinets }: { cabinets: CabinetLik
       <p className="text-[10px] text-muted-foreground">
         Orçamento com preços indicativos de MDF/ferragem — substitua pela tabela do seu fornecedor.
       </p>
+      <button
+        className="rounded-lg bg-primary/10 px-3 py-2 text-left font-medium text-xs hover:bg-primary/15 disabled:opacity-50"
+        disabled={busy || !projectReport}
+        onClick={() => void exportProject()}
+        title="Inclui todos os armários da cena e orçamento de referência para MDF 18 mm"
+        type="button"
+      >
+        {busy ? 'Gerando projeto…' : 'Plano e orçamento do projeto inteiro (XLSX)'}
+      </button>
     </div>
   )
 }

@@ -35,13 +35,13 @@ export type BrazilianMdfThickness = 15 | 18
 /** Indicative BRL prices; callers should override with their regional supplier table. */
 export const BRAZILIAN_PRICE_PRESETS: Record<BrazilianMdfThickness, PriceTable> = {
   15: {
-    boardPricePerM2: { 'mdf-15mm': 140 },
+    boardPricePerM2: { default: 140, 'mdf-15mm': 140 },
     edgeBandingPricePerMeter: 8,
     hardwarePrices: { hinge: 7, 'drawer-slide': 45, handle: 12 },
     laborPricePerPanelM2: 90,
   },
   18: {
-    boardPricePerM2: { 'mdf-18mm': 180 },
+    boardPricePerM2: { default: 180, 'mdf-18mm': 180 },
     edgeBandingPricePerMeter: 9,
     hardwarePrices: { hinge: 8, 'drawer-slide': 50, handle: 14 },
     laborPricePerPanelM2: 90,
@@ -107,7 +107,7 @@ export function calculateQuote(
       lineItems,
       `Chapa (${material})`,
       nesting.sheetCount,
-      sheetAreaM2 * (prices.boardPricePerM2[material] ?? 0),
+      sheetAreaM2 * (prices.boardPricePerM2[material] ?? prices.boardPricePerM2.default ?? 0),
     )
   }
 
