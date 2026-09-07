@@ -1,5 +1,4 @@
 export type {
-  BlockEvent,
   BuildingEvent,
   CabinetEvent,
   CabinetModuleEvent,

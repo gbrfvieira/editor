@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 import {
   type AnyNode,
   type AnyNodeId,
-  BlockNode,
   clearSceneHistory,
+  SpawnNode,
   useScene,
 } from '@pascal-app/core'
 import { meshEditScope } from '../lib/interaction/scope'
@@ -27,10 +27,10 @@ type RafFn = (callback: (time: number) => void) => number
 ;(globalThis as unknown as { cancelAnimationFrame?: (id: number) => void }).cancelAnimationFrame ??=
   () => {}
 
-const NODE_ID = 'block_history' as AnyNodeId
+const NODE_ID = 'spawn_history' as AnyNodeId
 
 beforeEach(() => {
-  const node = BlockNode.parse({ id: NODE_ID, position: [0, 0, 0] })
+  const node = SpawnNode.parse({ id: NODE_ID, position: [0, 0, 0] })
   useScene.setState({
     nodes: { [NODE_ID]: node },
     rootNodeIds: [NODE_ID],
@@ -90,7 +90,7 @@ describe('history shortcuts during block editing', () => {
     useInteractionScope.getState().begin(meshEditScope(NODE_ID))
 
     expect(runHistoryShortcut('undo')).toBe(true)
-    expect((useScene.getState().nodes[NODE_ID] as BlockNode).position).toEqual([0, 0, 0])
+    expect((useScene.getState().nodes[NODE_ID] as SpawnNode).position).toEqual([0, 0, 0])
     expect(useInteractionScope.getState().scope).toEqual({
       kind: 'mesh-editing',
       nodeId: NODE_ID,
@@ -98,7 +98,7 @@ describe('history shortcuts during block editing', () => {
     })
 
     expect(runHistoryShortcut('redo')).toBe(true)
-    expect((useScene.getState().nodes[NODE_ID] as BlockNode).position).toEqual([1, 2, 3])
+    expect((useScene.getState().nodes[NODE_ID] as SpawnNode).position).toEqual([1, 2, 3])
     expect(useInteractionScope.getState().scope).toEqual({
       kind: 'mesh-editing',
       nodeId: NODE_ID,

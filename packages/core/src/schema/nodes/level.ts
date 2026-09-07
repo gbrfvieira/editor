@@ -1,7 +1,6 @@
 import dedent from 'dedent'
 import { z } from 'zod'
 import { BaseNode, nodeType, objectId } from '../base'
-import type { BlockNode } from './block'
 import type { CeilingNode } from './ceiling'
 import type { ColumnNode } from './column'
 import type { ConstructionDimensionNode } from './construction-dimension'
@@ -22,7 +21,6 @@ type CoreLevelChildId =
   | FenceNode['id']
   | ColumnNode['id']
   | ConstructionDimensionNode['id']
-  | BlockNode['id']
   | ItemNode['id']
   | ZoneNode['id']
   | SlabNode['id']

@@ -1,5 +1,4 @@
 import type { AnyNodeDefinition, Plugin } from '@pascal-app/core'
-import { blockDefinition } from './block/definition'
 import { buildingDefinition } from './building'
 import { cabinetDefinition, cabinetModuleDefinition } from './cabinet'
 import { ceilingDefinition } from './ceiling'
@@ -45,7 +44,6 @@ export const builtinPlugin: Plugin = {
   nodes: [
     // Stage E-complete (full registry path)
     shelfDefinition as unknown as AnyNodeDefinition,
-    blockDefinition as unknown as AnyNodeDefinition,
     spawnDefinition as unknown as AnyNodeDefinition,
     wallDefinition as unknown as AnyNodeDefinition,
     fenceDefinition as unknown as AnyNodeDefinition,
@@ -73,15 +71,6 @@ export const builtinPlugin: Plugin = {
   ],
 }
 
-export {
-  applyBlockCommand,
-  type BlockCommand,
-  type BlockCommandResult,
-  type BlockSelection,
-  blockFaceCentroid,
-  blockFaceNormal,
-} from './block/commands'
-export { blockDefinition } from './block/definition'
 export { buildingDefinition } from './building'
 export {
   bakeCabinetAnimationClip,

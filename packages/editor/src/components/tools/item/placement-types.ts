@@ -1,6 +1,5 @@
 import type {
   AnyNode,
-  AnyNodeId,
   AssetInput,
   CeilingNode,
   ItemNode,
@@ -17,7 +16,6 @@ export type SurfaceType =
   | 'floor'
   | 'wall'
   | 'roof-wall'
-  | 'block-face'
   | 'ceiling'
   | 'item-surface'
   | 'shelf-surface'
@@ -35,8 +33,6 @@ export interface PlacementState {
    * (base walls + coplanar gable ends).
    */
   roofSegmentId: string | null
-  /** Active planar node face used as a wall-like attachment host. */
-  blockId?: AnyNodeId | null
   ceilingId: string | null
   surfaceItemId: string | null
   /**

@@ -42,17 +42,6 @@ export function getInitialState(
     : undefined,
 ): PlacementState {
   const attachTo = node.asset.attachTo
-  if (node.blockFaceId && parent?.type === 'block') {
-    return {
-      surface: 'block-face',
-      wallId: null,
-      roofSegmentId: null,
-      blockId: parent.id,
-      ceilingId: null,
-      surfaceItemId: null,
-      shelfId: null,
-    }
-  }
   if (attachTo === 'wall' || attachTo === 'wall-side') {
     if (node.roofSegmentId) {
       return {

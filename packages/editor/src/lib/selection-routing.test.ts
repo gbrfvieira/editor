@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 import {
   type AnyNode,
-  BlockNode,
   emitter,
   nodeRegistry,
   registerNode,
+  SpawnNode,
   useScene,
 } from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
@@ -81,7 +81,7 @@ describe('emitCanvasNodeSelection', () => {
   })
 
   test('deletes an accepted floorplan node when Delete mode is active', () => {
-    const node = BlockNode.parse({ id: 'block_floorplan-delete-target' })
+    const node = SpawnNode.parse({ id: 'spawn_floorplan-delete-target' })
     const previousToolMode = useEditor.getState().toolMode
     const previousScene = useScene.getState()
     const previousSelection = useViewer.getState().selection
@@ -113,7 +113,7 @@ describe('emitCanvasNodeSelection', () => {
   })
 
   test('preserves a floorplan node and its selection when the scene is read-only', () => {
-    const node = BlockNode.parse({ id: 'block_floorplan-read-only-target' })
+    const node = SpawnNode.parse({ id: 'spawn_floorplan-read-only-target' })
     const previousToolMode = useEditor.getState().toolMode
     const previousScene = useScene.getState()
     const previousSelection = useViewer.getState().selection

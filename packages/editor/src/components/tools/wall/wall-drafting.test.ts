@@ -3,7 +3,7 @@ import {
   type AnyNode,
   type AnyNodeId,
   applyHeightPatch,
-  BlockNode,
+  BaseNode,
   CeilingNode,
   createTerrainField,
   DoorNode as DoorSchema,
@@ -13,6 +13,8 @@ import {
   getFloorPlacedElevation,
   initSpaceDetectionSync,
   nodeRegistry,
+  nodeType,
+  objectId,
   registerNode,
   resolveTerrainWallConstructionOptions,
   runAsSingleSceneHistoryStep,
@@ -23,6 +25,7 @@ import {
   WallNode as WallSchema,
 } from '@pascal-app/core'
 import { useViewer } from '@pascal-app/viewer'
+import { z } from 'zod'
 import useEditor from '../../../store/use-editor'
 import useInteractionScope from '../../../store/use-interaction-scope'
 import {
@@ -326,15 +329,24 @@ describe('createWallOnCurrentLevel', () => {
     // The reset + throwaway `block` registration is scoped to this test —
     // the registry is a process-wide singleton, so leaking it would leave
     // later test FILES with a stripped registry (order-dependent flakes).
+    // A minimal stand-in schema: the fork no longer ships a `block` node
+    // kind, but this test only needs *some* floor-placed, position-bearing
+    // kind to exercise the construction-source pinning path.
+    const TestBlockNode = BaseNode.extend({
+      id: objectId('block'),
+      type: nodeType('block'),
+      position: z.tuple([z.number(), z.number(), z.number()]).default([0, 0, 0]),
+      supportSlabId: z.string().optional(),
+    })
     restoreRegistry = nodeRegistry._snapshot()
     nodeRegistry._reset()
     spatialGridManager.clear()
     registerNode({
       kind: 'block',
       schemaVersion: 2,
-      schema: BlockNode,
+      schema: TestBlockNode,
       category: 'structure',
-      defaults: () => BlockNode.parse({ name: 'Block' }),
+      defaults: () => TestBlockNode.parse({ name: 'Block' }),
       capabilities: {
         floorPlaced: {
           footprint: () => ({ dimensions: [4, 2.4, 4], rotation: [0, 0, 0] }),
@@ -342,12 +354,12 @@ describe('createWallOnCurrentLevel', () => {
       },
     } as never)
 
-    const slope = BlockNode.parse({
+    const slope = TestBlockNode.parse({
       name: 'Existing slope',
       parentId: LEVEL_ID,
       position: [0, 0, 0],
     })
-    seedLevel([makeWall([0, 0], [4, 0], 'wall_a')], [slope as AnyNode])
+    seedLevel([makeWall([0, 0], [4, 0], 'wall_a')], [slope as unknown as AnyNode])
 
     createWallOnCurrentLevel([0, 1], [1, 1], {
       constructionElevation: 2.4,
@@ -357,7 +369,7 @@ describe('createWallOnCurrentLevel', () => {
       supportCap: 2.4,
     })
 
-    const pinnedSlope = useScene.getState().nodes[slope.id] as BlockNode
+    const pinnedSlope = useScene.getState().nodes[slope.id] as z.infer<typeof TestBlockNode>
     expect(pinnedSlope.supportSlabId).toBe(GROUND_SUPPORT_ID)
 
     const generatedSlab = SlabNode.parse({

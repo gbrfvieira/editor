@@ -45,7 +45,6 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { positionLocal, smoothstep, time } from 'three/tsl'
-import { BlockFaceHostFrame } from '../shared/block-face-host'
 import { cancelItemModelLoad, getUnavailableItemAsset, ItemGLTFLoader } from './model-loader'
 
 type MutableMaterial = Material & {
@@ -468,13 +467,6 @@ export const ItemRenderer = ({ node: storeNode }: { node: ItemNode }) => {
     </group>
   )
 
-  if (node.blockFaceId && node.parentId) {
-    return (
-      <BlockFaceHostFrame blockId={node.parentId} faceId={node.blockFaceId}>
-        {content}
-      </BlockFaceHostFrame>
-    )
-  }
   return content
 }
 

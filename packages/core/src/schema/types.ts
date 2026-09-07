@@ -1,5 +1,4 @@
 import z from 'zod'
-import { BlockNode } from './nodes/block'
 import { BuildingNode } from './nodes/building'
 import { CabinetModuleNode, CabinetNode } from './nodes/cabinet'
 import { CeilingNode } from './nodes/ceiling'
@@ -63,7 +62,6 @@ export const AnyNode = nodeUnion([
   LevelNode,
   ColumnNode,
   ConstructionDimensionNode,
-  BlockNode,
   WallNode,
   FenceNode,
   CabinetNode,

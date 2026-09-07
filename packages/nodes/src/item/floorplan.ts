@@ -4,7 +4,6 @@ import {
   type FloorplanGeometry,
   type FloorplanPoint,
   type GeometryContext,
-  getBlockFaceFrame,
   getScaledDimensions,
   type ItemNode,
   useLiveTransforms,
@@ -113,28 +112,6 @@ function resolveItemTransform(
       x: shelfX + offsetX,
       y: shelfZ + offsetY,
       rotation: shelfRotationY + localRotation,
-    }
-  } else if (parentNode?.type === 'block' && item.blockFaceId) {
-    const frame = getBlockFaceFrame(parentNode.topology, item.blockFaceId)
-    if (frame) {
-      const localX =
-        frame.origin[0] +
-        frame.xAxis[0] * item.position[0] +
-        frame.yAxis[0] * item.position[1] +
-        frame.normal[0] * item.position[2]
-      const localZ =
-        frame.origin[2] +
-        frame.xAxis[2] * item.position[0] +
-        frame.yAxis[2] * item.position[1] +
-        frame.normal[2] * item.position[2]
-      const hostRotation = parentNode.rotation ?? 0
-      const [offsetX, offsetZ] = rotateVec(localX, localZ, hostRotation)
-      const faceRotation = -Math.atan2(frame.xAxis[2], frame.xAxis[0])
-      result = {
-        x: parentNode.position[0] + offsetX,
-        y: parentNode.position[2] + offsetZ,
-        rotation: hostRotation + faceRotation + localRotation,
-      }
     }
   } else {
     // Level / slab / ceiling parent — item.position is level-local.
