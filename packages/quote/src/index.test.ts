@@ -70,5 +70,7 @@ test('adds direct labor per square meter when configured', () => {
       laborPricePerPanelM2: 100,
     },
   )
-  expect(report.lineItems.find((line) => line.label === 'Mão de obra')?.total).toBe(48)
+  // cutList has one panel entry at 0.6 x 0.8 m, quantity 2 -> 0.96 m^2 total
+  // manufactured area (labor scales with every panel produced, not just one).
+  expect(report.lineItems.find((line) => line.label === 'Mão de obra')?.total).toBe(96)
 })
