@@ -224,10 +224,10 @@ export function FloorplanImportPanel() {
           return
         }
         if (isPdf) {
-          const segments = (
+          const rawSegments = (
             await extractPdfVectorSegments(new Uint8Array(await file.arrayBuffer()))
           ).flatMap((page) => page.segments)
-          if (segments.length === 0) {
+          if (rawSegments.length === 0) {
             setWalls([])
             setPdfFallback(file)
             setStatus(
@@ -235,6 +235,26 @@ export function FloorplanImportPanel() {
             )
             return
           }
+          // PDF user-space coordinates are always in points (1/72 inch) —
+          // unlike a DXF's ambiguous drawing unit, that conversion is a hard
+          // PDF-spec fact, not a guess. Without it a 600pt-wide sheet was
+          // being treated as 600 meters wide ("tudo gigantesco"). The
+          // "Unidade do arquivo" selector still applies on top of that base
+          // conversion, since an architectural PDF plotted at a drawing
+          // scale (1:50, 1:100...) needs further correction beyond the raw
+          // point size — same manual override as the DXF/DWG path.
+          const pointsToMeters = 0.0254 / 72
+          const segments = rawSegments.map((segment) => ({
+            ...segment,
+            start: [
+              segment.start[0] * pointsToMeters * unitScale,
+              segment.start[1] * pointsToMeters * unitScale,
+            ] as [number, number],
+            end: [
+              segment.end[0] * pointsToMeters * unitScale,
+              segment.end[1] * pointsToMeters * unitScale,
+            ] as [number, number],
+          }))
           const offset = boundingBoxCenter(segments)
           const recenteredSegments = segments.map((segment) => ({
             ...segment,
