@@ -30,13 +30,13 @@ interface IconRailProps {
 const sitePanel: { id: PanelId; iconSrc: string; label: string } = {
   id: 'site',
   iconSrc: '/icons/level.webp',
-  label: 'Site',
+  label: 'Terreno',
 }
 
 const settingsPanel: { id: PanelId; iconSrc: string; label: string } = {
   id: 'settings',
   iconSrc: '/icons/settings.webp',
-  label: 'Settings',
+  label: 'Configurações',
 }
 
 const panels: { id: PanelId; iconSrc: string; label: string }[] = [sitePanel, settingsPanel]

@@ -133,7 +133,7 @@ export function MaterialPaintPanel({ onCreateMaterialRequest }: MaterialPaintPan
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                aria-label="Add material"
+                aria-label="Adicionar material"
                 onClick={createCustomMaterial}
                 size="icon-sm"
                 type="button"
@@ -142,7 +142,7 @@ export function MaterialPaintPanel({ onCreateMaterialRequest }: MaterialPaintPan
                 <Plus />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Add material</TooltipContent>
+            <TooltipContent>Adicionar material</TooltipContent>
           </Tooltip>
         </div>
         <div className="subtle-scrollbar max-h-56 overflow-y-auto">

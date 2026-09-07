@@ -39,7 +39,7 @@ export function MultiSelectionActions() {
           icon={<Group className="h-4 w-4" />}
           label="Group"
           onClick={() => groupCurrentSelection()}
-          title="Group (Ctrl/Cmd+G)"
+          title="Agrupar (Ctrl/Cmd+G)"
         />
       )}
       {showUngroup && (
@@ -47,7 +47,7 @@ export function MultiSelectionActions() {
           icon={<Ungroup className="h-4 w-4" />}
           label="Ungroup"
           onClick={() => ungroupCurrentSelection()}
-          title="Ungroup (Ctrl/Cmd+Shift+G)"
+          title="Desagrupar (Ctrl/Cmd+Shift+G)"
         />
       )}
       <ActionButton

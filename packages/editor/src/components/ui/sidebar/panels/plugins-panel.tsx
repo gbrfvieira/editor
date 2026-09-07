@@ -83,7 +83,7 @@ export function PluginsPanel() {
           </div>
 
           <p className="mt-5 text-sidebar-foreground/70 text-sm">
-            {panel.description ?? 'Adds a new tool panel to the editor.'}
+            {panel.description ?? 'Adiciona um novo painel de ferramentas ao editor.'}
           </p>
 
           <dl className="mt-6 divide-y divide-border/50 rounded-xl border border-border/60">
@@ -193,7 +193,7 @@ export function PluginsPanel() {
                     <ChevronRight className="h-4 w-4 shrink-0 text-sidebar-foreground/50" />
                   </div>
                   <p className="mt-2 text-sidebar-foreground/60 text-sm">
-                    {panel.description ?? 'Adds a new tool panel to the editor.'}
+                    {panel.description ?? 'Adiciona um novo painel de ferramentas ao editor.'}
                   </p>
                 </div>
               </div>

@@ -28,7 +28,7 @@ export function ItemHelper({
         { keys: ['Left click'], label: 'Place' },
         { keys: ['R', 'T'], label: 'Rotate' },
         ...(showForce ? [{ keys: ['Alt'], label: 'Force place' }] : []),
-        { keys: [showEsc ? 'Esc' : 'Right click'], label: 'Cancel' },
+        { keys: [showEsc ? 'Esc' : 'Clique direito'], label: 'Cancelar' },
       ]}
       snapContext={snapContext}
     />

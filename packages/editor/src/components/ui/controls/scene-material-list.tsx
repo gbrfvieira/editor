@@ -173,7 +173,7 @@ function SceneMaterialRow({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                aria-label="Paint with"
+                aria-label="Pintar com"
                 onClick={() =>
                   armMaterialPaint({
                     materialPreset: toSceneMaterialRef(id),
@@ -192,7 +192,7 @@ function SceneMaterialRow({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                aria-label="Edit"
+                aria-label="Editar"
                 aria-pressed={isEditingMaterial}
                 onClick={() => setIsEditingMaterial((value) => !value)}
                 size="icon-sm"
@@ -207,7 +207,7 @@ function SceneMaterialRow({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                aria-label="Duplicate"
+                aria-label="Duplicar"
                 onClick={duplicateMaterial}
                 size="icon-sm"
                 type="button"
@@ -216,12 +216,12 @@ function SceneMaterialRow({
                 <Copy />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Duplicate</TooltipContent>
+            <TooltipContent>Duplicar</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                aria-label="Delete"
+                aria-label="Excluir"
                 onClick={() => removeSceneMaterial(id)}
                 size="icon-sm"
                 type="button"
@@ -230,7 +230,7 @@ function SceneMaterialRow({
                 <Trash2 />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Delete</TooltipContent>
+            <TooltipContent>Excluir</TooltipContent>
           </Tooltip>
         </div>
       </div>

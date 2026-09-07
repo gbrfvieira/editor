@@ -284,7 +284,7 @@ const CameraPopover = memo(function CameraPopover({
             buttonClassName,
           )}
           onClick={(e) => e.stopPropagation()}
-          title="Camera snapshot"
+          title="Captura da câmera"
         >
           <Camera className="h-3.5 w-3.5" />
           {hasCamera && (
@@ -321,7 +321,7 @@ const CameraPopover = memo(function CameraPopover({
             }}
           >
             <Camera className="h-3.5 w-3.5" />
-            {hasCamera ? 'Update snapshot' : 'Take snapshot'}
+            {hasCamera ? 'Atualizar captura' : 'Capturar imagem'}
           </button>
           {hasCamera && (
             <button
@@ -439,7 +439,7 @@ const ReferenceItem = memo(function ReferenceItem({
             />
           )}
           <InlineRenameInput
-            defaultName={isCapture ? 'Capture' : 'Guide Image'}
+            defaultName={isCapture ? 'Captura' : 'Imagem de guia'}
             isEditing={isEditing}
             nodeId={refNode.id}
             onStartEditing={() => setIsEditing(true)}
@@ -454,7 +454,7 @@ const ReferenceItem = memo(function ReferenceItem({
               event.stopPropagation()
               updateNode(refNode.id, { visible: !isVisible })
             }}
-            title={isVisible ? 'Hide' : 'Show'}
+            title={isVisible ? 'Ocultar' : 'Mostrar'}
             type="button"
           >
             {isVisible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
@@ -463,7 +463,7 @@ const ReferenceItem = memo(function ReferenceItem({
         <button
           className="z-20 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-black/5 hover:text-foreground group-hover/ref:opacity-100 dark:hover:bg-white/10"
           onClick={(e) => handleDelete(refNode.id, e)}
-          title="Delete"
+          title="Excluir"
           type="button"
         >
           <Trash2 className="h-3 w-3" />
@@ -834,7 +834,7 @@ const LevelItem = memo(function LevelItem({
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground',
               )}
               onClick={(e) => e.stopPropagation()}
-              title="Camera snapshot"
+              title="Captura da câmera"
             >
               <Camera className="h-3.5 w-3.5" />
               {level.camera && (
@@ -871,7 +871,7 @@ const LevelItem = memo(function LevelItem({
                 }}
               >
                 <Camera className="h-3.5 w-3.5" />
-                {level.camera ? 'Update snapshot' : 'Take snapshot'}
+                {level.camera ? 'Atualizar captura' : 'Capturar imagem'}
               </button>
               {level.camera && (
                 <button
@@ -907,7 +907,7 @@ const LevelItem = memo(function LevelItem({
             <button
               className="flex w-full cursor-pointer items-center gap-2 rounded px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent"
               onClick={() => handleDuplicateLevel()}
-              title="Duplicate level"
+              title="Duplicar nível"
             >
               <Copy className="h-3.5 w-3.5" />
               Duplicate
@@ -915,7 +915,7 @@ const LevelItem = memo(function LevelItem({
             <button
               className="flex w-full cursor-pointer items-center gap-2 rounded px-3 py-1.5 text-left text-sm transition-colors hover:bg-accent"
               onClick={() => setDuplicateDialogOpen(true)}
-              title="Duplicate level with options"
+              title="Duplicar nível com opções"
             >
               <Copy className="h-3.5 w-3.5" />
               Duplicate with options...
@@ -924,7 +924,7 @@ const LevelItem = memo(function LevelItem({
               className="flex w-full items-center gap-2 rounded px-3 py-1.5 text-left text-sm transition-colors enabled:cursor-pointer enabled:hover:bg-accent enabled:hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={!canDeleteLevel}
               onClick={() => deleteLevelWithFallbackSelection(level.id)}
-              title={canDeleteLevel ? 'Delete level' : 'The ground level cannot be deleted'}
+              title={canDeleteLevel ? 'Excluir nível' : 'O nível térreo não pode ser excluído'}
             >
               <Trash2 className="h-3.5 w-3.5" />
               Delete
@@ -1030,7 +1030,7 @@ const LevelsSection = memo(function LevelsSection({
           <div className="relative z-10 flex items-center pr-1 pl-[38px]">
             <Plus className="h-3.5 w-3.5" />
           </div>
-          <span className="truncate">Add level</span>
+          <span className="truncate">Adicionar nível</span>
         </button>
         {levels.length === 0 && (
           <div className="relative flex h-8 select-none items-center border-border/50 border-b py-0 pr-2 pl-[38px] text-muted-foreground text-xs">
@@ -1287,7 +1287,7 @@ const ZoneItem = memo(function ZoneItem({ zone, isLast }: { zone: ZoneNode; isLa
             <button
               className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-black/5 hover:text-foreground group-hover/row:opacity-100 dark:hover:bg-white/10"
               onClick={(e) => e.stopPropagation()}
-              title="Camera snapshot"
+              title="Captura da câmera"
             >
               <Camera className="h-3 w-3" />
               {zone.camera && (
@@ -1324,7 +1324,7 @@ const ZoneItem = memo(function ZoneItem({ zone, isLast }: { zone: ZoneNode; isLa
                 }}
               >
                 <Camera className="h-3.5 w-3.5" />
-                {zone.camera ? 'Update snapshot' : 'Take snapshot'}
+                {zone.camera ? 'Atualizar captura' : 'Capturar imagem'}
               </button>
               {zone.camera && (
                 <button
@@ -1366,7 +1366,7 @@ const MultiSelectionBadge = memo(function MultiSelectionBadge() {
         <button
           className="cursor-pointer rounded-full p-1.5 transition-colors hover:bg-primary-foreground/20"
           onClick={() => setSelection({ selectedIds: [] })}
-          title="Clear selection"
+          title="Limpar seleção"
         >
           <X className="h-4 w-4" />
         </button>
@@ -1408,7 +1408,7 @@ const ContentSection = memo(function ContentSection() {
 
   if (!level) {
     return (
-      <div className="px-3 py-4 text-muted-foreground text-sm">Select a level to view content</div>
+      <div className="px-3 py-4 text-muted-foreground text-sm">Selecione um nível para ver o conteúdo</div>
     )
   }
 
@@ -1522,7 +1522,7 @@ const BuildingItem = memo(function BuildingItem({
             )}
             src="/icons/building.webp"
           />
-          <span className="truncate font-medium text-sm">{building.name || 'Building'}</span>
+          <span className="truncate font-medium text-sm">{building.name || 'Edificação'}</span>
         </div>
         <Popover
           onOpenChange={(open) => setBuildingCameraOpen(open ? building.id : null)}
@@ -1574,7 +1574,7 @@ const BuildingItem = memo(function BuildingItem({
                 }}
               >
                 <Camera className="h-3.5 w-3.5" />
-                {building.camera ? 'Update snapshot' : 'Take snapshot'}
+                {building.camera ? 'Atualizar captura' : 'Capturar imagem'}
               </button>
               {building.camera && (
                 <button
@@ -1678,7 +1678,7 @@ export function SitePanel({ projectId, onUploadAsset, onDeleteAsset }: SitePanel
                 )}
                 src="/icons/site-flag.webp"
               />
-              <span className="font-medium text-sm">{siteNode.name || 'Site'}</span>
+              <span className="font-medium text-sm">{siteNode.name || 'Terreno'}</span>
             </div>
             <CameraPopover
               buttonClassName={cn(

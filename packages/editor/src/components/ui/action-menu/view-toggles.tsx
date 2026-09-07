@@ -148,7 +148,7 @@ function UploadButton({ onError }: { onError: (message: string | null) => void }
   return (
     <>
       <button
-        aria-label="Upload scan or guide image"
+        aria-label="Enviar escaneamento ou imagem de guia"
         className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border/40 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
         disabled={isAddingGuide}
         onClick={() => fileInputRef.current?.click()}
@@ -231,7 +231,7 @@ function GuidesControl() {
         <PopoverTrigger asChild>
           <button
             aria-expanded={isOpen}
-            aria-label="Guide image settings"
+            aria-label="Configurações da imagem de guia"
             className={cn(
               'flex h-11 w-6 items-center justify-center rounded-r-lg transition-colors',
               showGuides
@@ -261,7 +261,7 @@ function GuidesControl() {
               <img alt="" className="h-4 w-4 object-contain" src="/icons/floorplan.webp" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-foreground text-sm">Guide images</p>
+              <p className="font-medium text-foreground text-sm">Imagens de guia</p>
               {hasGuides && (
                 <p className="text-muted-foreground text-xs">
                   {guides.length} guide image{guides.length !== 1 ? 's' : ''} on this level
@@ -308,7 +308,7 @@ function GuidesControl() {
                       )}
                     </button>
                     <button
-                      aria-label="Delete guide image"
+                      aria-label="Excluir imagem de guia"
                       className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-muted-foreground/50 opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover/item:opacity-100"
                       onClick={(event) => {
                         event.stopPropagation()
@@ -406,7 +406,7 @@ function ScansControl() {
         <PopoverTrigger asChild>
           <button
             aria-expanded={isOpen}
-            aria-label="Scan settings"
+            aria-label="Configurações do escaneamento"
             className={cn(
               'flex h-11 w-6 items-center justify-center rounded-r-lg transition-colors',
               showScans
@@ -483,7 +483,7 @@ function ScansControl() {
                       )}
                     </button>
                     <button
-                      aria-label="Delete scan"
+                      aria-label="Excluir escaneamento"
                       className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-muted-foreground/50 opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover/item:opacity-100"
                       onClick={(event) => {
                         event.stopPropagation()
@@ -743,7 +743,7 @@ function ReferencesControl() {
             onError={setUploadError}
             setShow={setShowScans}
             show={showScans}
-            title="Scans"
+            title="Escaneamentos"
           />
           <div className="h-px bg-border/45" />
           <ReferenceListSection
@@ -754,7 +754,7 @@ function ReferencesControl() {
             onError={setUploadError}
             setShow={setShowGuides}
             show={showGuides}
-            title="Guide images"
+            title="Imagens de guia"
           />
         </div>
       </PopoverContent>
@@ -810,7 +810,7 @@ function ReferenceFloorControl() {
         <PopoverTrigger asChild>
           <button
             aria-expanded={isOpen}
-            aria-label="Reference floor settings"
+            aria-label="Configurações do piso de referência"
             className={cn(
               'flex h-11 w-6 items-center justify-center rounded-r-lg transition-colors',
               showReferenceFloor && selectedLevel

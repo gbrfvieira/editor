@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'Terms of Service for Pascal Editor and the Pascal platform.',
+  title: 'Termos de serviço',
+  description: 'Termos de serviço do Pascal Editor e da plataforma Pascal.',
 }
 
 export default function TermsPage() {
@@ -16,16 +16,16 @@ export default function TermsPage() {
               className="text-muted-foreground transition-colors hover:text-foreground"
               href="/"
             >
-              Home
+              Início
             </Link>
             <span className="text-muted-foreground">/</span>
-            <span className="font-medium text-foreground">Terms of Service</span>
+            <span className="font-medium text-foreground">Termos de serviço</span>
             <span className="text-muted-foreground">|</span>
             <Link
               className="text-muted-foreground transition-colors hover:text-foreground"
               href="/privacy"
             >
-              Privacy Policy
+              Política de privacidade
             </Link>
           </nav>
         </div>
@@ -33,11 +33,11 @@ export default function TermsPage() {
 
       <main className="container mx-auto max-w-3xl px-6 py-12">
         <article className="prose prose-neutral dark:prose-invert max-w-none">
-          <h1 className="mb-2 font-bold text-3xl">Terms of Service</h1>
-          <p className="mb-8 text-muted-foreground text-sm">Effective Date: February 20, 2026</p>
+          <h1 className="mb-2 font-bold text-3xl">Termos de serviço</h1>
+          <p className="mb-8 text-muted-foreground text-sm">Vigência: 20 de fevereiro de 2026</p>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">1. Introduction</h2>
+            <h2 className="font-semibold text-xl">1. Introdução</h2>
             <p className="text-foreground/90 leading-relaxed">
               Welcome to Pascal Editor (&quot;Editor&quot;) and the Pascal platform at pascal.app
               (&quot;Platform&quot;), operated by Pascal Group Inc. (&quot;we,&quot; &quot;us,&quot;
@@ -47,7 +47,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">2. The Editor and Platform</h2>
+            <h2 className="font-semibold text-xl">2. O editor e a plataforma</h2>
             <p className="text-foreground/90 leading-relaxed">
               The Pascal Editor is open-source software released under the MIT License. You may use,
               copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Editor
@@ -61,7 +61,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">3. Accounts and Authentication</h2>
+            <h2 className="font-semibold text-xl">3. Contas e autenticação</h2>
             <p className="text-foreground/90 leading-relaxed">
               To use certain features of the Platform, you must create an account. We use Google
               OAuth and magic link email authentication through Supabase. You are responsible for
@@ -71,7 +71,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">4. Acceptable Use</h2>
+            <h2 className="font-semibold text-xl">4. Uso aceitável</h2>
             <p className="text-foreground/90 leading-relaxed">You agree not to:</p>
             <ul className="list-disc space-y-2 pl-6 text-foreground/90">
               <li>
@@ -89,7 +89,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">5. Your Content and Intellectual Property</h2>
+            <h2 className="font-semibold text-xl">5. Seu conteúdo e propriedade intelectual</h2>
             <p className="text-foreground/90 leading-relaxed">
               You retain full ownership of all content, projects, and data you create or upload to
               the Platform (&quot;Your Content&quot;). By using the Platform, you grant us a limited
@@ -103,7 +103,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">6. Platform Ownership</h2>
+            <h2 className="font-semibold text-xl">6. Propriedade da plataforma</h2>
             <p className="text-foreground/90 leading-relaxed">
               The Platform, including its design, features, and proprietary code, is owned by Pascal
               Group Inc. and protected by intellectual property laws. While the Editor source code
@@ -113,7 +113,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">7. Account Termination</h2>
+            <h2 className="font-semibold text-xl">7. Encerramento da conta</h2>
             <p className="text-foreground/90 leading-relaxed">
               We reserve the right to suspend or terminate your account if you violate these Terms
               or engage in conduct that we determine is harmful to the Platform or other users. You
@@ -129,7 +129,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">8. Disclaimer of Warranties</h2>
+            <h2 className="font-semibold text-xl">8. Isenção de garantias</h2>
             <p className="text-foreground/90 leading-relaxed">
               THE PLATFORM IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT
               WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
@@ -143,7 +143,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">9. Limitation of Liability</h2>
+            <h2 className="font-semibold text-xl">9. Limitação de responsabilidade</h2>
             <p className="text-foreground/90 leading-relaxed">
               TO THE MAXIMUM EXTENT PERMITTED BY LAW, PASCAL GROUP INC. SHALL NOT BE LIABLE FOR ANY
               INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF
@@ -152,7 +152,7 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-8 space-y-4">
-            <h2 className="font-semibold text-xl">10. Changes to Terms</h2>
+            <h2 className="font-semibold text-xl">10. Alterações nos termos</h2>
             <p className="text-foreground/90 leading-relaxed">
               We may update these Terms from time to time. We will notify you of material changes by
               posting the updated Terms on the Platform. Your continued use of the Platform after
@@ -161,7 +161,7 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="font-semibold text-xl">11. Contact Us</h2>
+            <h2 className="font-semibold text-xl">11. Fale conosco</h2>
             <p className="text-foreground/90 leading-relaxed">
               If you have questions about these Terms, please contact us at{' '}
               <a

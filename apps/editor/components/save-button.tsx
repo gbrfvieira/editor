@@ -93,12 +93,12 @@ export function SaveButton({ sceneId, name, version, getGraph }: SaveButtonProps
         return
       }
       if (!response.ok) {
-        setStatus(`Save failed (${response.status})`)
+        setStatus(`Falha ao salvar (${response.status})`)
         return
       }
-      setStatus('Saved')
+      setStatus('Salvo')
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Save failed')
+      setStatus(error instanceof Error ? error.message : 'Falha ao salvar')
     } finally {
       setIsSaving(false)
     }
@@ -121,13 +121,13 @@ export function SaveButton({ sceneId, name, version, getGraph }: SaveButtonProps
         body: JSON.stringify({ name: newName, graph }),
       })
       if (!response.ok) {
-        setStatus(`Save-as failed (${response.status})`)
+        setStatus(`Falha ao salvar como (${response.status})`)
         return
       }
       const meta = (await response.json()) as { id: string }
       router.push(`/scene/${meta.id}`)
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Save-as failed')
+      setStatus(error instanceof Error ? error.message : 'Falha ao salvar como')
     } finally {
       setIsSaving(false)
     }
@@ -141,7 +141,7 @@ export function SaveButton({ sceneId, name, version, getGraph }: SaveButtonProps
         onClick={handleSave}
         type="button"
       >
-        {isSaving ? 'Saving…' : 'Save'}
+        {isSaving ? 'Salvando…' : 'Salvar'}
       </button>
       <button
         className="rounded-md border border-border bg-background px-3 py-1.5 font-medium text-xs hover:bg-accent/40 disabled:opacity-50"
@@ -149,7 +149,7 @@ export function SaveButton({ sceneId, name, version, getGraph }: SaveButtonProps
         onClick={handleSaveAs}
         type="button"
       >
-        Save as…
+        Salvar como…
       </button>
       {status && <span className="text-muted-foreground text-xs">{status}</span>}
     </div>

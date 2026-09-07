@@ -33,7 +33,7 @@ export function AudioSettingsDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Audio Settings</DialogTitle>
+          <DialogTitle>Configurações de áudio</DialogTitle>
           <DialogDescription>Adjust volume levels and mute settings</DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">

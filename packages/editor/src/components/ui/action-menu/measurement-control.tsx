@@ -169,7 +169,7 @@ export function MeasurementControl() {
           <button
             aria-expanded={isOpen}
             aria-haspopup="menu"
-            aria-label="Measurement options"
+            aria-label="Opções de medição"
             className={cn(
               'flex h-11 w-6 items-center justify-center rounded-r-lg text-muted-foreground transition-colors',
               isOpen
@@ -192,7 +192,7 @@ export function MeasurementControl() {
         side="top"
         sideOffset={14}
       >
-        <div aria-label="Measurement type" className="space-y-1" role="menu">
+        <div aria-label="Tipo de medição" className="space-y-1" role="menu">
           {measurementMenuOptions.map((option) => {
             const OptionIcon = option.icon
             const isSmart = option.kind === 'smart'

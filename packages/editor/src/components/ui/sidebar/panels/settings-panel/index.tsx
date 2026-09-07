@@ -366,13 +366,13 @@ export function SettingsPanel({
           <div className="font-medium text-sm">Project ID</div>
           <div className="flex items-center gap-2">
             <Input
-              aria-label="Project ID"
+              aria-label="ID do projeto"
               className="font-mono text-xs"
               readOnly
               value={projectId}
             />
             <Button
-              aria-label={projectIdCopyState === 'copied' ? 'Project ID copied' : 'Copy project ID'}
+              aria-label={projectIdCopyState === 'copied' ? 'ID do projeto copiado' : 'Copiar ID do projeto'}
               className="rounded-full"
               onClick={() => void handleCopyProjectId()}
               size="sm"
@@ -412,7 +412,7 @@ export function SettingsPanel({
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-sm">Show 3D Scans</div>
+              <div className="font-medium text-sm">Mostrar escaneamentos 3D</div>
               <div className="text-muted-foreground text-xs">Visible to public viewers</div>
             </div>
             <Switch
@@ -422,7 +422,7 @@ export function SettingsPanel({
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-sm">Show Floorplans</div>
+              <div className="font-medium text-sm">Mostrar plantas baixas</div>
               <div className="text-muted-foreground text-xs">Visible to public viewers</div>
             </div>
             <Switch
@@ -445,7 +445,7 @@ export function SettingsPanel({
 
       {/* Export Section */}
       <div className="space-y-4">
-        <label className="font-medium text-muted-foreground text-xs uppercase">Export</label>
+        <label className="font-medium text-muted-foreground text-xs uppercase">Exportar</label>
 
         <div className="space-y-2">
           <div className="font-medium text-muted-foreground text-xs">3D model</div>
@@ -488,7 +488,7 @@ export function SettingsPanel({
 
         <div className="space-y-2">
           <div className="flex items-center justify-between font-medium text-muted-foreground text-xs">
-            <span>Floor plan</span>
+            <span>Planta baixa</span>
             <span>{floorplanMode === 'default' ? 'Default mode' : 'Expert mode'}</span>
           </div>
           <Button
@@ -528,7 +528,7 @@ export function SettingsPanel({
 
       {/* Save/Load Section */}
       <div className="space-y-2">
-        <label className="font-medium text-muted-foreground text-xs uppercase">Save & Load</label>
+        <label className="font-medium text-muted-foreground text-xs uppercase">Salvar e carregar</label>
 
         <Button className="w-full justify-start gap-2" onClick={handleSaveBuild} variant="outline">
           <Save className="size-4" />

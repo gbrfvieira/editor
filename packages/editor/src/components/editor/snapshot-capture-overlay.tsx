@@ -873,7 +873,7 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
           ))}
 
         <button
-          aria-label={isPreset ? 'Capture' : 'Take snapshot'}
+          aria-label={isPreset ? 'Capturar' : 'Tirar captura'}
           className="group pointer-events-auto relative grid h-14 w-14 place-items-center rounded-full disabled:opacity-50"
           disabled={captureDisabled}
           onClick={handleCapture}
@@ -900,8 +900,8 @@ export function SnapshotCaptureOverlay({ projectId }: { projectId: string }) {
             : captureState === 'saved'
               ? 'Saved'
               : isPreset
-                ? 'Capture'
-                : 'Take snapshot'}
+                ? 'Capturar'
+                : 'Tirar captura'}
         </span>
       </div>
     </div>

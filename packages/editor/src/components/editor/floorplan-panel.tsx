@@ -11124,7 +11124,7 @@ export function FloorplanPanel({
                     referenceScaleInputError ? 'border-destructive/60' : 'border-border',
                   )}
                   onChange={(event) => setReferenceScaleValue(event.target.value)}
-                  placeholder={`e.g. 3.5, 180cm or 5'11"`}
+                  placeholder={`ex.: 3,5; 180 cm ou 1,80 m`}
                   type="text"
                   value={referenceScaleValue}
                 />

@@ -42,15 +42,15 @@ function reshapingHints(reshape: ReshapeKind): ContextualShortcutHint[] {
     reshape === 'curve'
       ? 'Curve'
       : reshape === 'control-point'
-        ? 'Move control point'
+        ? 'Mover ponto de controle'
         : reshape === 'tangent'
-          ? 'Move tangent'
+          ? 'Mover tangente'
       : reshape === 'endpoint'
-        ? 'Move endpoint'
-        : 'Move corner'
+        ? 'Mover ponto final'
+        : 'Mover canto'
   return [
     { keys: ['Drag'], label: action },
-    { keys: ['Esc'], label: 'Cancel' },
+    { keys: ['Esc'], label: 'Cancelar' },
   ]
 }
 
@@ -63,7 +63,7 @@ function terrainSculptHints(verb: TerrainVerb, sampling: boolean): ContextualSho
   if (sampling) {
     return [
       { keys: ['Click'], label: 'Pick target height' },
-      { keys: ['Esc'], label: 'Cancel picking' },
+      { keys: ['Esc'], label: 'Cancelar seleção' },
     ]
   }
   const action =
@@ -72,14 +72,14 @@ function terrainSculptHints(verb: TerrainVerb, sampling: boolean): ContextualSho
       : verb === 'lower'
         ? 'Lower ground'
         : verb === 'flatten'
-          ? 'Level ground'
+          ? 'Nivelar terreno'
           : 'Smooth ground'
   return [
     { keys: ['Drag'], label: action },
     // Nested, so the two render as alternatives ("[ / ]") rather than a chord —
     // a flat `['[', ']']` joins with "+" and would read as "press both".
     { keys: [['[', ']']], label: 'Brush size' },
-    { keys: ['Esc'], label: 'Cancel stroke' },
+    { keys: ['Esc'], label: 'Cancelar traço' },
   ]
 }
 
@@ -235,7 +235,7 @@ export function HelperManager() {
       <ContextualHelperPanel
         hints={[
           { keys: ['Drag'], label: 'Resize' },
-          { keys: ['Esc'], label: 'Cancel' },
+          { keys: ['Esc'], label: 'Cancelar' },
         ]}
         snapContext={snapContext}
       />

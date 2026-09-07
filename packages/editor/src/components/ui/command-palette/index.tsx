@@ -148,8 +148,8 @@ function OptionItem({
 // Sub-page label map
 // ---------------------------------------------------------------------------
 const PAGE_LABEL: Record<string, string> = {
-  'wall-mode': 'Wall Mode',
-  'level-mode': 'Level Mode',
+  'wall-mode': 'Modo parede',
+  'level-mode': 'Modo nível',
   'rename-level': 'Rename Level',
   'goto-level': 'Go to Level',
 }
@@ -329,7 +329,7 @@ export function CommandPalette({ emptyAction }: { emptyAction?: CommandPaletteEm
                     ? 'Type a new name…'
                     : page
                       ? 'Filter options…'
-                      : 'Search actions…'
+                      : 'Pesquisar ações…'
                 }
                 value={inputValue}
               />

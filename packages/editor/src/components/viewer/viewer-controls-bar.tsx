@@ -128,7 +128,7 @@ function VisibilityMenu({
             onSelect={(e) => keepOpen(e, () => useViewer.getState().setShowGuides(!showGuides))}
           >
             <img alt="" className="h-4 w-4 object-contain" src="/icons/floorplan.webp" />
-            <span>Guides</span>
+            <span>Guias</span>
             {showGuides ? (
               <Eye className="ml-auto h-4 w-4 text-foreground" />
             ) : (
@@ -193,7 +193,7 @@ function DisplayMenu() {
           onSelect={(e) => keepOpen(e, () => useViewer.getState().setTextures(!textures))}
         >
           {textures ? <Palette className="h-4 w-4" /> : <Square className="h-4 w-4" />}
-          <span>Colors</span>
+          <span>Cores</span>
           <span className="ml-auto text-muted-foreground text-xs">
             {textures ? 'Colored' : 'Monochrome'}
           </span>
@@ -417,14 +417,14 @@ export const ViewerControlsBar = ({
           {/* Camera actions */}
           <ActionButton
             className="group hidden hover:bg-white/5 sm:inline-flex"
-            label="Orbit left"
+            label="Orbitar para a esquerda"
             onClick={() => emitter.emit('camera-controls:orbit-ccw')}
             size="icon"
             tooltipSide="top"
             variant="ghost"
           >
             <img
-              alt="Orbit left"
+              alt="Orbitar para a esquerda"
               className="h-[28px] w-[28px] -scale-x-100 object-contain opacity-70 transition-opacity group-hover:opacity-100"
               src="/icons/rotate.webp"
             />
@@ -432,14 +432,14 @@ export const ViewerControlsBar = ({
 
           <ActionButton
             className="group hidden hover:bg-white/5 sm:inline-flex"
-            label="Orbit right"
+            label="Orbitar para a direita"
             onClick={() => emitter.emit('camera-controls:orbit-cw')}
             size="icon"
             tooltipSide="top"
             variant="ghost"
           >
             <img
-              alt="Orbit right"
+              alt="Orbitar para a direita"
               className="h-[28px] w-[28px] object-contain opacity-70 transition-opacity group-hover:opacity-100"
               src="/icons/rotate.webp"
             />
@@ -447,14 +447,14 @@ export const ViewerControlsBar = ({
 
           <ActionButton
             className="group hover:bg-white/5"
-            label="Top view"
+            label="Vista superior"
             onClick={() => emitter.emit('camera-controls:top-view')}
             size="icon"
             tooltipSide="top"
             variant="ghost"
           >
             <img
-              alt="Top view"
+              alt="Vista superior"
               className="h-[28px] w-[28px] object-contain opacity-70 transition-opacity group-hover:opacity-100"
               src="/icons/topview.webp"
             />

@@ -198,7 +198,7 @@ function LevelRow({
               dragHandleProps?.onClick?.(e)
             }}
             ref={dragHandleRef}
-            title="Drag to reorder"
+            title="Arraste para reordenar"
             type="button"
           >
             <GripVertical className="h-3.5 w-3.5" />
@@ -223,7 +223,7 @@ function LevelRow({
               <button
                 className="mr-0.5 shrink-0 whitespace-nowrap rounded px-1 py-0.5 font-mono text-[10px] text-muted-foreground/50 tabular-nums transition-colors hover:bg-white/5 hover:text-foreground"
                 onClick={(e) => e.stopPropagation()}
-                title="Level height"
+                title="Altura do nível"
                 type="button"
               >
                 {storeyHeightLabel}
@@ -313,7 +313,7 @@ function LevelRow({
                   e.stopPropagation()
                   onRequestDelete()
                 }}
-                title={canDeleteLevel ? 'Delete level' : 'The ground level cannot be deleted'}
+                title={canDeleteLevel ? 'Excluir nível' : 'O nível térreo não pode ser excluído'}
                 type="button"
               >
                 <Trash2 className="h-3 w-3" />
@@ -581,7 +581,7 @@ export function FloatingLevelSelector() {
               // read only from outside: nothing here depends on it.
               data-guide-target="level-add"
               onClick={handleAddAbove}
-              title="Add level above"
+              title="Adicionar nível acima"
               type="button"
             >
               <Plus className="h-2.5 w-2.5" />
@@ -593,7 +593,7 @@ export function FloatingLevelSelector() {
             <button
               className={cn(addButtonClass, 'bottom-0 translate-y-1/2')}
               onClick={handleAddBelow}
-              title="Add level below"
+              title="Adicionar nível abaixo"
               type="button"
             >
               <Plus className="h-2.5 w-2.5" />
@@ -645,7 +645,7 @@ export function FloatingLevelSelector() {
                         <button
                           className={cn(addButtonClass, 'bottom-0 translate-y-1/2')}
                           onClick={() => handleInsertBetween(sortedIndex - 1)}
-                          title="Insert level here"
+                          title="Inserir nível aqui"
                           type="button"
                         >
                           <Plus className="h-2.5 w-2.5" />
@@ -664,7 +664,7 @@ export function FloatingLevelSelector() {
       <Dialog onOpenChange={(open) => !open && setDeletingLevel(null)} open={!!deletingLevel}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Delete level</DialogTitle>
+            <DialogTitle>Excluir nível</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete{' '}
               <strong>{deletingLevel ? getLevelDisplayName(deletingLevel) : ''}</strong>? All

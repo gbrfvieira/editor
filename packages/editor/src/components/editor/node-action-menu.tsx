@@ -47,10 +47,10 @@ export function NodeActionMenu({
     >
       {onFind && (
         <button
-          aria-label="Find in catalog"
+          aria-label="Encontrar no catálogo"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onFind}
-          title="Find in catalog"
+          title="Encontrar no catálogo"
           type="button"
         >
           <Search className="h-4 w-4" />
@@ -58,10 +58,10 @@ export function NodeActionMenu({
       )}
       {onMove && (
         <button
-          aria-label="Move"
+          aria-label="Mover"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onMove}
-          title="Move"
+          title="Mover"
           type="button"
         >
           <Move className="h-4 w-4" />
@@ -69,10 +69,10 @@ export function NodeActionMenu({
       )}
       {onEditMesh && (
         <button
-          aria-label="Edit mesh"
+          aria-label="Editar malha"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onEditMesh}
-          title="Edit mesh"
+          title="Editar malha"
           type="button"
         >
           <PencilRuler className="h-4 w-4" />
@@ -80,10 +80,10 @@ export function NodeActionMenu({
       )}
       {onGroup && (
         <button
-          aria-label="Group selection"
+          aria-label="Agrupar seleção"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onGroup}
-          title="Group (Ctrl/Cmd+G)"
+          title="Agrupar (Ctrl/Cmd+G)"
           type="button"
         >
           <Group className="h-4 w-4" />
@@ -91,10 +91,10 @@ export function NodeActionMenu({
       )}
       {onUngroup && (
         <button
-          aria-label="Ungroup selection"
+          aria-label="Desagrupar seleção"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onUngroup}
-          title="Ungroup (Ctrl/Cmd+Shift+G)"
+          title="Desagrupar (Ctrl/Cmd+Shift+G)"
           type="button"
         >
           <Ungroup className="h-4 w-4" />
@@ -102,10 +102,10 @@ export function NodeActionMenu({
       )}
       {onCurve && (
         <button
-          aria-label="Curve"
+          aria-label="Curvar"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onCurve}
-          title="Curve"
+          title="Curvar"
           type="button"
         >
           <Spline className="h-4 w-4" />
@@ -113,10 +113,10 @@ export function NodeActionMenu({
       )}
       {onDuplicate && (
         <button
-          aria-label="Duplicate"
+          aria-label="Duplicar"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onDuplicate}
-          title="Duplicate"
+          title="Duplicar"
           type="button"
         >
           <Copy className="h-4 w-4" />
@@ -124,10 +124,10 @@ export function NodeActionMenu({
       )}
       {onAddHole && (
         <button
-          aria-label="Cut Out"
+          aria-label="Recortar abertura"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={onAddHole}
-          title="Cut Out"
+          title="Recortar abertura"
           type="button"
         >
           <Icon height={16} icon="carbon:cut-out" width={16} />
@@ -135,10 +135,10 @@ export function NodeActionMenu({
       )}
       {onDelete && (
         <button
-          aria-label="Delete"
+          aria-label="Excluir"
           className="tooltip-trigger rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
           onClick={onDelete}
-          title="Delete"
+          title="Excluir"
           type="button"
         >
           <Trash2 className="h-4 w-4" />

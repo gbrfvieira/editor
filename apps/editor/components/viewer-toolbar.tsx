@@ -210,9 +210,9 @@ function CollapseSidebarButton() {
 
   return (
     <div className={TOOLBAR_CONTAINER}>
-      <ToolbarTooltip label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+      <ToolbarTooltip label={isCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}>
         <button
-          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={isCollapsed ? 'Expandir barra lateral' : 'Recolher barra lateral'}
           className={TOOLBAR_BTN}
           onClick={toggle}
           type="button"
@@ -361,7 +361,7 @@ function DisplayMenu() {
       <ToolbarTooltip label="Display settings">
         <DropdownMenuTrigger asChild>
           <button
-            aria-label="Display settings"
+            aria-label="Configurações de exibição"
             className={cn(TOOLBAR_BTN, 'w-auto gap-1.5 px-2.5 text-foreground/90')}
             type="button"
           >
@@ -403,7 +403,7 @@ function DisplayMenu() {
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Layers3 className="h-4 w-4" />
-                <span>Floor plan mode</span>
+                <span>Modo planta baixa</span>
                 <span className="ml-auto text-muted-foreground text-xs">
                   {floorplanMode === 'default' ? 'Default' : 'Expert'}
                 </span>
@@ -427,7 +427,7 @@ function DisplayMenu() {
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <Layers3 className="h-4 w-4" />
-                    <span>Floor plan annotations</span>
+                    <span>Anotações da planta baixa</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className={SUBMENU_CONTENT_CLASS}>
                     {FLOORPLAN_ANNOTATION_OPTIONS.map((option) => {
@@ -455,7 +455,7 @@ function DisplayMenu() {
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <Ruler className="h-4 w-4" />
-                    <span>Wall dimensions</span>
+                    <span>Dimensões das paredes</span>
                     <span className="ml-auto text-muted-foreground text-xs">
                       {
                         FLOORPLAN_WALL_DIMENSION_REFERENCE_OPTIONS.find(
@@ -680,7 +680,7 @@ function PreviewButton() {
         type="button"
       >
         <Eye className="h-3.5 w-3.5 shrink-0" />
-        <span>Preview</span>
+        <span>Pré-visualização</span>
       </button>
     </ToolbarTooltip>
   )

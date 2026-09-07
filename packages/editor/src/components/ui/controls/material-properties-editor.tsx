@@ -99,7 +99,7 @@ export function MaterialPropertiesEditor({
           value={currentProps.side}
         >
           <option value="front">Front</option>
-          <option value="back">Back</option>
+          <option value="back">Trás</option>
           <option value="double">Double</option>
         </select>
       </div>

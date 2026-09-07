@@ -22,22 +22,22 @@ const DUPLICATE_PRESETS: Array<{
   {
     id: 'everything',
     label: 'Everything',
-    description: 'Structure, materials, furniture, and references.',
+    description: 'Estrutura, materiais, móveis e referências.',
   },
   {
     id: 'structure',
-    label: 'Structure only',
-    description: 'Walls, slabs, roofs, stairs, windows, and doors without finishes.',
+    label: 'Somente estrutura',
+    description: 'Paredes, lajes, telhados, escadas, janelas e portas sem acabamentos.',
   },
   {
     id: 'structure-materials',
-    label: 'Structure + materials',
-    description: 'Structure with the current material and finish assignments.',
+    label: 'Estrutura + materiais',
+    description: 'Estrutura com os materiais e acabamentos atuais.',
   },
   {
     id: 'structure-furniture',
-    label: 'Structure + furniture',
-    description: 'Structure, finishes, and placed items, without guide references.',
+    label: 'Estrutura + móveis',
+    description: 'Estrutura, acabamentos e itens posicionados, sem referências de guia.',
   },
 ]
 
@@ -69,7 +69,7 @@ export function LevelDuplicateDialog({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>Duplicate Level</DialogTitle>
+          <DialogTitle>Duplicar nível</DialogTitle>
           <DialogDescription>Choose what to copy from {getLevelLabel(level)}.</DialogDescription>
         </DialogHeader>
 

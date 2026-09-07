@@ -67,7 +67,7 @@ function ZoneItem({ zone }: { zone: ZoneNode }) {
           <button
             className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground opacity-0 transition-colors hover:bg-black/5 hover:text-foreground group-hover/row:opacity-100 dark:hover:bg-white/10"
             onClick={(e) => e.stopPropagation()}
-            title="Camera snapshot"
+            title="Captura da câmera"
           >
             <Camera className="h-3 w-3" />
             {zone.camera && (
@@ -104,7 +104,7 @@ function ZoneItem({ zone }: { zone: ZoneNode }) {
               }}
             >
               <Camera className="h-3.5 w-3.5" />
-              {zone.camera ? 'Update snapshot' : 'Take snapshot'}
+              {zone.camera ? 'Atualizar captura' : 'Capturar imagem'}
             </button>
             {zone.camera && (
               <button
@@ -187,7 +187,7 @@ export function ZonePanel() {
         levelZones.map((zone) => <ZoneItem key={zone.id} zone={zone} />)
       )}
       {selectedZone ? (
-        <PanelSection className="mt-2 border-t" title="Actions">
+        <PanelSection className="mt-2 border-t" title="Ações">
           <ActionButton
             className="w-full flex-none"
             icon={<Save className="h-4 w-4" />}

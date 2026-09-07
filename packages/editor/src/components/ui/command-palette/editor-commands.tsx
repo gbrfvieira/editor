@@ -77,7 +77,7 @@ export function EditorCommands() {
       // ── Scene ────────────────────────────────────────────────────────────
       {
         id: 'editor.tool.wall',
-        label: 'Wall Tool',
+        label: 'Ferramenta parede',
         group: 'Scene',
         icon: <Square className="h-4 w-4" />,
         keywords: ['draw', 'build', 'structure'],
@@ -141,7 +141,7 @@ export function EditorCommands() {
       },
       {
         id: 'editor.delete-selection',
-        label: 'Delete Selection',
+        label: 'Excluir seleção',
         group: 'Scene',
         icon: <Trash2 className="h-4 w-4" />,
         keywords: ['remove', 'erase'],
@@ -182,7 +182,7 @@ export function EditorCommands() {
       {
         id: 'editor.level.goto',
         label: 'Go to Level',
-        group: 'Levels',
+        group: 'Níveis',
         icon: <ArrowRight className="h-4 w-4" />,
         keywords: ['level', 'floor', 'go', 'navigate', 'switch', 'select'],
         navigate: true,
@@ -191,8 +191,8 @@ export function EditorCommands() {
       },
       {
         id: 'editor.level.add',
-        label: 'Add Level',
-        group: 'Levels',
+        label: 'Adicionar nível',
+        group: 'Níveis',
         icon: <Plus className="h-4 w-4" />,
         keywords: ['level', 'floor', 'add', 'create', 'new'],
         execute: () =>
@@ -216,7 +216,7 @@ export function EditorCommands() {
       {
         id: 'editor.level.rename',
         label: 'Rename Level',
-        group: 'Levels',
+        group: 'Níveis',
         icon: <PencilLine className="h-4 w-4" />,
         keywords: ['level', 'floor', 'rename', 'name'],
         navigate: true,
@@ -231,8 +231,8 @@ export function EditorCommands() {
       },
       {
         id: 'editor.level.delete',
-        label: 'Delete Level',
-        group: 'Levels',
+        label: 'Excluir nível',
+        group: 'Níveis',
         icon: <Trash2 className="h-4 w-4" />,
         keywords: ['level', 'floor', 'delete', 'remove'],
         when: () => {
@@ -252,7 +252,7 @@ export function EditorCommands() {
       // ── Viewer Controls ──────────────────────────────────────────────────
       {
         id: 'editor.viewer.wall-mode',
-        label: 'Wall Mode',
+        label: 'Modo parede',
         group: 'Viewer Controls',
         icon: <Layers className="h-4 w-4" />,
         keywords: ['wall', 'cutaway', 'up', 'down', 'translucent', 'view'],
@@ -265,7 +265,7 @@ export function EditorCommands() {
       },
       {
         id: 'editor.viewer.level-mode',
-        label: 'Level Mode',
+        label: 'Modo nível',
         group: 'Viewer Controls',
         icon: <SquareStack className="h-4 w-4" />,
         keywords: ['level', 'floor', 'exploded', 'stacked', 'solo'],
@@ -309,7 +309,7 @@ export function EditorCommands() {
       },
       {
         id: 'editor.viewer.camera-snapshot',
-        label: 'Take Snapshot',
+        label: 'Tirar captura',
         group: 'Viewer Controls',
         icon: <Camera className="h-4 w-4" />,
         keywords: ['camera', 'snapshot', 'capture', 'save', 'view', 'bookmark'],
@@ -322,7 +322,7 @@ export function EditorCommands() {
       // ── View ─────────────────────────────────────────────────────────────
       {
         id: 'editor.view.preview',
-        label: () => (isPreviewMode ? 'Exit Preview' : 'Enter Preview'),
+        label: () => (isPreviewMode ? 'Sair da pré-visualização' : 'Entrar na pré-visualização'),
         group: 'View',
         icon: isPreviewMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />,
         keywords: ['preview', 'view', 'read-only', 'present'],
@@ -344,7 +344,7 @@ export function EditorCommands() {
       // ── History ──────────────────────────────────────────────────────────
       {
         id: 'editor.history.undo',
-        label: 'Undo',
+        label: 'Desfazer',
         group: 'History',
         icon: <Undo2 className="h-4 w-4" />,
         keywords: ['undo', 'revert', 'back'],
@@ -353,7 +353,7 @@ export function EditorCommands() {
       },
       {
         id: 'editor.history.redo',
-        label: 'Redo',
+        label: 'Refazer',
         group: 'History',
         icon: <Redo2 className="h-4 w-4" />,
         keywords: ['redo', 'forward', 'repeat'],
@@ -364,8 +364,8 @@ export function EditorCommands() {
       // ── Export & Share ───────────────────────────────────────────────────
       {
         id: 'editor.export.json',
-        label: 'Export Scene (JSON)',
-        group: 'Export & Share',
+        label: 'Exportar cena (JSON)',
+        group: 'Exportar e compartilhar',
         icon: <FileJson className="h-4 w-4" />,
         keywords: ['export', 'download', 'json', 'save', 'data'],
         execute: () =>
@@ -386,8 +386,8 @@ export function EditorCommands() {
         ? [
             {
               id: 'editor.export.glb',
-              label: 'Export 3D Model (GLB)',
-              group: 'Export & Share',
+              label: 'Exportar modelo 3D (GLB)',
+              group: 'Exportar e compartilhar',
               icon: <Box className="h-4 w-4" />,
               keywords: ['export', 'glb', 'gltf', '3d', 'model', 'download'],
               execute: () => run(() => exportScene()),
@@ -396,16 +396,16 @@ export function EditorCommands() {
         : []),
       {
         id: 'editor.export.share-link',
-        label: 'Copy Share Link',
-        group: 'Export & Share',
+        label: 'Copiar link de compartilhamento',
+        group: 'Exportar e compartilhar',
         icon: <Copy className="h-4 w-4" />,
         keywords: ['share', 'copy', 'url', 'link'],
         execute: () => run(() => navigator.clipboard.writeText(window.location.href)),
       },
       {
         id: 'editor.export.screenshot',
-        label: 'Take Screenshot',
-        group: 'Export & Share',
+        label: 'Tirar captura de tela',
+        group: 'Exportar e compartilhar',
         icon: <Camera className="h-4 w-4" />,
         keywords: ['screenshot', 'capture', 'image', 'photo', 'png'],
         execute: () =>

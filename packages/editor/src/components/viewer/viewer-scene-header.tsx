@@ -18,7 +18,7 @@ import { cn } from '../../lib/utils'
 
 const getNodeName = (node: AnyNode): string => {
   if ('name' in node && node.name) return node.name
-  if (node.type === 'wall') return 'Wall'
+  if (node.type === 'wall') return 'Parede'
   if (node.type === 'fence') return 'Fence'
   if (node.type === 'item') return (node as { asset: { name: string } }).asset?.name || 'Item'
   if (node.type === 'slab') return 'Slab'
@@ -99,7 +99,7 @@ export const ViewerSceneHeader = ({
         <div className="flex items-center gap-3 px-3 py-2.5">
           {onBack ? (
             <button
-              aria-label="Back"
+              aria-label="Voltar"
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-white/10"
               onClick={onBack}
               type="button"
@@ -108,7 +108,7 @@ export const ViewerSceneHeader = ({
             </button>
           ) : (
             <Link
-              aria-label="Back"
+              aria-label="Voltar"
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-white/10"
               href={backHref}
               prefetch={false}
@@ -151,7 +151,7 @@ export const ViewerSceneHeader = ({
                 className={`truncate transition-colors ${level ? 'text-muted-foreground hover:text-foreground' : 'font-medium text-foreground'}`}
                 onClick={() => handleBreadcrumbClick('building')}
               >
-                {building.name || 'Building'}
+                {building.name || 'Edificação'}
               </button>
 
               {level && (

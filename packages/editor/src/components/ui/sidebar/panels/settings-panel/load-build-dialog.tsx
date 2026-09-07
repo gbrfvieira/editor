@@ -171,7 +171,7 @@ export function LoadBuildDialog({ pending, onCancel, onConfirm }: Props) {
                   })}
                   {stats.floorAreaM2 > 0 && (
                     <div className="flex items-center justify-between border-t px-3 py-2">
-                      <span className="text-muted-foreground text-sm">Floor area</span>
+                      <span className="text-muted-foreground text-sm">Área do piso</span>
                       <span className="font-medium text-sm">
                         {formatFloorArea(stats.floorAreaM2, unit)}
                       </span>

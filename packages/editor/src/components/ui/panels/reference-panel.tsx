@@ -179,12 +179,12 @@ export function ReferencePanel() {
   return (
     <PanelWrapper
       onClose={handleClose}
-      title={node.name || (isScan ? 'Capture' : 'Guide Image')}
+      title={node.name || (isScan ? 'Captura' : 'Imagem de guia')}
       width={300}
     >
       {!isScan && (
         <>
-          <PanelSection title="Image">
+          <PanelSection title="Imagem">
             <input
               accept="image/*"
               className="hidden"
@@ -252,7 +252,7 @@ export function ReferencePanel() {
             )}
           </PanelSection>
 
-          <PanelSection title="Reference Scale">
+          <PanelSection title="Escala de referência">
             <div className="flex items-center gap-2 rounded-md border border-border/50 bg-background/40 px-2.5 py-2 text-sm">
               <Ruler
                 className={cn(
@@ -304,7 +304,7 @@ export function ReferencePanel() {
             )}
           </PanelSection>
 
-          <PanelSection title="Quick Actions">
+          <PanelSection title="Ações rápidas">
             <ActionGroup>
               <ActionButton
                 icon={<LocateFixed className="h-3.5 w-3.5" />}
@@ -337,7 +337,7 @@ export function ReferencePanel() {
       )}
 
       {isScan && (
-        <PanelSection title="Capture">
+        <PanelSection title="Captura">
           <ActionGroup>
             <ActionButton
               icon={<Move className="h-3.5 w-3.5" />}
@@ -359,7 +359,7 @@ export function ReferencePanel() {
         </PanelSection>
       )}
 
-      <PanelSection title="Position">
+      <PanelSection title="Posição">
         <SliderControl
           label={
             <>
@@ -416,7 +416,7 @@ export function ReferencePanel() {
         />
       </PanelSection>
 
-      <PanelSection title="Rotation">
+      <PanelSection title="Rotação">
         <SliderControl
           label={
             <>
@@ -456,7 +456,7 @@ export function ReferencePanel() {
         </div>
       </PanelSection>
 
-      <PanelSection title="Scale & Opacity">
+      <PanelSection title="Escala e opacidade">
         <SliderControl
           label={
             <>

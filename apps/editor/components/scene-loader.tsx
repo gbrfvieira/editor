@@ -68,7 +68,7 @@ const SIDEBAR_TABS: (SidebarTab & { component: React.ComponentType })[] = [
   },
   {
     id: 'settings',
-    label: 'Settings',
+    label: 'Configurações',
     component: () => null,
     mobileDefaultSnap: 0.5,
     mobileIcon: <Settings className="h-5 w-5" />,
@@ -189,7 +189,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
         serverNodeCountRef.current = next.nodeCount
         setSaveError(null)
       } catch (error) {
-        setSaveError(error instanceof Error ? error.message : 'Save failed')
+        setSaveError(error instanceof Error ? error.message : 'Falha ao salvar')
       }
     },
     [meta.id, meta.name],
@@ -261,7 +261,7 @@ export function SceneLoader({ initialScene, meta }: SceneLoaderProps) {
               onClick={() => setConflict(false)}
               type="button"
             >
-              Dismiss
+              Fechar
             </button>
           </div>
         </div>

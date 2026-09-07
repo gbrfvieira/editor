@@ -242,7 +242,7 @@ function LegacyItemsPanel({
               setSearch(e.target.value)
               onSearchChange?.(e.target.value)
             }}
-            placeholder="Search..."
+            placeholder="Pesquisar..."
             type="text"
             value={search}
           />

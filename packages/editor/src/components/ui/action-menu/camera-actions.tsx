@@ -35,7 +35,7 @@ export function CameraActions({ hideOrbit = false }: { hideOrbit?: boolean }) {
             variant="ghost"
           >
             <Image
-              alt="Orbit Left"
+              alt="Orbitar para a esquerda"
               className="h-[28px] w-[28px] -scale-x-100 object-contain opacity-70 transition-opacity group-hover:opacity-100"
               height={28}
               src="/icons/rotate.webp"
@@ -52,7 +52,7 @@ export function CameraActions({ hideOrbit = false }: { hideOrbit?: boolean }) {
             variant="ghost"
           >
             <Image
-              alt="Orbit Right"
+              alt="Orbitar para a direita"
               className="h-[28px] w-[28px] object-contain opacity-70 transition-opacity group-hover:opacity-100"
               height={28}
               src="/icons/rotate.webp"
@@ -72,7 +72,7 @@ export function CameraActions({ hideOrbit = false }: { hideOrbit?: boolean }) {
           variant="ghost"
         >
           <Image
-            alt="Top View"
+            alt="Vista superior"
             className="h-[28px] w-[28px] object-contain opacity-70 transition-opacity group-hover:opacity-100"
             height={28}
             src="/icons/topview.webp"

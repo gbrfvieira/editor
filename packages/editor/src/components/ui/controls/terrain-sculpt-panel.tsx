@@ -145,7 +145,7 @@ export function TerrainSculptPanel() {
               />
             </div>
             <Button
-              aria-label="Pick target height from the ground"
+              aria-label="Escolher altura-alvo a partir do chão"
               aria-pressed={sampling}
               onClick={() => setTerrainSampling(!sampling)}
               size="icon-sm"

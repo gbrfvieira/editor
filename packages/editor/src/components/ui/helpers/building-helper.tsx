@@ -12,7 +12,7 @@ export function BuildingHelper({ showRotate }: BuildingHelperProps) {
       hints={[
         { keys: ['Left click'], label: 'Place building' },
         ...(showRotate ? [{ keys: ['R', 'T'], label: 'Rotate' }] : []),
-        { keys: ['Esc'], label: 'Cancel' },
+        { keys: ['Esc'], label: 'Cancelar' },
       ]}
     />
   )

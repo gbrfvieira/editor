@@ -12,7 +12,7 @@ export type ToolConfig = {
 // for cursor/floorplan indicators. Roof-mounted accessories are intentionally
 // absent — they're placed from the roof inspector's "Add element" section.
 export const tools: ToolConfig[] = [
-  { id: 'wall', iconSrc: '/icons/wall.webp', label: 'Wall' },
+  { id: 'wall', iconSrc: '/icons/wall.webp', label: 'Parede' },
   { id: 'door', iconSrc: '/icons/door.webp', label: 'Door' },
   { id: 'window', iconSrc: '/icons/window.webp', label: 'Window' },
   { id: 'stair', iconSrc: '/icons/stairs.webp', label: 'Stairs' },
