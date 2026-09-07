@@ -1,8 +1,0 @@
-{
-  "extends": "@pascal/typescript-config/base.json",
-  "compilerOptions": {
-    "noEmit": true,
-    "types": ["node"]
-  },
-  "include": ["scripts"]
-}
