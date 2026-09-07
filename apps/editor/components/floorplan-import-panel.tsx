@@ -19,7 +19,7 @@ import {
 } from '@pascal-app/floorplan-import'
 import { extractPdfVectorSegments } from '@pascal-app/pdf-vector-extract'
 import { useViewer } from '@pascal-app/viewer'
-import { detectWalls } from '@pascal-app/wall-detect'
+import { detectDoorOpenings, detectWalls } from '@pascal-app/wall-detect'
 import { useCallback, useState } from 'react'
 
 type EditableWall = DetectedWall & { id: number }
@@ -120,23 +120,60 @@ export function FloorplanImportPanel() {
         start: recenter(segment.start),
         end: recenter(segment.end),
       }))
-
-      let openingId = 0
-      setOpenings(
-        dxfLayers.flatMap((layer) =>
-          (layer.openings ?? []).map((opening) => ({
-            ...opening,
-            position: recenter([opening.position[0] * scale, opening.position[1] * scale]),
-            id: openingId++,
-          })),
-        ),
+      const recenteredArcs = dxfLayers.flatMap((layer) =>
+        (layer.arcs ?? []).map((arc) => ({
+          ...arc,
+          center: recenter([arc.center[0] * scale, arc.center[1] * scale]),
+          radius: arc.radius * scale,
+        })),
       )
+
+      const blockOpenings = dxfLayers.flatMap((layer) =>
+        (layer.openings ?? []).map((opening) => ({
+          ...opening,
+          position: recenter([opening.position[0] * scale, opening.position[1] * scale]),
+        })),
+      )
+
       const detected = detectWalls(recenteredSegments, {
         preferLayerContaining: 'PAREDE',
         snapToleranceM: snapTolerance,
       }).walls
       setWalls(toEditableWalls(detected))
-      const openingCount = dxfLayers.reduce((sum, layer) => sum + (layer.openings?.length ?? 0), 0)
+
+      // Doors are commonly drawn as pure geometry (a ~90° swing arc + a
+      // radial leaf line) rather than a named block — detectDoorOpenings
+      // recognizes that symbol independently of layer/block naming.
+      // Skip an arc-detected door that's essentially the same opening as
+      // one already found by name (rare, but both paths can fire on a file
+      // that mixes conventions).
+      const arcDoors = detectDoorOpenings(recenteredArcs, recenteredSegments, detected, {
+        metersPerUnit: 1,
+      }).filter(
+        (door) =>
+          !blockOpenings.some(
+            (opening) =>
+              Math.hypot(
+                opening.position[0] - door.position[0],
+                opening.position[1] - door.position[1],
+              ) < 0.4,
+          ),
+      )
+
+      let openingId = 0
+      setOpenings([
+        ...blockOpenings.map((opening) => ({ ...opening, id: openingId++ })),
+        ...arcDoors.map((door) => ({
+          type: 'door' as const,
+          position: door.position,
+          width: door.width,
+          rotation: door.rotation,
+          blockName: 'arco de porta',
+          id: openingId++,
+        })),
+      ])
+
+      const openingCount = blockOpenings.length + arcDoors.length
       setStatus(
         `${detected.length} parede(s) e ${openingCount} vão(s) detectados (recentralizado na origem). Revise e confirme.`,
       )

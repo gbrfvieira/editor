@@ -6,9 +6,12 @@ export interface DxfSegment {
   start: Point
   end: Point
   source?: 'arc' | 'bulge'
+  /** Set when `source === 'arc'` — matches the originating DxfArc's `id`. */
+  arcId?: number
 }
 
 export interface DxfArc {
+  id: number
   center: Point
   radius: number
   startAngle: number
@@ -182,19 +185,26 @@ export function extractDxfVectorSegments(
   const byLayer = new Map<string, DxfSegment[]>()
   const openingsByLayer = new Map<string, DxfOpening[]>()
   const arcsByLayer = new Map<string, DxfArc[]>()
+  let nextArcId = 0
 
   const addSegment = (
     layerName: string,
     start: Point,
     end: Point,
     source?: DxfSegment['source'],
+    arcId?: number,
   ): void => {
     let segments = byLayer.get(layerName)
     if (!segments) {
       segments = []
       byLayer.set(layerName, segments)
     }
-    segments.push({ start, end, ...(source ? { source } : {}) })
+    segments.push({
+      start,
+      end,
+      ...(source ? { source } : {}),
+      ...(arcId !== undefined ? { arcId } : {}),
+    })
   }
 
   const addOpening = (layerName: string, opening: DxfOpening): void => {
@@ -234,9 +244,11 @@ export function extractDxfVectorSegments(
           // this doesn't attempt to correct — mirrored block inserts are rare
           // in practice for architectural symbols.
           const worldRotation = Math.atan2(transform[1], transform[0])
+          const arcId = nextArcId++
           arcsByLayer.set(layer, [
             ...(arcsByLayer.get(layer) ?? []),
             {
+              id: arcId,
               center: worldCenter,
               radius: worldRadius,
               startAngle: entity.startAngle + worldRotation,
@@ -256,6 +268,7 @@ export function extractDxfVectorSegments(
               applyMatrix(transform, segment.start),
               applyMatrix(transform, segment.end),
               'arc',
+              arcId,
             )
           }
         }
