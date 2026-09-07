@@ -1,8 +1,12 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { SceneOperations } from '../operations'
+import { registerAddCabinetModule } from './add-cabinet-module'
+import { registerApplyCabinetPreset } from './apply-cabinet-preset'
 import { registerApplyPatch } from './apply-patch'
 import { registerCheckCollisions } from './check-collisions'
+import { registerCommitFloorplanWalls } from './commit-floorplan-walls'
 import { registerConstructionTools } from './construction-tools'
+import { registerCreateCabinetRun } from './create-cabinet-run'
 import { registerCreateLevel } from './create-level'
 import { registerCreateWall } from './create-wall'
 import { registerCutOpening } from './cut-opening'
@@ -12,8 +16,10 @@ import { registerDuplicateLevel } from './duplicate-level'
 import { registerExportGlb } from './export-glb'
 import { registerExportJson } from './export-json'
 import { registerFindNodes } from './find-nodes'
+import { registerGenerateCutlist } from './generate-cutlist'
 import { registerGetNode } from './get-node'
 import { registerGetScene } from './get-scene'
+import { registerImportFloorplanDxf } from './import-floorplan-dxf'
 import { registerMeasure } from './measure'
 import { registerPhotoToSceneTool } from './photo-to-scene'
 import { registerPlaceItem } from './place-item'
@@ -36,6 +42,12 @@ import { registerVariantTools } from './variants'
  * when persistence operations are available.
  */
 export function registerTools(server: McpServer, operations: SceneOperations): void {
+  registerCreateCabinetRun(server, operations)
+  registerAddCabinetModule(server, operations)
+  registerApplyCabinetPreset(server, operations)
+  registerImportFloorplanDxf(server, operations)
+  registerCommitFloorplanWalls(server, operations)
+  registerGenerateCutlist(server, operations)
   registerGetScene(server, operations)
   registerGetNode(server, operations)
   registerDescribeNode(server, operations)

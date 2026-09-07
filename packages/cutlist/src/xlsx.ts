@@ -1,0 +1,40 @@
+import ExcelJS from 'exceljs'
+import type { CutListReport } from './index'
+
+export async function toXlsx(report: CutListReport): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook()
+
+  const panels = workbook.addWorksheet('Painéis')
+  panels.addRow([
+    'cabinetId',
+    'label',
+    'widthMm',
+    'heightMm',
+    'thicknessMm',
+    'material',
+    'quantity',
+  ])
+  for (const panel of report.panels) {
+    panels.addRow([
+      panel.cabinetId,
+      panel.label,
+      panel.widthMm,
+      panel.heightMm,
+      panel.thicknessMm,
+      panel.material ?? '',
+      panel.quantity,
+    ])
+  }
+
+  const hardware = workbook.addWorksheet('Ferragens')
+  hardware.addRow(['cabinetId', 'item', 'quantity'])
+  for (const item of report.hardware) hardware.addRow([item.cabinetId, item.item, item.quantity])
+
+  const edgeBanding = workbook.addWorksheet('Fita de borda')
+  edgeBanding.addRow(['cabinetId', 'panel', 'lengthMm'])
+  for (const item of report.edgeBanding)
+    edgeBanding.addRow([item.cabinetId, item.panel, item.lengthMm])
+
+  const data = await workbook.xlsx.writeBuffer()
+  return Buffer.from(data)
+}

@@ -192,3 +192,5 @@ export function toCsv(report: CutListReport): string {
 
 export type { CutPanel, NestingPlacement, NestingResult, SheetSize } from './nesting'
 export { nestPanels } from './nesting'
+export { toNestingSvg } from './svg'
+export { toXlsx } from './xlsx'

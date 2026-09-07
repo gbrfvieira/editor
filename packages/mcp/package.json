@@ -59,7 +59,12 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "@pascal-app/cutlist": "workspace:*",
+    "@pascal-app/dxf-vector-extract": "workspace:*",
+    "@pascal-app/floorplan-import": "workspace:*",
     "@pascal-app/lingo": "^0.2.0",
+    "@pascal-app/nodes": "workspace:*",
+    "@pascal-app/wall-detect": "workspace:*",
     "zod": ">=4.5.4 <4.6"
   },
   "devDependencies": {
