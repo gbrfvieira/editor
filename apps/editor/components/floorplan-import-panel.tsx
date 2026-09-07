@@ -1,8 +1,21 @@
 'use client'
 
-import { type AnyNodeId, GuideNode, saveAsset, useScene, WallNode } from '@pascal-app/core'
+import {
+  type AnyNodeId,
+  DoorNode,
+  GuideNode,
+  saveAsset,
+  useScene,
+  WallNode,
+  WindowNode,
+} from '@pascal-app/core'
 import { type DxfOpening, extractDxfVectorSegments } from '@pascal-app/dxf-vector-extract'
-import { commitWalls, type DetectedWall, toWallNodePatches } from '@pascal-app/floorplan-import'
+import {
+  commitWalls,
+  type DetectedWall,
+  matchOpeningsToWalls,
+  toWallNodePatches,
+} from '@pascal-app/floorplan-import'
 import { extractPdfVectorSegments } from '@pascal-app/pdf-vector-extract'
 import { useViewer } from '@pascal-app/viewer'
 import { detectWalls } from '@pascal-app/wall-detect'
@@ -10,6 +23,12 @@ import { useCallback, useState } from 'react'
 
 type EditableWall = DetectedWall & { id: number }
 type PreviewOpening = DxfOpening & { id: number }
+
+// Matches DoorNode/WindowNode schema defaults — kept explicit here so the
+// wall-local Y position math below stays correct regardless of schema drift.
+const DOOR_HEIGHT = 2.1
+const WINDOW_HEIGHT = 1.5
+const WINDOW_SILL_HEIGHT = 0.9
 
 function toEditableWalls(source: DetectedWall[]): EditableWall[] {
   return source.map((wall, id) => ({
@@ -190,16 +209,66 @@ export function FloorplanImportPanel() {
     // list above, so that review is the confidence gate — don't silently
     // drop low-confidence walls a second time here.
     const patches = toWallNodePatches(walls, { minConfidence: 0 })
+    const createdWalls: {
+      id: string
+      start: [number, number]
+      end: [number, number]
+      thickness: number
+    }[] = []
     commitWalls(
       patches,
       {
         createNode: (data, parentId) => {
-          createNode(WallNode.parse(data), parentId as AnyNodeId)
+          const wall = WallNode.parse(data)
+          createNode(wall, parentId as AnyNodeId)
+          createdWalls.push({
+            id: wall.id,
+            start: wall.start,
+            end: wall.end,
+            thickness: wall.thickness,
+          })
         },
       },
       levelId,
     )
-    setStatus(`${patches.length} parede(s) adicionada(s) ao nível.`)
+
+    const openingPatches = matchOpeningsToWalls(
+      openings.map((opening) => ({
+        type: opening.type,
+        position: opening.position,
+        width: opening.width,
+      })),
+      createdWalls,
+    )
+    for (const patch of openingPatches) {
+      if (patch.type === 'door') {
+        const door = DoorNode.parse({
+          wallId: patch.wallId,
+          parentId: patch.wallId,
+          position: [patch.localX, DOOR_HEIGHT / 2, 0],
+          width: patch.width,
+          height: DOOR_HEIGHT,
+        })
+        createNode(door, patch.wallId as AnyNodeId)
+      } else {
+        const windowNode = WindowNode.parse({
+          wallId: patch.wallId,
+          parentId: patch.wallId,
+          position: [patch.localX, WINDOW_SILL_HEIGHT + WINDOW_HEIGHT / 2, 0],
+          width: patch.width,
+          height: WINDOW_HEIGHT,
+        })
+        createNode(windowNode, patch.wallId as AnyNodeId)
+      }
+    }
+
+    const skippedOpenings = openings.length - openingPatches.length
+    setStatus(
+      `${patches.length} parede(s), ${openingPatches.length} vão(s) adicionados ao nível` +
+        (skippedOpenings > 0
+          ? ` (${skippedOpenings} vão(s) não encontraram parede próxima e foram ignorados — ajuste manualmente).`
+          : '.'),
+    )
   }
 
   const addPdfGuide = async () => {
@@ -231,8 +300,8 @@ export function FloorplanImportPanel() {
         <h3 className="font-medium text-sm">Importar planta (DXF, DWG ou PDF)</h3>
         <p className="mt-1 text-[11px] text-muted-foreground">
           Carregue um arquivo, confira a unidade abaixo (a maioria dos DWG/DXF de arquitetura usa
-          milímetros ou centímetros), revise as paredes detectadas e confirme. DWG é convertido
-          para DXF automaticamente (local e gratuito).
+          milímetros ou centímetros), revise as paredes detectadas e confirme. DWG é convertido para
+          DXF automaticamente (local e gratuito).
         </p>
       </div>
 
