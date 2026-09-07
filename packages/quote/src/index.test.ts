@@ -1,5 +1,11 @@
 import { expect, test } from 'bun:test'
-import { type CutListReport, calculateQuote, toQuoteText } from './index'
+import {
+  BRAZILIAN_PRICE_PRESETS,
+  brazilianPricePreset,
+  type CutListReport,
+  calculateQuote,
+  toQuoteText,
+} from './index'
 
 const cutList: CutListReport = {
   panels: [
@@ -43,4 +49,26 @@ test('exports a readable text quote', () => {
   expect(text).toContain('ORÇAMENTO')
   expect(text).toContain('Subtotal')
   expect(text).toContain('15.00')
+})
+
+test('provides Brazilian MDF presets with per-panel labor pricing', () => {
+  const preset = brazilianPricePreset(18)
+  expect(preset.boardPricePerM2['mdf-18mm']).toBe(
+    BRAZILIAN_PRICE_PRESETS[18].boardPricePerM2['mdf-18mm'],
+  )
+  expect(preset.laborPricePerPanelM2).toBeGreaterThan(0)
+})
+
+test('adds direct labor per square meter when configured', () => {
+  const report = calculateQuote(
+    cutList,
+    { sheets: [], sheetCount: 0, wasteAreaM2: 0, utilizationPercent: 0 },
+    {
+      boardPricePerM2: {},
+      edgeBandingPricePerMeter: 0,
+      hardwarePrices: { hinge: 0, 'drawer-slide': 0, handle: 0 },
+      laborPricePerPanelM2: 100,
+    },
+  )
+  expect(report.lineItems.find((line) => line.label === 'Mão de obra')?.total).toBe(48)
 })

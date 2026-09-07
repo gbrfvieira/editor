@@ -27,8 +27,9 @@ export async function toXlsx(report: CutListReport): Promise<Buffer> {
   }
 
   const hardware = workbook.addWorksheet('Ferragens')
-  hardware.addRow(['cabinetId', 'item', 'quantity'])
-  for (const item of report.hardware) hardware.addRow([item.cabinetId, item.item, item.quantity])
+  hardware.addRow(['cabinetId', 'item', 'quantity', 'brand', 'name'])
+  for (const item of report.hardware)
+    hardware.addRow([item.cabinetId, item.item, item.quantity, item.brand ?? '', item.name ?? ''])
 
   const edgeBanding = workbook.addWorksheet('Fita de borda')
   edgeBanding.addRow(['cabinetId', 'panel', 'lengthMm'])

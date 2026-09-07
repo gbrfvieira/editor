@@ -22,6 +22,25 @@ export type CabinetLike = {
   stack?: CabinetCompartmentLike[]
 }
 
+export type HardwareBrand = 'generic' | 'blum' | 'hafele' | 'fgv'
+
+export type HardwarePreset = {
+  hinge: string
+  'drawer-slide': string
+  handle: string
+}
+
+export const HARDWARE_PRESETS: Record<HardwareBrand, HardwarePreset> = {
+  generic: { hinge: 'Dobradiça 110°', 'drawer-slide': 'Corrediça telescópica', handle: 'Puxador' },
+  blum: { hinge: 'Blum CLIP top 110°', 'drawer-slide': 'Blum TANDEM', handle: 'Blum puxador' },
+  hafele: {
+    hinge: 'Häfele Metalla 110°',
+    'drawer-slide': 'Häfele Matrix',
+    handle: 'Häfele puxador',
+  },
+  fgv: { hinge: 'FGV Omnia 110°', 'drawer-slide': 'FGV V6', handle: 'FGV puxador' },
+}
+
 export type CutListReport = {
   panels: {
     cabinetId: string
@@ -32,7 +51,13 @@ export type CutListReport = {
     material?: string
     quantity: number
   }[]
-  hardware: { cabinetId: string; item: 'hinge' | 'drawer-slide' | 'handle'; quantity: number }[]
+  hardware: {
+    cabinetId: string
+    item: 'hinge' | 'drawer-slide' | 'handle'
+    quantity: number
+    brand?: HardwareBrand
+    name?: string
+  }[]
   edgeBanding: {
     cabinetId: string
     panel: string
@@ -81,13 +106,22 @@ function addHardware(
   cabinetId: string,
   item: CutListReport['hardware'][number]['item'],
   quantity: number,
+  brand: HardwareBrand,
 ) {
   if (quantity <= 0) return
   const existing = report.hardware.find(
     (entry) => entry.cabinetId === cabinetId && entry.item === item,
   )
   if (existing) existing.quantity += quantity
-  else report.hardware.push({ cabinetId, item, quantity })
+  else {
+    const preset = HARDWARE_PRESETS[brand]
+    report.hardware.push({
+      cabinetId,
+      item,
+      quantity,
+      ...(brand !== 'generic' ? { brand, name: preset[item] } : {}),
+    })
+  }
 }
 
 function addFrontEdgeBanding(
@@ -115,8 +149,12 @@ function hingesPerLeaf(height: number): number {
   return height > 0.9 ? 3 : 2
 }
 
-export function createCutList(cabinets: CabinetLike[]): CutListReport {
+export function createCutList(
+  cabinets: CabinetLike[],
+  options: { hardwareBrand?: HardwareBrand } = {},
+): CutListReport {
   const report: CutListReport = { panels: [], hardware: [], edgeBanding: [] }
+  const hardwareBrand = options.hardwareBrand ?? 'generic'
   for (const cabinet of cabinets) {
     const board = cabinet.boardThickness
     addPanel(report, cabinet, 'side', cabinet.depth, cabinet.carcassHeight, board, 2)
@@ -161,15 +199,17 @@ export function createCutList(cabinets: CabinetLike[]): CutListReport {
           )
         }
         addPanel(report, cabinet, 'door', cabinet.width / leaves, height, board, leaves)
-        addHardware(report, cabinet.id, 'hinge', hingesPerLeaf(height) * leaves)
-        if (cabinet.handleStyle !== 'none') addHardware(report, cabinet.id, 'handle', leaves)
+        addHardware(report, cabinet.id, 'hinge', hingesPerLeaf(height) * leaves, hardwareBrand)
+        if (cabinet.handleStyle !== 'none')
+          addHardware(report, cabinet.id, 'handle', leaves, hardwareBrand)
         addFrontEdgeBanding(report, cabinet.id, 'door', cabinet.width / leaves, height, leaves)
       } else if (compartment.type === 'drawer') {
         const count = Math.max(0, Math.floor(compartment.drawerCount ?? 0))
         const height = (compartment.height ?? cabinet.carcassHeight) / Math.max(1, count)
         addPanel(report, cabinet, 'drawer-front', cabinet.width, height, board, count)
-        addHardware(report, cabinet.id, 'drawer-slide', count)
-        if (cabinet.handleStyle !== 'none') addHardware(report, cabinet.id, 'handle', count)
+        addHardware(report, cabinet.id, 'drawer-slide', count, hardwareBrand)
+        if (cabinet.handleStyle !== 'none')
+          addHardware(report, cabinet.id, 'handle', count, hardwareBrand)
         addFrontEdgeBanding(report, cabinet.id, 'drawer-front', cabinet.width, height, count)
       }
     }
@@ -201,9 +241,11 @@ export function toCsv(report: CutListReport): string {
         .map(csvCell)
         .join(','),
     )
-  rows.push('', '[hardware]', 'cabinetId,item,quantity')
+  rows.push('', '[hardware]', 'cabinetId,item,quantity,brand,name')
   for (const item of report.hardware)
-    rows.push([item.cabinetId, item.item, item.quantity].map(csvCell).join(','))
+    rows.push(
+      [item.cabinetId, item.item, item.quantity, item.brand, item.name].map(csvCell).join(','),
+    )
   rows.push('', '[edgeBanding]', 'cabinetId,panel,edge,lengthMm')
   for (const item of report.edgeBanding)
     rows.push([item.cabinetId, item.panel, item.edge, item.lengthMm].map(csvCell).join(','))
@@ -212,5 +254,6 @@ export function toCsv(report: CutListReport): string {
 
 export type { CutPanel, NestingPlacement, NestingResult, SheetSize } from './nesting'
 export { nestPanels } from './nesting'
+export { toPdf } from './pdf'
 export { toNestingSvg } from './svg'
 export { toXlsx } from './xlsx'

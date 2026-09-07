@@ -1,7 +1,7 @@
 'use client'
 
 import { type AnyNodeId, GuideNode, saveAsset, useScene, WallNode } from '@pascal-app/core'
-import { extractDxfVectorSegments } from '@pascal-app/dxf-vector-extract'
+import { type DxfOpening, extractDxfVectorSegments } from '@pascal-app/dxf-vector-extract'
 import { commitWalls, type DetectedWall, toWallNodePatches } from '@pascal-app/floorplan-import'
 import { extractPdfVectorSegments } from '@pascal-app/pdf-vector-extract'
 import { useViewer } from '@pascal-app/viewer'
@@ -9,6 +9,7 @@ import { detectWalls } from '@pascal-app/wall-detect'
 import { useCallback, useState } from 'react'
 
 type EditableWall = DetectedWall & { id: number }
+type PreviewOpening = DxfOpening & { id: number }
 
 function toEditableWalls(source: DetectedWall[]): EditableWall[] {
   return source.map((wall, id) => ({
@@ -41,52 +42,86 @@ export function FloorplanImportPanel() {
   const levelId = useViewer((state) => state.selection.levelId)
   const createNode = useScene((state) => state.createNode)
   const [walls, setWalls] = useState<EditableWall[]>([])
+  const [openings, setOpenings] = useState<PreviewOpening[]>([])
+  const [removedWalls, setRemovedWalls] = useState<EditableWall[]>([])
+  const [snapTolerance, setSnapTolerance] = useState(0.05)
   const [fileName, setFileName] = useState<string | null>(null)
   const [dwgFileName, setDwgFileName] = useState<string | null>(null)
   const [pdfFallback, setPdfFallback] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState<string | null>(null)
 
-  const handleFile = useCallback(async (file: File | undefined) => {
-    if (!file) return
-    setFileName(file.name)
-    setError(null)
-    setStatus(null)
-    setPdfFallback(null)
-    if (file.name.toLocaleLowerCase().endsWith('.dwg')) {
-      setDwgFileName(file.name)
-      setWalls([])
-      setStatus(
-        'DWG selecionado. Converta-o para DXF com o ODA File Converter e carregue o DXF gerado abaixo.',
-      )
-      return
-    }
-    setDwgFileName(null)
-    try {
-      const isPdf = file.name.toLocaleLowerCase().endsWith('.pdf')
-      const segments = isPdf
-        ? (await extractPdfVectorSegments(new Uint8Array(await file.arrayBuffer()))).flatMap(
-            (page) => page.segments,
-          )
-        : extractDxfVectorSegments(await file.text()).flatMap((layer) =>
-            layer.segments.map((segment) => ({ ...segment, layer: layer.layer })),
-          )
-      const detected = detectWalls(segments, { preferLayerContaining: 'PAREDE' }).walls
-      setWalls(toEditableWalls(detected))
-      if (isPdf && segments.length === 0) {
-        setPdfFallback(file)
-        setStatus('Este PDF não contém vetores de linha. Você pode adicioná-lo como guia visual.')
-      } else {
-        setStatus(`${detected.length} parede(s) detectada(s). Revise e confirme.`)
+  const handleFile = useCallback(
+    async (file: File | undefined) => {
+      if (!file) return
+      setFileName(file.name)
+      setError(null)
+      setStatus(null)
+      setPdfFallback(null)
+      setOpenings([])
+      setRemovedWalls([])
+      if (file.name.toLocaleLowerCase().endsWith('.dwg')) {
+        setDwgFileName(file.name)
+        setWalls([])
+        setStatus(
+          'DWG selecionado. Converta-o para DXF com o ODA File Converter e carregue o DXF gerado abaixo.',
+        )
+        return
       }
-    } catch (cause) {
-      setWalls([])
-      setError(cause instanceof Error ? cause.message : 'Não foi possível ler o arquivo.')
-    }
-  }, [])
+      setDwgFileName(null)
+      try {
+        const isPdf = file.name.toLocaleLowerCase().endsWith('.pdf')
+        const dxfLayers = isPdf ? [] : extractDxfVectorSegments(await file.text())
+        const segments = isPdf
+          ? (await extractPdfVectorSegments(new Uint8Array(await file.arrayBuffer()))).flatMap(
+              (page) => page.segments,
+            )
+          : dxfLayers.flatMap((layer) =>
+              layer.segments.map((segment) => ({ ...segment, layer: layer.layer })),
+            )
+        let openingId = 0
+        setOpenings(
+          dxfLayers.flatMap((layer) =>
+            (layer.openings ?? []).map((opening) => ({ ...opening, id: openingId++ })),
+          ),
+        )
+        const detected = detectWalls(segments, {
+          preferLayerContaining: 'PAREDE',
+          snapToleranceM: snapTolerance,
+        }).walls
+        setWalls(toEditableWalls(detected))
+        if (isPdf && segments.length === 0) {
+          setPdfFallback(file)
+          setStatus('Este PDF não contém vetores de linha. Você pode adicioná-lo como guia visual.')
+        } else {
+          setStatus(
+            `${detected.length} parede(s) e ${dxfLayers.reduce((sum, layer) => sum + (layer.openings?.length ?? 0), 0)} vão(s) detectados. Revise e confirme.`,
+          )
+        }
+      } catch (cause) {
+        setWalls([])
+        setError(cause instanceof Error ? cause.message : 'Não foi possível ler o arquivo.')
+      }
+    },
+    [snapTolerance],
+  )
 
   const updateWall = (id: number, update: (wall: EditableWall) => EditableWall) => {
     setWalls((current) => current.map((wall) => (wall.id === id ? update(wall) : wall)))
+  }
+
+  const removeWall = (id: number) => {
+    const removed = walls.find((wall) => wall.id === id)
+    if (removed) setRemovedWalls((history) => [...history, removed])
+    setWalls((current) => current.filter((wall) => wall.id !== id))
+  }
+
+  const undoRemove = () => {
+    setRemovedWalls((history) => {
+      const restored = history.at(-1)
+      if (restored) setWalls((current) => [...current, restored])
+      return restored ? history.slice(0, -1) : history
+    })
   }
 
   const confirm = () => {
@@ -149,6 +184,22 @@ export function FloorplanImportPanel() {
         />
       </label>
 
+      <label className="flex items-center justify-between gap-2 text-xs">
+        <span>Snap de cantos (m)</span>
+        <input
+          aria-label="snap tolerance"
+          className="w-24 rounded border border-border/60 bg-background px-1.5 py-1"
+          min="0"
+          onChange={(event) => {
+            const value = Number(event.target.value)
+            if (Number.isFinite(value)) setSnapTolerance(value)
+          }}
+          step="0.01"
+          type="number"
+          value={snapTolerance}
+        />
+      </label>
+
       {dwgFileName ? (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-[11px] text-muted-foreground">
           <p className="font-medium text-foreground">Conversão DWG manual necessária</p>
@@ -173,7 +224,17 @@ export function FloorplanImportPanel() {
             <div className="rounded-lg bg-muted/30 p-2" key={wall.id}>
               <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
                 <span>Parede {index + 1}</span>
-                <span>{Math.round(wall.confidence * 100)}% confiança</span>
+                <div className="flex items-center gap-2">
+                  <span>{Math.round(wall.confidence * 100)}% confiança</span>
+                  <button
+                    aria-label={`Excluir parede ${index + 1}`}
+                    className="text-red-500 hover:text-red-600"
+                    onClick={() => removeWall(wall.id)}
+                    type="button"
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
               <div className="grid grid-cols-5 gap-1">
                 {(['start', 'end'] as const).flatMap((point) =>
@@ -209,6 +270,35 @@ export function FloorplanImportPanel() {
               </div>
             </div>
           ))}
+        </div>
+      ) : null}
+
+      {removedWalls.length > 0 ? (
+        <button
+          className="rounded-lg border border-border/60 px-3 py-2 text-left text-xs hover:bg-muted"
+          onClick={undoRemove}
+          type="button"
+        >
+          Desfazer exclusão ({removedWalls.length})
+        </button>
+      ) : null}
+
+      {openings.length > 0 ? (
+        <div className="rounded-lg border border-border/60 p-2 text-xs">
+          <div className="mb-1 font-medium">Vãos detectados (prévia)</div>
+          <div className="flex flex-col gap-1 text-muted-foreground">
+            {openings.map((opening) => (
+              <div className="flex items-center justify-between" key={opening.id}>
+                <span>
+                  {opening.type === 'door' ? 'Porta' : 'Janela'} · {opening.blockName}
+                </span>
+                <span>
+                  {opening.width.toFixed(2)} m · ({opening.position[0].toFixed(2)},{' '}
+                  {opening.position[1].toFixed(2)})
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 

@@ -34,6 +34,21 @@ test('base-door preset shape produces panels and double-door hardware', () => {
   })
 })
 
+test('adds real hardware names for a selected brand', () => {
+  const report = createCutList(
+    [
+      base({
+        id: 'brand-cabinet',
+        stack: [{ type: 'door', doorType: 'single', height: 0.8 }],
+      }),
+    ],
+    { hardwareBrand: 'blum' },
+  )
+  expect(report.hardware).toContainEqual(
+    expect.objectContaining({ item: 'hinge', brand: 'blum', name: 'Blum CLIP top 110°' }),
+  )
+})
+
 test('drawer-base and sink-base representative presets', () => {
   const report = createCutList([
     base({ id: 'drawer-base', stack: [{ type: 'drawer', height: 0.8, drawerCount: 3 }] }),

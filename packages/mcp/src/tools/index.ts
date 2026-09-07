@@ -28,6 +28,7 @@ import { registerRedo } from './redo'
 import { registerRoomTools } from './room-tools'
 import { registerSceneLifecycleTools } from './scene-lifecycle'
 import { registerSceneQueryTools } from './scene-query'
+import { registerSetCabinetStack } from './set-cabinet-stack'
 import { registerSetZone } from './set-zone'
 import { registerTemplateTools } from './templates'
 import { registerUndo } from './undo'
@@ -46,6 +47,7 @@ export function registerTools(server: McpServer, operations: SceneOperations): v
   registerCreateCabinetRun(server, operations)
   registerAddCabinetModule(server, operations)
   registerApplyCabinetPreset(server, operations)
+  registerSetCabinetStack(server, operations)
   registerImportFloorplanDxf(server, operations)
   registerCommitFloorplanWalls(server, operations)
   registerGenerateCutlist(server, operations)

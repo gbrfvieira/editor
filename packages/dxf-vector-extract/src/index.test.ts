@@ -71,3 +71,52 @@ test('ignores unsupported entities without breaking the parse', () => {
     },
   ])
 })
+
+test('extracts named door and window INSERT openings', () => {
+  const result = extractDxfVectorSegments(
+    dxf(
+      '0\nINSERT\n8\nPAREDES\n2\nPORTA_900\n10\n2\n20\n3\n50\n90\n' +
+        '0\nINSERT\n8\nESQUADRIAS\n2\nWINDOW_1200\n10\n4\n20\n5\n',
+    ),
+  )
+  expect(result).toEqual([
+    {
+      layer: 'PAREDES',
+      segments: [],
+      openings: [
+        {
+          type: 'door',
+          position: [2, 3],
+          width: 0.9,
+          rotation: Math.PI / 2,
+          blockName: 'PORTA_900',
+        },
+      ],
+    },
+    {
+      layer: 'ESQUADRIAS',
+      segments: [],
+      openings: [
+        {
+          type: 'window',
+          position: [4, 5],
+          width: 1.2,
+          rotation: 0,
+          blockName: 'WINDOW_1200',
+        },
+      ],
+    },
+  ])
+})
+
+test('flattens ARC and bulged polyline entities', () => {
+  const result = extractDxfVectorSegments(
+    dxf(
+      '0\nARC\n8\nCURVES\n10\n0\n20\n0\n40\n1\n50\n0\n51\n90\n' +
+        '0\nLWPOLYLINE\n8\nCURVES\n90\n2\n10\n0\n20\n0\n42\n1\n10\n2\n20\n0\n',
+    ),
+    { curveTolerance: 0.1 },
+  )
+  expect(result[0]?.segments.length).toBeGreaterThan(2)
+  expect(result[0]?.segments.every((segment) => Number.isFinite(segment.end[0]))).toBe(true)
+})

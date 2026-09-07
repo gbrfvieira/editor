@@ -6,6 +6,7 @@ import { SceneBridge } from '../bridge/scene-bridge'
 import { registerAddCabinetModule } from './add-cabinet-module'
 import { registerApplyCabinetPreset } from './apply-cabinet-preset'
 import { registerCreateCabinetRun } from './create-cabinet-run'
+import { registerSetCabinetStack } from './set-cabinet-stack'
 
 describe('cabinet MCP tools', () => {
   let client: Client
@@ -19,6 +20,7 @@ describe('cabinet MCP tools', () => {
     registerCreateCabinetRun(server, bridge)
     registerAddCabinetModule(server, bridge)
     registerApplyCabinetPreset(server, bridge)
+    registerSetCabinetStack(server, bridge)
     const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair()
     client = new Client({ name: 'cabinet-client', version: '0.0.0' })
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)])
@@ -44,6 +46,19 @@ describe('cabinet MCP tools', () => {
     expect(presetResult.isError).toBeFalsy()
     const module = bridge.getNode(moduleId) as { stack?: Array<{ type: string }> }
     expect(module.stack?.map((entry) => entry.type)).toEqual(['drawer', 'door'])
+
+    const stackResult = await client.callTool({
+      name: 'set_cabinet_stack',
+      arguments: {
+        moduleId,
+        stack: [
+          { type: 'shelf', shelfCount: 3 },
+          { type: 'door', doorType: 'single-left' },
+        ],
+      },
+    })
+    expect(stackResult.isError).toBeFalsy()
+    expect((bridge.getNode(moduleId) as { stack?: Array<{ type: string }> }).stack).toHaveLength(2)
   })
 
   test('rejects an invalid level for a new run', async () => {

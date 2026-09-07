@@ -20,7 +20,7 @@ function EditorItemsPanel() {
 const SIDEBAR_TABS = [
   {
     id: 'site',
-    label: 'Scene',
+    label: 'Cena',
     component: () => null,
     mobileDefaultSnap: 0.5,
     mobileIcon: <Layers className="h-5 w-5" />,
@@ -36,7 +36,7 @@ const SIDEBAR_TABS = [
   },
   {
     id: 'build',
-    label: 'Build',
+    label: 'Construir',
     component: BuildTab,
     mobileDefaultSnap: 0.5,
     mobileIcon: <Hammer className="h-5 w-5" />,
@@ -52,7 +52,7 @@ const SIDEBAR_TABS = [
   },
   {
     id: 'items',
-    label: 'Items',
+    label: 'Itens',
     component: EditorItemsPanel,
     mobileDefaultSnap: 0.5,
     mobileIcon: <Package className="h-5 w-5" />,
@@ -68,7 +68,7 @@ const SIDEBAR_TABS = [
   },
   {
     id: 'settings',
-    label: 'Settings',
+    label: 'Configurações',
     component: () => null,
     mobileDefaultSnap: 0.5,
     mobileIcon: <Settings className="h-5 w-5" />,

@@ -41,26 +41,26 @@ type BuildType = {
 
 // Same icons + ordering as the community Build sidebar, minus presets.
 const BASE_BUILD_TYPES: BuildType[] = [
-  { id: 'wall', label: 'Wall', iconSrc: '/icons/wall.webp', kind: 'wall' },
-  { id: 'fence', label: 'Fence', iconSrc: '/icons/fence.webp', kind: 'fence' },
-  { id: 'slab', label: 'Slab', iconSrc: '/icons/floor.webp', kind: 'slab' },
-  { id: 'ceiling', label: 'Ceiling', iconSrc: '/icons/ceiling.webp', kind: 'ceiling' },
-  { id: 'stair', label: 'Stairs', iconSrc: '/icons/stairs.webp', kind: 'stair' },
-  { id: 'elevator', label: 'Elevator', iconSrc: '/icons/elevator.webp', kind: 'elevator' },
-  { id: 'door', label: 'Door', iconSrc: '/icons/door.webp', kind: 'door' },
-  { id: 'window', label: 'Window', iconSrc: '/icons/window.webp', kind: 'window' },
-  { id: 'column', label: 'Column', iconSrc: '/icons/column.webp', kind: 'column' },
-  { id: 'shelf', label: 'Shelf', iconSrc: '/icons/shelf.webp', kind: 'shelf' },
-  { id: 'spawn', label: 'Spawn Point', iconSrc: '/icons/spawn-point.webp', kind: 'spawn' },
-  { id: 'kitchen', label: 'Kitchen', iconSrc: '/icons/kitchen.webp' },
+  { id: 'wall', label: 'Parede', iconSrc: '/icons/wall.webp', kind: 'wall' },
+  { id: 'fence', label: 'Cerca', iconSrc: '/icons/fence.webp', kind: 'fence' },
+  { id: 'slab', label: 'Laje', iconSrc: '/icons/floor.webp', kind: 'slab' },
+  { id: 'ceiling', label: 'Forro', iconSrc: '/icons/ceiling.webp', kind: 'ceiling' },
+  { id: 'stair', label: 'Escada', iconSrc: '/icons/stairs.webp', kind: 'stair' },
+  { id: 'elevator', label: 'Elevador', iconSrc: '/icons/elevator.webp', kind: 'elevator' },
+  { id: 'door', label: 'Porta', iconSrc: '/icons/door.webp', kind: 'door' },
+  { id: 'window', label: 'Janela', iconSrc: '/icons/window.webp', kind: 'window' },
+  { id: 'column', label: 'Coluna', iconSrc: '/icons/column.webp', kind: 'column' },
+  { id: 'shelf', label: 'Prateleira', iconSrc: '/icons/shelf.webp', kind: 'shelf' },
+  { id: 'spawn', label: 'Ponto de início', iconSrc: '/icons/spawn-point.webp', kind: 'spawn' },
+  { id: 'kitchen', label: 'Cozinha', iconSrc: '/icons/kitchen.webp' },
   {
     id: 'floorplan-import',
-    label: 'Import floorplan',
+    label: 'Importar planta',
     iconSrc: '/icons/floor.webp',
     action: 'floorplan-import',
   },
-  { id: 'painting', label: 'Painting', iconSrc: '/icons/paint.webp', mode: 'material-paint' },
-  { id: 'terrain', label: 'Terrain', iconSrc: '/icons/mesh.webp', mode: 'terrain-sculpt' },
+  { id: 'painting', label: 'Pintura', iconSrc: '/icons/paint.webp', mode: 'material-paint' },
+  { id: 'terrain', label: 'Terreno', iconSrc: '/icons/mesh.webp', mode: 'terrain-sculpt' },
 ]
 
 const subscribeToClientMount = () => () => {}

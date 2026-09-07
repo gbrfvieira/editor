@@ -13,3 +13,8 @@ chamador.
 
 `toQuoteText(report)` gera uma representação textual simples com cada item,
 quantidade, preço unitário, total da linha, subtotal e total final.
+
+`brazilianPricePreset(15 | 18)` fornece valores indicativos em BRL para
+espessuras comuns de MDF, fita de borda e ferragem, incluindo um preço
+opcional de mão de obra por m² de painel. Os preços são configuráveis e devem
+ser substituídos por uma cotação atual de fornecedor.
