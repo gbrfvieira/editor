@@ -5,6 +5,15 @@ export type Point = [number, number]
 export interface DxfSegment {
   start: Point
   end: Point
+  source?: 'arc' | 'bulge'
+}
+
+export interface DxfArc {
+  center: Point
+  radius: number
+  startAngle: number
+  endAngle: number
+  layer: string
 }
 
 export interface DxfOpening {
@@ -19,6 +28,7 @@ export interface DxfLayerSegments {
   layer: string
   segments: DxfSegment[]
   openings?: DxfOpening[]
+  arcs?: DxfArc[]
 }
 
 type SupportedEntity = {
@@ -51,10 +61,10 @@ function segmentsForArc(
   endAngle: number,
   tolerance: number,
 ): DxfSegment[] {
-  if (!Number.isFinite(radius) || radius <= 0) return []
+  if (![radius, startAngle, endAngle].every(Number.isFinite) || radius <= 0) return []
   let sweep = endAngle - startAngle
   if (sweep <= 0) sweep += Math.PI * 2
-  const count = Math.max(2, Math.ceil((Math.abs(sweep) * radius) / tolerance))
+  const count = Math.min(4096, Math.max(2, Math.ceil((Math.abs(sweep) * radius) / tolerance)))
   const points = Array.from({ length: count + 1 }, (_, index) => {
     const angle = startAngle + (sweep * index) / count
     return [center[0] + radius * Math.cos(angle), center[1] + radius * Math.sin(angle)] as Point
@@ -78,7 +88,7 @@ function segmentsForBulge(
   const offset = chord / (2 * Math.tan(sweep / 2))
   const center: Point = [midpoint[0] + normal[0] * offset, midpoint[1] + normal[1] * offset]
   const startAngle = Math.atan2(start[1] - center[1], start[0] - center[0])
-  const count = Math.max(2, Math.ceil((Math.abs(sweep) * radius) / tolerance))
+  const count = Math.min(4096, Math.max(2, Math.ceil((Math.abs(sweep) * radius) / tolerance)))
   const points = Array.from({ length: count + 1 }, (_, index) => {
     const angle = startAngle + (sweep * index) / count
     return [center[0] + radius * Math.cos(angle), center[1] + radius * Math.sin(angle)] as Point
@@ -116,14 +126,20 @@ export function extractDxfVectorSegments(
   const document = new DxfParser().parseSync(source)
   const byLayer = new Map<string, DxfSegment[]>()
   const openingsByLayer = new Map<string, DxfOpening[]>()
+  const arcsByLayer = new Map<string, DxfArc[]>()
 
-  const addSegment = (layerName: string, start: Point, end: Point): void => {
+  const addSegment = (
+    layerName: string,
+    start: Point,
+    end: Point,
+    source?: DxfSegment['source'],
+  ): void => {
     let segments = byLayer.get(layerName)
     if (!segments) {
       segments = []
       byLayer.set(layerName, segments)
     }
-    segments.push({ start, end })
+    segments.push({ start, end, ...(source ? { source } : {}) })
   }
 
   const addOpening = (layerName: string, opening: DxfOpening): void => {
@@ -153,6 +169,20 @@ export function extractDxfVectorSegments(
         entity.startAngle !== undefined &&
         entity.endAngle !== undefined
       ) {
+        if (
+          ![entity.radius, entity.startAngle, entity.endAngle].every(Number.isFinite) ||
+          entity.radius <= 0
+        )
+          continue
+        const arcs = arcsByLayer.get(layer) ?? []
+        arcs.push({
+          center,
+          radius: entity.radius,
+          startAngle: entity.startAngle,
+          endAngle: entity.endAngle,
+          layer,
+        })
+        arcsByLayer.set(layer, arcs)
         for (const segment of segmentsForArc(
           center,
           entity.radius,
@@ -160,7 +190,7 @@ export function extractDxfVectorSegments(
           entity.endAngle,
           curveTolerance,
         )) {
-          addSegment(layer, segment.start, segment.end)
+          addSegment(layer, segment.start, segment.end, 'arc')
         }
       }
       continue
@@ -196,7 +226,12 @@ export function extractDxfVectorSegments(
         vertices[index - 1].bulge,
         curveTolerance,
       )) {
-        addSegment(layer, segment.start, segment.end)
+        addSegment(
+          layer,
+          segment.start,
+          segment.end,
+          vertices[index - 1].bulge ? 'bulge' : undefined,
+        )
       }
     }
     if ((entity.shape === true || entity.closed === true) && vertices.length > 2) {
@@ -206,7 +241,12 @@ export function extractDxfVectorSegments(
         vertices[vertices.length - 1].bulge,
         curveTolerance,
       )) {
-        addSegment(layer, segment.start, segment.end)
+        addSegment(
+          layer,
+          segment.start,
+          segment.end,
+          vertices[vertices.length - 1].bulge ? 'bulge' : undefined,
+        )
       }
     }
   }
@@ -215,8 +255,35 @@ export function extractDxfVectorSegments(
   return [...layerNames].map((layer) => {
     const segments = byLayer.get(layer) ?? []
     const openings = openingsByLayer.get(layer)
-    return openings ? { layer, segments, openings } : { layer, segments }
+    const arcs = arcsByLayer.get(layer)
+    return { layer, segments, ...(openings ? { openings } : {}), ...(arcs ? { arcs } : {}) }
   })
 }
 
 export const extractDxfSegments = extractDxfVectorSegments
+
+/** Includes table-only layers and unsupported entities, unlike the geometry-only result. */
+export function inspectDxf(
+  source: string,
+  options: { curveTolerance?: number } = {},
+): {
+  insertionUnits: number | null
+  layers: { layer: string; segmentCount: number; entityCount: number }[]
+} {
+  const document = new DxfParser().parseSync(source)
+  const layers = new Map<string, { layer: string; segmentCount: number; entityCount: number }>()
+  const ensure = (layer: string) => {
+    let entry = layers.get(layer)
+    if (!entry) {
+      entry = { layer, segmentCount: 0, entityCount: 0 }
+      layers.set(layer, entry)
+    }
+    return entry
+  }
+  for (const layer of Object.keys(document?.tables?.layer?.layers ?? {})) ensure(layer)
+  for (const entity of document?.entities ?? []) ensure(entity.layer ?? '0').entityCount += 1
+  for (const result of extractDxfVectorSegments(source, options))
+    ensure(result.layer).segmentCount = result.segments.length
+  const units = document?.header?.$INSUNITS
+  return { insertionUnits: typeof units === 'number' ? units : null, layers: [...layers.values()] }
+}

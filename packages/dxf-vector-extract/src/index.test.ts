@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test'
-import { extractDxfVectorSegments } from './index'
+import { detectDoorOpenings, detectWalls, suggestCadUnit } from '../../wall-detect/src/index'
+import { extractDxfVectorSegments, inspectDxf } from './index'
 
 function dxf(entities: string): string {
   return `0\nSECTION\n2\nENTITIES\n${entities}0\nENDSEC\n0\nEOF\n`
@@ -119,4 +120,65 @@ test('flattens ARC and bulged polyline entities', () => {
   )
   expect(result[0]?.segments.length).toBeGreaterThan(2)
   expect(result[0]?.segments.every((segment) => Number.isFinite(segment.end[0]))).toBe(true)
+  expect(result[0].arcs?.[0].endAngle).toBeCloseTo(Math.PI / 2)
+  expect(result[0].arcs?.[0].radius).toBe(1)
+  expect(result[0].segments[0].source).toBe('arc')
+})
+
+test('reports layers with unsupported entities and DXF insertion units', () => {
+  const source =
+    '0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n' +
+    dxf(
+      '0\nLINE\n8\nALV\n10\n0\n20\n0\n11\n3000\n21\n0\n0\nTEXT\n8\nNOTES\n10\n0\n20\n0\n40\n100\n1\nNote\n',
+    )
+  expect(inspectDxf(source)).toEqual({
+    insertionUnits: 4,
+    layers: [
+      { layer: 'ALV', segmentCount: 1, entityCount: 1 },
+      { layer: 'NOTES', segmentCount: 0, entityCount: 1 },
+    ],
+  })
+})
+
+test('includes an empty layer defined only in the layer table', () => {
+  const source =
+    '0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n70\n1\n0\nLAYER\n2\nEMPTY\n70\n0\n62\n7\n6\nCONTINUOUS\n0\nENDTAB\n0\nENDSEC\n' +
+    dxf('')
+  expect(inspectDxf(source)).toEqual({
+    insertionUnits: null,
+    layers: [{ layer: 'EMPTY', segmentCount: 0, entityCount: 0 }],
+  })
+})
+
+test('a millimetre DXF produces a door candidate without any INSERT', () => {
+  const source =
+    '0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n' +
+    dxf(
+      '0\nLINE\n8\nARQ-PAREDE\n10\n-3000\n20\n0\n11\n0\n21\n0\n' +
+        '0\nARC\n8\nESQUADRIAS\n10\n0\n20\n0\n40\n900\n50\n0\n51\n90\n' +
+        '0\nLINE\n8\nESQUADRIAS\n10\n0\n20\n0\n11\n0\n21\n900\n',
+    )
+  const groups = extractDxfVectorSegments(source, { curveTolerance: 20 })
+  const segments = groups.flatMap(({ layer, segments }) => segments.map((s) => ({ ...s, layer })))
+  const { metersPerUnit } = suggestCadUnit(segments, inspectDxf(source).insertionUnits)
+  const { walls } = detectWalls(
+    segments
+      .filter((s) => s.layer === 'ARQ-PAREDE')
+      .map((s) => ({
+        ...s,
+        start: [s.start[0] * metersPerUnit, s.start[1] * metersPerUnit],
+        end: [s.end[0] * metersPerUnit, s.end[1] * metersPerUnit],
+      })),
+  )
+  const doors = detectDoorOpenings(
+    groups.flatMap((g) => g.arcs ?? []),
+    segments,
+    walls,
+    { metersPerUnit },
+  )
+  expect(walls).toHaveLength(1)
+  expect(doors).toHaveLength(1)
+  expect(doors[0].width).toBeCloseTo(0.9, 12)
+  expect(doors[0].position[0]).toBeCloseTo(0.45, 12)
+  expect(walls[0].confidence).toBe(0.7)
 })

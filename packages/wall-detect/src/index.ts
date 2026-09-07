@@ -4,6 +4,7 @@ export interface InputSegment {
   start: Point
   end: Point
   layer?: string
+  source?: 'arc' | 'bulge'
 }
 
 export interface Wall {
@@ -28,6 +29,10 @@ const DEFAULT_SNAP_TOLERANCE = 0.05
 const DEFAULT_SINGLE_WALL_THICKNESS = 0.2
 const PARALLEL_ANGLE_TOLERANCE = Math.PI / 18
 const MIN_OVERLAP_FRACTION = 0.1
+
+export function isWallLayer(layer = ''): boolean {
+  return /PAREDE|WALL|ALVEN|(?:^|[^A-Z])ALV(?:$|[^A-Z])/i.test(layer)
+}
 
 function subtract(left: Point, right: Point): Point {
   return [left[0] - right[0], left[1] - right[1]]
@@ -222,7 +227,7 @@ export function detectWalls(
         start: [...segment.start],
         end: [...segment.end],
         thickness: DEFAULT_SINGLE_WALL_THICKNESS,
-        confidence: 0.35,
+        confidence: !segment.source && isWallLayer(segment.layer) ? 0.7 : 0.35,
       })
     }
   })
@@ -232,3 +237,8 @@ export function detectWalls(
 }
 
 export const detectWallSegments = detectWalls
+
+export type { DoorArc, DoorOpening } from './openings'
+export { detectDoorOpenings } from './openings'
+export type { CadUnit, UnitSuggestion } from './units'
+export { suggestCadUnit } from './units'

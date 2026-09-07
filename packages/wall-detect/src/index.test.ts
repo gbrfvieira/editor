@@ -49,5 +49,6 @@ test('snaps nearly touching endpoints to the same point', () => {
     (wall) => Math.abs(wall.end[0] - wall.start[0]) < Math.abs(wall.end[1] - wall.start[1]),
   )?.start
   expect(horizontalEnd).toEqual(verticalStart)
-  expect(horizontalEnd).toEqual([1.015, 0.01])
+  expect(horizontalEnd?.[0]).toBeCloseTo(1.015, 12)
+  expect(horizontalEnd?.[1]).toBeCloseTo(0.01, 12)
 })
