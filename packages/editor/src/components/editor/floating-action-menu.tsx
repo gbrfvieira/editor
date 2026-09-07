@@ -10,8 +10,6 @@ import {
   ElevatorNode,
   emitter,
   FenceNode,
-  generateId,
-  getActiveRoofHeight,
   getEffectiveNode,
   getWallCurveLength,
   getWallEffectiveHeightForNodes,
@@ -23,7 +21,6 @@ import {
   isSplineFence,
   type NodeQuickAction,
   nodeRegistry,
-  RoofSegmentNode,
   runAsSingleSceneHistoryStep,
   type SlabNode,
   SpawnNode,
@@ -53,7 +50,6 @@ import { resolveFloatingActionMenuVisibility } from '../../lib/interaction/overl
 import { curveReshapeScope, holeEditScope } from '../../lib/interaction/scope'
 import { playBlockedQuickActionFeedback } from '../../lib/quick-action-feedback'
 import { collectQuickActionNodeScope } from '../../lib/quick-action-nodes'
-import { duplicateRoofSubtree } from '../../lib/roof-duplication'
 import { emitDeleteSFX, sfxEmitter } from '../../lib/sfx-bus'
 import { cn } from '../../lib/utils'
 import useEditor from '../../store/use-editor'
@@ -86,8 +82,6 @@ const ALLOWED_TYPES = [
   'door',
   'window',
   'elevator',
-  'roof',
-  'roof-segment',
   'stair',
   'stair-segment',
   'wall',
@@ -226,24 +220,6 @@ function getObjectGeometryKey(object: THREE.Object3D): string {
     )
   })
   return parts.join('|')
-}
-
-function setNodeDerivedMenuAnchor(
-  node: AnyNode,
-  object: THREE.Object3D,
-  target: THREE.Vector3,
-): boolean {
-  if (node.type !== 'roof-segment') return false
-
-  const visualTop =
-    node.wallHeight +
-    getActiveRoofHeight(node) +
-    Math.max(0, node.deckThickness ?? 0) +
-    Math.max(0, node.shingleThickness ?? 0)
-
-  target.set(0, visualTop, 0).applyMatrix4(object.matrixWorld)
-  target.y += getMenuYOffset(node)
-  return true
 }
 
 // Fence schema defaults — mirror packages/nodes/src/fence/definition.ts so the
@@ -441,20 +417,16 @@ export function FloatingActionMenu() {
 
       if (needsRecompute) {
         const effectiveNode = getEffectiveNode(node)
-        if (!setNodeDerivedMenuAnchor(effectiveNode, obj, anchorRef.current)) {
-          _anchorBox.setFromObject(obj)
-          if (!_anchorBox.isEmpty()) {
-            _anchorBox.getCenter(_anchorCenter)
-            // Position above the object. Per-type offsets clear each kind's
-            // in-world chrome (height-resize arrows, measurement labels).
-            anchorRef.current.set(
-              _anchorCenter.x,
-              _anchorBox.max.y + getMenuYOffset(effectiveNode),
-              _anchorCenter.z,
-            )
-            hasAnchorRef.current = true
-          }
-        } else {
+        _anchorBox.setFromObject(obj)
+        if (!_anchorBox.isEmpty()) {
+          _anchorBox.getCenter(_anchorCenter)
+          // Position above the object. Per-type offsets clear each kind's
+          // in-world chrome (height-resize arrows, measurement labels).
+          anchorRef.current.set(
+            _anchorCenter.x,
+            _anchorBox.max.y + getMenuYOffset(effectiveNode),
+            _anchorCenter.z,
+          )
           hasAnchorRef.current = true
         }
         lastMatrixRef.current.copy(obj.matrixWorld)
@@ -501,15 +473,6 @@ export function FloatingActionMenu() {
       if (!node?.parentId) return
       sfxEmitter.emit('sfx:item-pick')
 
-      if (node.type === 'roof') {
-        try {
-          duplicateRoofSubtree(node.id as AnyNodeId, { mode: 'move' })
-        } catch (error) {
-          console.error('Failed to duplicate roof', error)
-        }
-        return
-      }
-
       useScene.temporal.getState().pause()
 
       if (duplicatesAsFreshSubtree(node as AnyNode)) {
@@ -552,9 +515,6 @@ export function FloatingActionMenu() {
           duplicate = FenceNode.parse(duplicateInfo)
           duplicate.start = [duplicate.start[0] + 1, duplicate.start[1] + 1]
           duplicate.end = [duplicate.end[0] + 1, duplicate.end[1] + 1]
-        } else if (node.type === 'roof-segment') {
-          duplicateInfo.id = generateId('rseg')
-          duplicate = RoofSegmentNode.parse(duplicateInfo)
         } else if (node.type === 'stair-segment') {
           duplicate = StairSegmentNode.parse(duplicateInfo)
         } else if (node.type === 'spawn') {
@@ -592,7 +552,7 @@ export function FloatingActionMenu() {
           useScene.getState().createNode(duplicate, duplicate.parentId as AnyNodeId)
         } else if (duplicate.type === 'fence') {
           useScene.getState().createNode(duplicate, duplicate.parentId as AnyNodeId)
-        } else if (duplicate.type === 'roof-segment' || duplicate.type === 'stair-segment') {
+        } else if (duplicate.type === 'stair-segment') {
           // Add small offset to make it visible
           if ('position' in duplicate) {
             duplicate.position = [
@@ -602,17 +562,12 @@ export function FloatingActionMenu() {
             ]
           }
           useScene.getState().createNode(duplicate, duplicate.parentId as AnyNodeId)
-        } else if (
-          duplicate.type === 'item' ||
-          duplicate.type === 'chimney' ||
-          duplicate.type === 'dormer'
-        ) {
-          // Items, chimneys & dormers use pure drag-to-place: NO node is
-          // inserted into the scene until the user clicks to commit. The
-          // `setMovingNode` call below hands the clone (with
-          // `metadata.isNew = true` + no id) to its move tool —
-          // `MoveItemTool` / `MoveChimneyTool` / `MoveDormerTool` — which
-          // create a draft and call `createNode` on the commit click.
+        } else if (duplicate.type === 'item') {
+          // Items use pure drag-to-place: NO node is inserted into the
+          // scene until the user clicks to commit. The `setMovingNode`
+          // call below hands the clone (with `metadata.isNew = true` +
+          // no id) to `MoveItemTool`, which creates a draft and calls
+          // `createNode` on the commit click.
           // Pre-creating here would drop a second copy into the scene
           // before any click — the furnish-tab "duplicate auto-places an
           // item without clicking" bug. (Item has its own
@@ -629,7 +584,7 @@ export function FloatingActionMenu() {
         } else if (nodeRegistry.has(duplicate.type)) {
           // Registry-driven kinds: offset slightly so the duplicate doesn't
           // overlap exactly, then create + hand to the move tool. Mirrors the
-          // roof-segment / stair-segment behavior.
+          // stair-segment behavior.
           if ('position' in duplicate && Array.isArray((duplicate as any).position)) {
             const pos = (duplicate as { position: [number, number, number] }).position
             ;(duplicate as { position: [number, number, number] }).position = [
@@ -654,7 +609,6 @@ export function FloatingActionMenu() {
           duplicate.type === 'fence' ||
           duplicate.type === 'window' ||
           duplicate.type === 'door' ||
-          duplicate.type === 'roof-segment' ||
           duplicate.type === 'spawn' ||
           duplicate.type === 'stair-segment' ||
           // Registry-driven kinds get picked up by MoveTool's generic

@@ -1,16 +1,11 @@
 import {
   type AnyNode,
   type AnyNodeId,
-  type DormerEvent,
-  type DormerNode,
-  dormerWallFacePointToDormer,
   emitter,
   type GridEvent,
   getEffectiveNode,
   holdHiddenWallPointerEvents,
   isCurvedWall,
-  type RoofEvent,
-  type RoofNode,
   sceneRegistry,
   spatialGridManager,
   useLiveNodeOverrides,
@@ -18,7 +13,6 @@ import {
   type WallEvent,
   type WallNode,
   WallNode as WallNodeSchema,
-  type WindowEvent,
   WindowNode,
 } from '@pascal-app/core'
 import {
@@ -28,7 +22,6 @@ import {
   getSideFromNormal,
   isMagneticSnapActive,
   isValidWallSideFace,
-  publishPlacementSurface,
   snapToHalf,
   triggerSFX,
   useAlignmentGuides,
@@ -40,24 +33,12 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BoxGeometry, EdgesGeometry, type Group, type LineSegments, Vector3 } from 'three'
 import { LineBasicNodeMaterial } from 'three/webgpu'
-import {
-  type DormerWindowTarget,
-  dormerEventFromHostedWindow,
-  getDormerWindowWorldNormal,
-  getDormerWindowWorldYaw,
-  resolveDormerWindowTarget,
-} from '../shared/dormer-wall-opening-placement'
+import { worldToSelectedBuildingLocal } from '../shared/building-local'
 import {
   clearOpeningGuides3D,
   publishOpeningGuidesForWallEvent,
   resolveSillSnap,
 } from '../shared/opening-guides-runtime'
-import {
-  getRoofWallOpeningCursorPose,
-  type RoofWallOpeningTarget,
-  resolveRoofWallOpeningTarget,
-  worldToSelectedBuildingLocal,
-} from '../shared/roof-wall-opening-placement'
 import {
   collectWallOpeningAlignmentCandidates,
   resolveWallSlideAlignment,
@@ -178,7 +159,6 @@ const WindowTool: React.FC = () => {
     // to the last wall hover so the flip shows live before commit.
     let sideFlip = false
     let lastWallEvent: WallEvent | null = null
-    let lastDormerEvent: DormerEvent | null = null
     // Last open-floor cursor point (level-local X/Z) + floor Y, so an R-flip
     // while free-following can re-render the floating ghost with the new facing.
     let lastFloorPoint: { pos: [number, number, number]; floorY: number } | null = null
@@ -293,69 +273,12 @@ const WindowTool: React.FC = () => {
       useFacingPose.getState().clear()
     }
 
-    const showRoofFallbackCursor = (event: RoofEvent) => {
-      const [x, , z] = worldToSelectedBuildingLocal(roofFallbackPoint.set(...event.position))
-      showGhostAt(
-        [x, getLevelYOffset() + FALLBACK_HEIGHT / 2 + FALLBACK_SILL_LIFT, z],
-        getLevelYOffset(),
-      )
-    }
-
     const showWallFallbackCursor = (event: WallEvent) => {
       const [x, , z] = worldToSelectedBuildingLocal(roofFallbackPoint.set(...event.position))
       showGhostAt(
         [x, getLevelYOffset() + FALLBACK_HEIGHT / 2 + FALLBACK_SILL_LIFT, z],
         getLevelYOffset(),
       )
-    }
-
-    const dormerWindowWorldPosition = (event: DormerEvent, target: DormerWindowTarget) => {
-      const point = roofFallbackPoint.set(
-        ...dormerWallFacePointToDormer(event.node, target.face, target.position),
-      )
-      event.object.localToWorld(point)
-      return worldToSelectedBuildingLocal(point)
-    }
-
-    const applyDormerTarget = (event: DormerEvent, target: DormerWindowTarget) => {
-      const side = sideFlip ? 'back' : 'front'
-      const itemRotation = sideFlip ? Math.PI : 0
-
-      if (draftRef.current && draftRef.current.parentId !== event.node.id) destroyDraft()
-      if (!draftRef.current) {
-        const node = WindowNode.parse({
-          position: target.position,
-          rotation: [0, itemRotation, 0],
-          side,
-          parentId: event.node.id,
-          dormerId: event.node.id,
-          dormerFace: target.face,
-          metadata: { isTransient: true },
-        })
-        useScene.getState().createNode(node, event.node.id as AnyNodeId)
-        draftRef.current = node
-      } else {
-        useLiveNodeOverrides.getState().set(draftRef.current.id, {
-          position: target.position,
-          rotation: [0, itemRotation, 0],
-          side,
-          parentId: event.node.id,
-          dormerId: event.node.id,
-          dormerFace: target.face,
-          wallId: undefined,
-          roofSegmentId: undefined,
-          roofFace: undefined,
-        })
-      }
-
-      publishDraftPreview(event.node)
-      clearOpeningGuides3D()
-      const worldPosition = dormerWindowWorldPosition(event, target)
-      publishPlacementSurface(
-        new Vector3(...worldPosition),
-        getDormerWindowWorldNormal(event, target),
-      )
-      updateCursor(worldPosition, getDormerWindowWorldYaw(event, target), target.valid, 0)
     }
 
     // Sill alignment (snap + guide): a sibling sill/centre/top wins over the
@@ -591,66 +514,6 @@ const WindowTool: React.FC = () => {
       }
     }
 
-    const commitWindowAtDormer = (dormer: DormerNode, target: DormerWindowTarget) => {
-      const draft = draftRef.current
-      if (!draft) return
-      clearPlacementPreview()
-      draftRef.current = null
-      hostKind = null
-
-      useLiveNodeOverrides.getState().clear(draft.id)
-      useScene.getState().deleteNode(draft.id)
-      useScene.temporal.getState().resume()
-
-      const state = useScene.getState()
-      const windowCount = Object.values(state.nodes).filter((node) => node.type === 'window').length
-      const side = sideFlip ? 'back' : 'front'
-      const node = WindowNode.parse({
-        name: `Window ${windowCount + 1}`,
-        position: target.position,
-        rotation: [0, sideFlip ? Math.PI : 0, 0],
-        side,
-        parentId: dormer.id,
-        dormerId: dormer.id,
-        dormerFace: target.face,
-        width: draft.width,
-        height: draft.height,
-        material: draft.material,
-        slots: draft.slots,
-        openingKind: draft.openingKind,
-        windowType: draft.windowType,
-        operationState: draft.operationState,
-        awningDirection: draft.awningDirection,
-        casementStyle: draft.casementStyle,
-        hingesSide: draft.hingesSide,
-        openingShape: draft.openingShape,
-        openingRadiusMode: draft.openingRadiusMode,
-        openingCornerRadii: draft.openingCornerRadii,
-        cornerRadius: draft.cornerRadius,
-        archHeight: draft.archHeight,
-        frameThickness: draft.frameThickness,
-        frameDepth: draft.frameDepth,
-        columnRatios: draft.columnRatios,
-        rowRatios: draft.rowRatios,
-        columnDividerThickness: draft.columnDividerThickness,
-        rowDividerThickness: draft.rowDividerThickness,
-        sill: draft.sill,
-        sillDepth: draft.sillDepth,
-        sillThickness: draft.sillThickness,
-      })
-
-      state.createNode(node, dormer.id as AnyNodeId)
-      state.dirtyNodes.add(dormer.id as AnyNodeId)
-      selectNode(node.id)
-      triggerSFX('sfx:structure-build')
-      if (useEditor.getState().getContinuation('point') === 'repeat') {
-        useScene.temporal.getState().pause()
-      } else {
-        hideCursor()
-        useEditor.getState().setTool(null)
-      }
-    }
-
     // ── Direct wall-mesh hover ──────────────────────────────────────
     const onWallHover = (event: WallEvent) => {
       hostKind = 'wall'
@@ -750,222 +613,6 @@ const WindowTool: React.FC = () => {
       showGhostAt([x, y + FALLBACK_HEIGHT / 2 + FALLBACK_SILL_LIFT, z], y)
     }
 
-    // ── Dormer wall faces ──────────────────────────────────────────
-    // Dormer windows use the same WindowNode mesh and inspector as regular
-    // windows, but their host frame is supplied by DormerRenderer.
-    const resolveDormerTarget = (event: DormerEvent) =>
-      resolveDormerWindowTarget({
-        event,
-        width: draftRef.current?.width ?? FALLBACK_WIDTH,
-        height: draftRef.current?.height ?? FALLBACK_HEIGHT,
-        nodes: useScene.getState().nodes,
-        ignoreId: draftRef.current?.id,
-        snap: snapToHalf,
-      })
-
-    const showDormerFallbackCursor = (event: DormerEvent) => {
-      const [x, y, z] = worldToSelectedBuildingLocal(roofFallbackPoint.set(...event.position))
-      showGhostAt([x, y, z], y)
-    }
-
-    const onDormerHover = (event: DormerEvent) => {
-      hostKind = 'dormer'
-      lastMeshEventTime = event.nativeEvent?.timeStamp ?? -1
-      lastDormerEvent = event
-      const target = resolveDormerTarget(event)
-      if (!target) {
-        destroyDraft()
-        showDormerFallbackCursor(event)
-        return
-      }
-      applyDormerTarget(event, target)
-      event.stopPropagation()
-    }
-
-    const onDormerClick = (event: DormerEvent) => {
-      if (!draftRef.current || draftRef.current.parentId !== event.node.id) return
-      const target = resolveDormerTarget(event)
-      if (!target) return
-      if (!target.valid && event.nativeEvent?.altKey !== true) return
-      commitWindowAtDormer(event.node, target)
-      event.stopPropagation()
-    }
-
-    const onDormerLeave = () => {
-      if (hostKind !== 'dormer') return
-      lastDormerEvent = null
-      destroyDraft()
-      hideCursor()
-      hostKind = null
-    }
-
-    // The default dormer window is a real WindowNode and therefore sits in
-    // front of the dormer body for raycasting. While placing another window,
-    // translate hits on that child back into a dormer-local event so the
-    // placement tool does not fall through to the ground ghost.
-    const dormerEventFromWindow = (event: WindowEvent): DormerEvent | null => {
-      const dormerId = event.node.dormerId ?? event.node.parentId
-      const dormer = dormerId
-        ? (useScene.getState().nodes[dormerId as AnyNodeId] as DormerNode | undefined)
-        : undefined
-      const object = dormer ? sceneRegistry.nodes.get(dormer.id as AnyNodeId) : undefined
-      if (!(dormer?.type === 'dormer' && object)) return null
-      return dormerEventFromHostedWindow(event, dormer, object)
-    }
-
-    const onDormerWindowHover = (event: WindowEvent) => {
-      const dormerEvent = dormerEventFromWindow(event)
-      if (dormerEvent) onDormerHover(dormerEvent)
-    }
-
-    const onDormerWindowClick = (event: WindowEvent) => {
-      const dormerEvent = dormerEventFromWindow(event)
-      if (dormerEvent) onDormerClick(dormerEvent)
-    }
-
-    const onDormerWindowLeave = (event: WindowEvent) => {
-      if (
-        event.node.dormerId ||
-        useScene.getState().nodes[event.node.parentId as AnyNodeId]?.type === 'dormer'
-      ) {
-        onDormerLeave()
-      }
-    }
-
-    // ── Roof-segment wall faces ─────────────────────────────────────
-    // The merged roof mesh emits `roof:*`; hits are resolved against the
-    // segments' vertical wall faces (base walls + coplanar gable ends),
-    // so a window can sit anywhere inside the face profile — including
-    // the gable pediment triangle.
-
-    const resolveRoofTarget = (event: RoofEvent) =>
-      resolveRoofWallOpeningTarget({
-        event,
-        width: draftRef.current?.width ?? 1.5,
-        height: draftRef.current?.height ?? 1.5,
-        ignoreId: draftRef.current?.id,
-        vertical: {
-          kind: 'free',
-          // `snapToHalf` is mode-aware (raw cursor when grid snap is off).
-          snap: snapToHalf,
-        },
-      })
-
-    const updateRoofCursor = (target: RoofWallOpeningTarget, roof: RoofNode) => {
-      const pose = getRoofWallOpeningCursorPose(target, roof)
-      if (pose) updateCursor(pose.position, pose.rotationY, target.valid, -target.position[1])
-    }
-
-    const onRoofHover = (event: RoofEvent) => {
-      hostKind = 'roof'
-      lastMeshEventTime = event.nativeEvent?.timeStamp ?? -1
-      const target = resolveRoofTarget(event)
-      if (!target) {
-        // On the roof but not over a placeable wall face (slope, soffit,
-        // or a face the window cannot fit on).
-        destroyDraft()
-        showRoofFallbackCursor(event)
-        return
-      }
-      const { segment, face, position } = target
-
-      if (draftRef.current && draftRef.current.parentId !== segment.id) destroyDraft()
-      if (draftRef.current) {
-        useLiveNodeOverrides.getState().set(draftRef.current.id, {
-          position,
-          rotation: [0, 0, 0],
-          roofFace: face.id,
-        })
-      } else {
-        const node = WindowNode.parse({
-          position,
-          rotation: [0, 0, 0],
-          side: 'front',
-          roofSegmentId: segment.id,
-          roofFace: face.id,
-          parentId: segment.id,
-          metadata: { isTransient: true },
-        })
-        useScene.getState().createNode(node, segment.id as AnyNodeId)
-        draftRef.current = node
-      }
-      publishDraftPreview(segment)
-      // Opening guides are wall-specific; clear them while over a roof face.
-      clearOpeningGuides3D()
-      updateRoofCursor(target, event.node as RoofNode)
-      event.stopPropagation()
-    }
-
-    const onRoofClick = (event: RoofEvent) => {
-      if (!draftRef.current?.roofSegmentId) return
-      const target = resolveRoofTarget(event)
-      // Alt force-places over a colliding roof-face target (see onWallClick).
-      if (!target) return
-      if (!target.valid && event.nativeEvent?.altKey !== true) return
-      const { segment, face, position } = target
-
-      const draft = draftRef.current
-      clearPlacementPreview()
-      draftRef.current = null
-      hostKind = null
-
-      useLiveNodeOverrides.getState().clear(draft.id)
-      useScene.getState().deleteNode(draft.id)
-      useScene.temporal.getState().resume()
-
-      const state = useScene.getState()
-      const windowCount = Object.values(state.nodes).filter(
-        (n) => n.type === 'window' && (n as WindowNode).roofSegmentId !== undefined,
-      ).length
-
-      const node = WindowNode.parse({
-        name: `Window ${windowCount + 1}`,
-        position,
-        rotation: [0, 0, 0],
-        side: 'front',
-        roofSegmentId: segment.id,
-        roofFace: face.id,
-        parentId: segment.id,
-        width: draft.width,
-        height: draft.height,
-        windowType: draft.windowType,
-        operationState: draft.operationState,
-        awningDirection: draft.awningDirection,
-        casementStyle: draft.casementStyle,
-        hingesSide: draft.hingesSide,
-        frameThickness: draft.frameThickness,
-        frameDepth: draft.frameDepth,
-        columnRatios: draft.columnRatios,
-        rowRatios: draft.rowRatios,
-        columnDividerThickness: draft.columnDividerThickness,
-        rowDividerThickness: draft.rowDividerThickness,
-        sill: draft.sill,
-        sillDepth: draft.sillDepth,
-        sillThickness: draft.sillThickness,
-      })
-
-      useScene.getState().createNode(node, segment.id as AnyNodeId)
-      // Rebuild the segment (and the merged roof) so the wall brush
-      // picks up the new opening cut.
-      useScene.getState().dirtyNodes.add(segment.id as AnyNodeId)
-      selectNode(node.id)
-      triggerSFX('sfx:structure-build')
-      if (useEditor.getState().getContinuation('point') === 'repeat') {
-        useScene.temporal.getState().pause()
-      } else {
-        hideCursor()
-        useEditor.getState().setTool(null)
-      }
-      event.stopPropagation()
-    }
-
-    const onRoofLeave = () => {
-      if (hostKind !== 'roof') return
-      destroyDraft()
-      hideCursor()
-      hostKind = null
-    }
-
     const onCancel = () => {
       destroyDraft()
       hideCursor()
@@ -986,8 +633,6 @@ const WindowTool: React.FC = () => {
       triggerSFX('sfx:item-rotate')
       if (lastWallEvent) {
         onWallHover(lastWallEvent)
-      } else if (lastDormerEvent) {
-        onDormerHover(lastDormerEvent)
       } else if (lastFloorPoint) {
         showGhostAt(lastFloorPoint.pos, lastFloorPoint.floorY)
       }
@@ -998,18 +643,6 @@ const WindowTool: React.FC = () => {
     emitter.on('wall:move', onWallHover)
     emitter.on('wall:click', onWallClick)
     emitter.on('wall:leave', onWallLeave)
-    emitter.on('roof:enter', onRoofHover)
-    emitter.on('roof:move', onRoofHover)
-    emitter.on('roof:click', onRoofClick)
-    emitter.on('roof:leave', onRoofLeave)
-    emitter.on('dormer:enter', onDormerHover)
-    emitter.on('dormer:move', onDormerHover)
-    emitter.on('dormer:click', onDormerClick)
-    emitter.on('dormer:leave', onDormerLeave)
-    emitter.on('window:enter', onDormerWindowHover)
-    emitter.on('window:move', onDormerWindowHover)
-    emitter.on('window:click', onDormerWindowClick)
-    emitter.on('window:leave', onDormerWindowLeave)
     emitter.on('grid:move', onGridFreeFollow)
     emitter.on('tool:cancel', onCancel)
     window.addEventListener('keydown', onKeyDown)
@@ -1031,18 +664,6 @@ const WindowTool: React.FC = () => {
       emitter.off('wall:move', onWallHover)
       emitter.off('wall:click', onWallClick)
       emitter.off('wall:leave', onWallLeave)
-      emitter.off('roof:enter', onRoofHover)
-      emitter.off('roof:move', onRoofHover)
-      emitter.off('roof:click', onRoofClick)
-      emitter.off('roof:leave', onRoofLeave)
-      emitter.off('dormer:enter', onDormerHover)
-      emitter.off('dormer:move', onDormerHover)
-      emitter.off('dormer:click', onDormerClick)
-      emitter.off('dormer:leave', onDormerLeave)
-      emitter.off('window:enter', onDormerWindowHover)
-      emitter.off('window:move', onDormerWindowHover)
-      emitter.off('window:click', onDormerWindowClick)
-      emitter.off('window:leave', onDormerWindowLeave)
       emitter.off('grid:move', onGridFreeFollow)
       emitter.off('tool:cancel', onCancel)
       window.removeEventListener('keydown', onKeyDown)

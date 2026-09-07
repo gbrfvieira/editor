@@ -6,8 +6,6 @@ import {
   type GridEvent,
   holdHiddenWallPointerEvents,
   isCurvedWall,
-  type RoofEvent,
-  type RoofNode,
   sceneRegistry,
   spatialGridManager,
   useScene,
@@ -31,16 +29,11 @@ import { useViewer } from '@pascal-app/viewer'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BoxGeometry, EdgesGeometry, type Group, type LineSegments, Vector3 } from 'three'
 import { LineBasicNodeMaterial } from 'three/webgpu'
+import { worldToSelectedBuildingLocal } from '../shared/building-local'
 import {
   clearOpeningGuides3D,
   publishOpeningGuidesForWallEvent,
 } from '../shared/opening-guides-runtime'
-import {
-  getRoofWallOpeningCursorPose,
-  type RoofWallOpeningTarget,
-  resolveRoofWallOpeningTarget,
-  worldToSelectedBuildingLocal,
-} from '../shared/roof-wall-opening-placement'
 import {
   collectWallOpeningAlignmentCandidates,
   resolveWallSlideAlignment,
@@ -257,11 +250,6 @@ const DoorTool: React.FC = () => {
       clearOpeningGuides3D()
       // Off-host (invalid) floating ghost — no direction triangle.
       useFacingPose.getState().clear()
-    }
-
-    const showRoofFallbackCursor = (event: RoofEvent) => {
-      const [x, , z] = worldToSelectedBuildingLocal(roofFallbackPoint.set(...event.position))
-      showGhostAt([x, getLevelYOffset() + FALLBACK_HEIGHT / 2, z])
     }
 
     const showWallFallbackCursor = (event: WallEvent) => {
@@ -555,139 +543,6 @@ const DoorTool: React.FC = () => {
       showGhostAt(lastFloorPoint)
     }
 
-    // ── Roof-segment wall faces ─────────────────────────────────────
-    // The merged roof mesh emits `roof:*`; hits are resolved against the
-    // segments' vertical wall faces (base walls + coplanar gable ends).
-
-    const resolveRoofTarget = (event: RoofEvent) =>
-      resolveRoofWallOpeningTarget({
-        event,
-        width: draftRef.current?.width ?? 0.9,
-        height: draftRef.current?.height ?? 2.1,
-        ignoreId: draftRef.current?.id,
-        vertical: { kind: 'bottom-locked' },
-      })
-
-    const updateRoofCursor = (target: RoofWallOpeningTarget, roof: RoofNode) => {
-      const pose = getRoofWallOpeningCursorPose(target, roof)
-      if (pose) updateCursor(pose.position, pose.rotationY, target.valid, -target.position[1])
-    }
-
-    const onRoofHover = (event: RoofEvent) => {
-      hostKind = 'roof'
-      lastMeshEventTime = event.nativeEvent?.timeStamp ?? -1
-      const target = resolveRoofTarget(event)
-      if (!target) {
-        // On the roof but not over a placeable wall face (slope, soffit,
-        // or a face the door cannot fit on).
-        destroyDraft()
-        showRoofFallbackCursor(event)
-        return
-      }
-      const { segment, face, position } = target
-
-      if (draftRef.current && draftRef.current.parentId !== segment.id) destroyDraft()
-      if (draftRef.current) {
-        useScene.getState().updateNode(draftRef.current.id, {
-          position,
-          rotation: [0, 0, 0],
-          roofFace: face.id,
-        })
-      } else {
-        const node = DoorNode.parse({
-          position,
-          rotation: [0, 0, 0],
-          side: 'front',
-          roofSegmentId: segment.id,
-          roofFace: face.id,
-          parentId: segment.id,
-          metadata: { isTransient: true },
-        })
-        useScene.getState().createNode(node, segment.id as AnyNodeId)
-        draftRef.current = node
-      }
-      publishDraftPreview(segment)
-      // Opening guides are wall-specific; clear them while over a roof face.
-      clearOpeningGuides3D()
-      updateRoofCursor(target, event.node as RoofNode)
-      event.stopPropagation()
-    }
-
-    const onRoofClick = (event: RoofEvent) => {
-      if (!draftRef.current?.roofSegmentId) return
-      const target = resolveRoofTarget(event)
-      // Alt force-places over a colliding roof-face target (see onWallClick).
-      if (!target) return
-      if (!target.valid && event.nativeEvent?.altKey !== true) return
-      const { segment, face, position } = target
-
-      const draft = draftRef.current
-      clearPlacementPreview()
-      draftRef.current = null
-      hostKind = null
-
-      useScene.getState().deleteNode(draft.id)
-      useScene.temporal.getState().resume()
-
-      const state = useScene.getState()
-      const doorCount = Object.values(state.nodes).filter(
-        (n) => n.type === 'door' && (n as DoorNode).roofSegmentId !== undefined,
-      ).length
-
-      const node = DoorNode.parse({
-        name: `Door ${doorCount + 1}`,
-        position,
-        rotation: [0, 0, 0],
-        side: 'front',
-        roofSegmentId: segment.id,
-        roofFace: face.id,
-        parentId: segment.id,
-        width: draft.width,
-        height: draft.height,
-        doorCategory: draft.doorCategory,
-        doorType: draft.doorType,
-        leafCount: draft.leafCount,
-        operationState: draft.operationState,
-        slideDirection: draft.slideDirection,
-        trackStyle: draft.trackStyle,
-        garagePanelCount: draft.garagePanelCount,
-        frameThickness: draft.frameThickness,
-        frameDepth: draft.frameDepth,
-        threshold: draft.threshold,
-        thresholdHeight: draft.thresholdHeight,
-        hingesSide: draft.hingesSide,
-        swingDirection: draft.swingDirection,
-        segments: draft.segments,
-        handle: draft.handle,
-        handleHeight: draft.handleHeight,
-        handleSide: draft.handleSide,
-        doorCloser: draft.doorCloser,
-        panicBar: draft.panicBar,
-        panicBarHeight: draft.panicBarHeight,
-      })
-
-      useScene.getState().createNode(node, segment.id as AnyNodeId)
-      // Rebuild the segment (and the merged roof) so the wall brush
-      // picks up the new opening cut.
-      useScene.getState().dirtyNodes.add(segment.id as AnyNodeId)
-      useViewer.getState().setSelection({ selectedIds: [node.id] })
-      triggerSFX('sfx:structure-build')
-      if (useEditor.getState().getContinuation('point') === 'repeat') {
-        useScene.temporal.getState().pause()
-      } else {
-        hideCursor()
-        useEditor.getState().setTool(null)
-      }
-      event.stopPropagation()
-    }
-
-    const onRoofLeave = () => {
-      if (hostKind !== 'roof') return
-      destroyDraft()
-      hideCursor()
-      hostKind = null
-    }
-
     const onCancel = () => {
       destroyDraft()
       hideCursor()
@@ -721,10 +576,6 @@ const DoorTool: React.FC = () => {
     emitter.on('wall:move', onWallHover)
     emitter.on('wall:click', onWallClick)
     emitter.on('wall:leave', onWallLeave)
-    emitter.on('roof:enter', onRoofHover)
-    emitter.on('roof:move', onRoofHover)
-    emitter.on('roof:click', onRoofClick)
-    emitter.on('roof:leave', onRoofLeave)
     emitter.on('grid:move', onGridFreeFollow)
     emitter.on('tool:cancel', onCancel)
     window.addEventListener('keydown', onKeyDown)
@@ -746,10 +597,6 @@ const DoorTool: React.FC = () => {
       emitter.off('wall:move', onWallHover)
       emitter.off('wall:click', onWallClick)
       emitter.off('wall:leave', onWallLeave)
-      emitter.off('roof:enter', onRoofHover)
-      emitter.off('roof:move', onRoofHover)
-      emitter.off('roof:click', onRoofClick)
-      emitter.off('roof:leave', onRoofLeave)
       emitter.off('grid:move', onGridFreeFollow)
       emitter.off('tool:cancel', onCancel)
       window.removeEventListener('keydown', onKeyDown)

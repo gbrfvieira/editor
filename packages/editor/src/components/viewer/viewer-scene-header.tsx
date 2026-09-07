@@ -23,8 +23,6 @@ const getNodeName = (node: AnyNode): string => {
   if (node.type === 'item') return (node as { asset: { name: string } }).asset?.name || 'Item'
   if (node.type === 'slab') return 'Slab'
   if (node.type === 'ceiling') return 'Ceiling'
-  if (node.type === 'roof') return 'Roof'
-  if (node.type === 'roof-segment') return 'Roof Segment'
   return node.type
 }
 

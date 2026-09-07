@@ -4,7 +4,6 @@ import { BaseNode, nodeType, objectId } from '../base'
 import { MaterialSchema } from '../material'
 import { DoorNode } from './door'
 import { ItemNode } from './item'
-import { LeanToExtensionNode } from './lean-to-extension'
 import { WindowNode } from './window'
 
 export const WallTreatmentSide = z.enum(['interior', 'exterior', 'both'])
@@ -133,12 +132,7 @@ export const WallNode = BaseNode.extend({
   type: nodeType('wall'),
   children: z
     .array(
-      z.union([
-        ItemNode.shape.id,
-        DoorNode.shape.id,
-        WindowNode.shape.id,
-        LeanToExtensionNode.shape.id,
-      ]),
+      z.union([ItemNode.shape.id, DoorNode.shape.id, WindowNode.shape.id]),
     )
     .default([]),
   // Legacy single-material wall finish. Read for backward compatibility only.

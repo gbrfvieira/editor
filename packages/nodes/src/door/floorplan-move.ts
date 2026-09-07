@@ -18,7 +18,7 @@ import {
   usePlacementPreview,
 } from '@pascal-app/editor'
 import { createFloorplanCursorResolver } from '../shared/floorplan-cursor'
-import { getOpeningHostLevelId, getRoofHostedOpeningPlanPoint } from '../shared/roof-opening-host'
+import { getOpeningHostLevelId } from '../shared/opening-host'
 import {
   findClosestWallInPlan,
   projectWallLocalPointToPlan,
@@ -47,8 +47,8 @@ export const doorFloorplanMoveTarget: FloorplanMoveTarget<DoorNode> = ({ node })
   const nodeId = node.id as AnyNodeId
   // Snapshot of the door's "valid" state at move-start — used by
   // canCommit to decide whether the current snapped position is OK.
-  // The level that owns the wall-snap candidates — resolves the wall-hosted,
-  // roof-hosted, and fresh-placement parentings (see `getOpeningHostLevelId`).
+  // The level that owns the wall-snap candidates — resolves the wall-hosted
+  // and fresh-placement parentings (see `getOpeningHostLevelId`).
   // Cached at start because the parent chain doesn't change during a move.
   const startLevelId = getOpeningHostLevelId(node, useScene.getState().nodes)
   const originalWall = node.parentId
@@ -58,7 +58,7 @@ export const doorFloorplanMoveTarget: FloorplanMoveTarget<DoorNode> = ({ node })
     original:
       originalWall?.type === 'wall'
         ? projectWallLocalPointToPlan(originalWall, node.position[0])
-        : (getRoofHostedOpeningPlanPoint(node, useScene.getState().nodes) ?? [node.position[0], 0]),
+        : ([node.position[0], 0] as [number, number]),
     metadata: node.metadata,
     // Absolute: query the wall snap with the TRUE cursor, not the door's
     // original wall position plus a grab delta. A wall-hosted opening always

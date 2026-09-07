@@ -1,11 +1,6 @@
 'use client'
 
-import {
-  nodeRegistry,
-  type RoofType,
-  RoofType as RoofTypeSchema,
-  useRegistryVersion,
-} from '@pascal-app/core'
+import { nodeRegistry, useRegistryVersion } from '@pascal-app/core'
 import {
   CATALOG_ITEMS,
   type FloorplanMode,
@@ -13,7 +8,6 @@ import {
   isFloorplanToolAvailableInMode,
   MaterialPaintPanel,
   TerrainSculptPanel,
-  ToolOptionsPanel,
   triggerSFX,
   useEditor,
   useFloorplanMode,
@@ -27,12 +21,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/toolbar-tooltip'
-import { getActiveRoofFeatureId, ROOF_TYPE_OPTIONS } from '@/lib/build-tab-state'
 import { cn } from '@/lib/utils'
 
 /**
  * MEP (mechanical / plumbing) tool kinds surfaced under the Build tab's "MEP"
- * group tile — its own sub-grid, like Roof's "Features".
+ * group tile — its own sub-grid.
  */
 type MepToolKind = 'lineset'
 
@@ -63,7 +56,6 @@ const BASE_BUILD_TYPES: BuildType[] = [
   { id: 'fence', label: 'Fence', iconSrc: '/icons/fence.webp', kind: 'fence' },
   { id: 'slab', label: 'Slab', iconSrc: '/icons/floor.webp', kind: 'slab' },
   { id: 'ceiling', label: 'Ceiling', iconSrc: '/icons/ceiling.webp', kind: 'ceiling' },
-  { id: 'roof', label: 'Roof', iconSrc: '/icons/roof.webp', kind: 'roof' },
   { id: 'stair', label: 'Stairs', iconSrc: '/icons/stairs.webp', kind: 'stair' },
   { id: 'elevator', label: 'Elevator', iconSrc: '/icons/elevator.webp', kind: 'elevator' },
   { id: 'door', label: 'Door', iconSrc: '/icons/door.webp', kind: 'door' },
@@ -72,7 +64,7 @@ const BASE_BUILD_TYPES: BuildType[] = [
   { id: 'shelf', label: 'Shelf', iconSrc: '/icons/shelf.webp', kind: 'shelf' },
   { id: 'spawn', label: 'Spawn Point', iconSrc: '/icons/spawn-point.webp', kind: 'spawn' },
   { id: 'kitchen', label: 'Kitchen', iconSrc: '/icons/kitchen.webp' },
-  // Group tile — no tool of its own; opens the MEP sub-grid below (like Roof).
+  // Group tile — no tool of its own; opens the MEP sub-grid below.
   { id: 'mep', label: 'MEP', iconSrc: '/icons/HVAC.webp' },
   { id: 'painting', label: 'Painting', iconSrc: '/icons/paint.webp', mode: 'material-paint' },
   { id: 'terrain', label: 'Terrain', iconSrc: '/icons/mesh.webp', mode: 'terrain-sculpt' },
@@ -92,7 +84,6 @@ function collectBuildTypes(floorplanMode: FloorplanMode): BuildType[] {
     const extension = getFloorplanNodeExtension(definition)
     if (
       baseKinds.has(kind) ||
-      definition.presentation?.paletteGroup === 'roof-features' ||
       !extension?.tool ||
       !isFloorplanToolAvailableInMode(extension.availableModes, floorplanMode) ||
       !presentation ||
@@ -173,59 +164,6 @@ function activateTerrainSculptMode(): void {
   useEditor.getState().setMode('terrain-sculpt')
 }
 
-type RoofFeature = {
-  id: string
-  label: string
-  iconSrc: string
-  kind?: string
-}
-
-const ROOF_FEATURE_FALLBACK_ICON = '/icons/roof.webp'
-
-function collectRoofFeatures(): RoofFeature[] {
-  const features: RoofFeature[] = []
-  for (const [kind, def] of nodeRegistry.entries()) {
-    if (
-      def.capabilities.roofAccessory === undefined &&
-      def.presentation?.paletteGroup !== 'roof-features'
-    ) {
-      continue
-    }
-    if (def.capabilities.wallOpeningPlacement) continue
-    const icon = def.presentation?.icon
-    features.push({
-      id: kind,
-      kind,
-      label: def.presentation?.label ?? kind,
-      iconSrc: icon?.kind === 'url' ? icon.src : ROOF_FEATURE_FALLBACK_ICON,
-    })
-  }
-  return features
-}
-
-/**
- * Roof accessories and extensions surfaced under the Roof tile. Unlike the
- * community editor these aren't DB presets — each is a registry kind, either
- * carrying `capabilities.roofAccessory` or explicitly classified as a roof
- * extension. They are enumerated at render time because the registry is
- * populated during app bootstrap. Label + icon come from `presentation`;
- * non-url icons fall back to the roof icon.
- */
-function activateRoofFeatureTool(feature: RoofFeature): void {
-  const ed = useEditor.getState()
-  ed.setPhase('structure')
-  ed.setStructureLayer('elements')
-  ed.setCatalogCategory(null)
-  ed.setMode('build')
-  if (feature.kind) ed.setTool(feature.kind)
-}
-
-function activateRoofType(roofType: RoofType): void {
-  const editor = useEditor.getState()
-  if (!(editor.mode === 'build' && editor.tool === 'roof')) activateBuildTool('roof')
-  editor.setToolDefaults('roof', { ...editor.toolDefaults.roof, roofType })
-}
-
 /**
  * Build tab for the open-source standalone editor — a preset-less replica of
  * the community Build sidebar. Clicking a type activates its raw tool, drawn
@@ -239,7 +177,6 @@ const MEP_TOOL_KINDS = new Set<string>(MEP_ITEMS.map((item) => item.kind))
 export function BuildTab() {
   const activeTool = useEditor((s) => s.tool)
   const mode = useEditor((s) => s.mode)
-  const roofDefaults = useEditor((s) => s.toolDefaults.roof)
   const floorplanMode = useFloorplanMode((s) => s.mode)
   useRegistryVersion()
   const registryReady = useSyncExternalStore(
@@ -251,29 +188,16 @@ export function BuildTab() {
 
   const isMepItemActive = (item: MepItem) => mode === 'build' && activeTool === item.kind
 
-  // Read at render time (not module scope): the registry is populated by the
-  // app bootstrap, so enumerating earlier would race it and see no kinds.
-  const roofFeatures = registryReady ? collectRoofFeatures() : []
-
   // Tile highlight derives from the single source of truth (the active tool /
   // mode), never a separate local selection — so keyboard shortcuts and panel
   // clicks always agree on which tile is lit.
-  // The roof Features sub-grid arms roof-accessory tools (skylight, chimney,
-  // …); keep the Roof tile lit (and its panel open) while any of them is the
-  // active tool, the same way MEP stays lit for its sub-grid tools.
-  const activeRoofFeatureId = getActiveRoofFeatureId(roofFeatures, activeTool)
-  const isRoofFeatureActive = mode === 'build' && activeRoofFeatureId !== null
   const isMepActive = mode === 'build' && !!activeTool && MEP_TOOL_KINDS.has(activeTool)
   const isKitchenActive = mode === 'build' && activeTool === 'cabinet'
-  const parsedRoofType = RoofTypeSchema.safeParse(roofDefaults?.roofType)
-  const activeRoofType = parsedRoofType.success ? parsedRoofType.data : 'gable'
 
   const isTypeActive = (type: BuildType) => {
     if (type.mode) return mode === type.mode
     if (type.id === 'mep') return isMepActive
     if (type.id === 'kitchen') return isKitchenActive
-    if (type.id === 'roof')
-      return mode === 'build' && (activeTool === 'roof' || isRoofFeatureActive)
     return mode === 'build' && activeTool === type.kind
   }
 
@@ -358,101 +282,6 @@ export function BuildTab() {
       ) : mode === 'terrain-sculpt' ? (
         <div className="min-h-0 flex-1 overflow-y-auto">
           <TerrainSculptPanel />
-        </div>
-      ) : mode === 'build' && (activeTool === 'roof' || isRoofFeatureActive) ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-          <div className="flex flex-col gap-2">
-            <div className="px-0.5 pt-1 font-medium text-muted-foreground text-xs">Roof type</div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {ROOF_TYPE_OPTIONS.map((roofType) => {
-                const active = activeTool === 'roof' && activeRoofType === roofType.value
-                return (
-                  <button
-                    aria-pressed={active}
-                    className={cn(
-                      'rounded-lg px-2.5 py-2 text-left font-medium text-xs transition-colors',
-                      active
-                        ? 'bg-primary/10 text-primary ring-1 ring-primary/50'
-                        : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground',
-                    )}
-                    key={roofType.value}
-                    onClick={() => {
-                      triggerSFX('sfx:menu-click')
-                      activateRoofType(roofType.value)
-                    }}
-                    onMouseEnter={() => triggerSFX('sfx:menu-hover')}
-                    type="button"
-                  >
-                    {roofType.label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          <ToolOptionsPanel
-            className="border-border/50 border-t pt-3"
-            kind="roof"
-            onSelect={() => {
-              const editor = useEditor.getState()
-              if (!(editor.mode === 'build' && editor.tool === 'roof')) activateBuildTool('roof')
-            }}
-          />
-          {activeRoofType === 'conical' && (
-            <p className="border-border/50 border-t px-0.5 pt-3 text-[11px] text-muted-foreground leading-relaxed">
-              Select a curved wall to match its radius and arc.
-            </p>
-          )}
-
-          {roofFeatures.length > 0 ? (
-            <div className="flex flex-col gap-2 border-border/50 border-t pt-3">
-              <div className="px-0.5 font-medium text-muted-foreground text-xs">
-                Features & extensions
-              </div>
-              <TooltipProvider delayDuration={0} disableHoverableContent>
-                <div
-                  className="grid gap-1.5"
-                  style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(56px, 1fr))' }}
-                >
-                  {roofFeatures.map((feature) => {
-                    const active = mode === 'build' && feature.id === activeRoofFeatureId
-                    return (
-                      <Tooltip key={feature.id}>
-                        <TooltipTrigger asChild>
-                          <button
-                            aria-pressed={active}
-                            className={cn(
-                              'group relative flex aspect-square items-center justify-center rounded-xl p-1 transition-all duration-200',
-                              active
-                                ? 'bg-primary/10 ring-1 ring-primary/50'
-                                : 'bg-muted/40 opacity-70 grayscale hover:bg-muted hover:opacity-100 hover:grayscale-0',
-                            )}
-                            onClick={() => {
-                              triggerSFX('sfx:menu-click')
-                              activateRoofFeatureTool(feature)
-                            }}
-                            onMouseEnter={() => triggerSFX('sfx:menu-hover')}
-                            type="button"
-                          >
-                            <Image
-                              alt={feature.label}
-                              className="size-full object-contain transition-transform duration-200 group-hover:scale-110"
-                              height={48}
-                              src={feature.iconSrc}
-                              width={48}
-                            />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent className="pointer-events-none" side="top">
-                          {feature.label}
-                        </TooltipContent>
-                      </Tooltip>
-                    )
-                  })}
-                </div>
-              </TooltipProvider>
-            </div>
-          ) : null}
         </div>
       ) : isKitchenActive ? (
         <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">

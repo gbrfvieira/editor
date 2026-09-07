@@ -30,8 +30,6 @@ import {
   nodeRegistry,
   normalizeWallCurveOffset,
   type Point2D,
-  type RoofNode,
-  type RoofSegmentNode,
   resolveSlabPlacementElevation,
   resolveTerrainWallConstructionOptions,
   type SiteNode,
@@ -634,7 +632,7 @@ type ReferenceFloorRegistryEntry = {
 // Top-level structural kinds drawn on the *reference* (dimmed, below) floor
 // via their `def.floorplan` builder, so the symbol is identical to the active
 // floor. Walls / columns / slabs / fences / items / openings still have
-// bespoke reference rendering above; these five are the registry-driven kinds
+// bespoke reference rendering above; these four are the registry-driven kinds
 // that don't.
 //
 // This is a deliberate curation, NOT "every kind with a `def.floorplan`":
@@ -647,7 +645,6 @@ type ReferenceFloorRegistryEntry = {
 // wiki/architecture/layers.md). New top-level structural kinds opt in here.
 const REFERENCE_REGISTRY_KINDS = new Set<AnyNode['type']>([
   'stair',
-  'roof',
   'shelf',
   'spawn',
   'elevator',
@@ -3180,91 +3177,6 @@ function worldToBuildingLocalPlanPoint(
   }
 }
 
-function getRoofSegmentCenter(
-  roof: RoofNode,
-  segment: RoofSegmentNode,
-  worldPositionOverride?: Point2D,
-): Point2D {
-  if (worldPositionOverride) {
-    return worldPositionOverride
-  }
-
-  const cos = Math.cos(roof.rotation)
-  const sin = Math.sin(roof.rotation)
-  const localX = segment.position[0]
-  const localZ = segment.position[2]
-
-  return {
-    x: roof.position[0] + localX * cos - localZ * sin,
-    y: roof.position[2] + localX * sin + localZ * cos,
-  }
-}
-
-function getRoofSegmentPolygon(
-  roof: RoofNode,
-  segment: RoofSegmentNode,
-  options?: {
-    localRotation?: number
-    worldPositionOverride?: Point2D
-  },
-): Point2D[] {
-  const center = getRoofSegmentCenter(roof, segment, options?.worldPositionOverride)
-  const rotation = roof.rotation + (options?.localRotation ?? segment.rotation)
-  const cos = Math.cos(rotation)
-  const sin = Math.sin(rotation)
-  const halfWidth = segment.width / 2
-  const halfDepth = segment.depth / 2
-
-  const corners: Array<[number, number]> = [
-    [-halfWidth, -halfDepth],
-    [halfWidth, -halfDepth],
-    [halfWidth, halfDepth],
-    [-halfWidth, halfDepth],
-  ]
-
-  return corners.map(([x, y]) => ({
-    x: center.x + x * cos - y * sin,
-    y: center.y + x * sin + y * cos,
-  }))
-}
-
-function getRoofSegmentRidgeLine(
-  roof: RoofNode,
-  segment: RoofSegmentNode,
-  options?: {
-    localRotation?: number
-    worldPositionOverride?: Point2D
-  },
-): FloorplanLineSegment | null {
-  if (segment.roofType === 'flat') {
-    return null
-  }
-
-  const center = getRoofSegmentCenter(roof, segment, options?.worldPositionOverride)
-  const rotation = roof.rotation + (options?.localRotation ?? segment.rotation)
-  const ridgeAxis =
-    segment.roofType === 'gable' || segment.roofType === 'gambrel'
-      ? 'x'
-      : segment.roofType === 'dutch'
-        ? segment.width >= segment.depth
-          ? 'x'
-          : 'z'
-        : 'z'
-  const axisAngle = ridgeAxis === 'x' ? rotation : rotation + Math.PI / 2
-  const halfSpan = ridgeAxis === 'x' ? segment.width / 2 : segment.depth / 2
-
-  return {
-    start: {
-      x: center.x - halfSpan * Math.cos(axisAngle),
-      y: center.y - halfSpan * Math.sin(axisAngle),
-    },
-    end: {
-      x: center.x + halfSpan * Math.cos(axisAngle),
-      y: center.y + halfSpan * Math.sin(axisAngle),
-    },
-  }
-}
-
 const FloorplanGridLayer = memo(function FloorplanGridLayer({
   majorGridPath,
   minorGridPath,
@@ -5065,7 +4977,6 @@ export function FloorplanPanel({
     levelGuides,
     levelNode,
     openings,
-    roofs,
     site,
     slabs,
     spawns,
@@ -5866,7 +5777,11 @@ export function FloorplanPanel({
   const isRoofBuildActive = phase === 'structure' && mode === 'build' && tool === 'roof'
   const isStairBuildActive = phase === 'structure' && mode === 'build' && tool === 'stair'
   const isStairMoveActive = movingNode?.type === 'stair'
-  const isRoofMoveActive = movingNode?.type === 'roof' || movingNode?.type === 'roof-segment'
+  // The 'roof' / 'roof-segment' node kinds were removed from this fork's
+  // schema, so a moving node can never be one — kept `false` (not deleted)
+  // because it still gates several branches below alongside the other
+  // `isXMoveActive` flags.
+  const isRoofMoveActive = false
   const isSlabMoveActive = movingNode?.type === 'slab'
   const isCeilingMoveActive = movingNode?.type === 'ceiling'
   const isFenceMoveActive = movingNode?.type === 'fence'
@@ -8155,30 +8070,6 @@ export function FloorplanPanel({
 
     return unsubscribe
   }, [fences, movingNode, scheduleMovingFloorplanNodeRefresh])
-
-  useEffect(() => {
-    if (!(movingNode?.type === 'roof' || movingNode?.type === 'roof-segment')) {
-      return
-    }
-
-    const movingRoofNodeId = movingNode.id
-    const refreshRoofPreview = () => {
-      scheduleMovingFloorplanNodeRefresh()
-    }
-
-    refreshRoofPreview()
-
-    const unsubscribe = useLiveTransforms.subscribe((state, previousState) => {
-      const nextTransform = state.transforms.get(movingRoofNodeId)
-      const previousTransform = previousState.transforms.get(movingRoofNodeId)
-
-      if (nextTransform !== previousTransform) {
-        refreshRoofPreview()
-      }
-    })
-
-    return unsubscribe
-  }, [movingNode, scheduleMovingFloorplanNodeRefresh])
 
   useEffect(() => {
     if (movingNode?.type !== 'spawn') {

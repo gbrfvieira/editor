@@ -3,10 +3,6 @@ import { resolveStairTotalRise } from '@pascal-app/core'
 import type { AnyNode, AnyNodeId } from '@pascal-app/core/schema'
 import {
   CeilingNode,
-  getActiveRoofHeight,
-  LevelNode,
-  RoofNode,
-  RoofSegmentNode,
   SlabNode,
   StairNode,
   StairSegmentNode,
@@ -18,16 +14,6 @@ import { liveSyncOutput, persistencePayload, publishLiveSceneSnapshot } from './
 import { measurement } from './measurement'
 import { NodeIdSchema, Vec2Schema, Vec3Schema } from './schemas'
 
-const ROOF_TYPES = [
-  'hip',
-  'gable',
-  'shed',
-  'gambrel',
-  'dutch',
-  'mansard',
-  'flat',
-  'conical',
-] as const
 const RAILING_MODES = ['none', 'left', 'right', 'both'] as const
 
 export const createStoryShellInput = {
@@ -60,43 +46,6 @@ export const createStoryShellOutput = {
   slabId: z.string().nullable(),
   ceilingId: z.string().nullable(),
   createdIds: z.array(z.string()),
-  ...liveSyncOutput,
-}
-
-export const createRoofInput = {
-  levelId: NodeIdSchema,
-  roofLevelId: NodeIdSchema.optional(),
-  useDedicatedRoofLevel: z.boolean().default(true),
-  roofLevelLabel: z.string().default('Roof'),
-  // A level ordinal (story index), not a length — kept numeric.
-  roofLevelElevation: z.number().optional(),
-  roofLevelHeight: measurement('length', 'm', {
-    positive: true,
-    description: 'Roof level height.',
-  }).optional(),
-  center: Vec3Schema.optional(),
-  width: measurement('length', 'm', { positive: true, description: 'Roof width.' }),
-  depth: measurement('length', 'm', { positive: true, description: 'Roof depth.' }),
-  roofType: z.enum(ROOF_TYPES).default('hip'),
-  pitch: measurement('angle', 'deg', { min: 0, max: 85, description: 'Roof pitch.' }).default(35),
-  wallHeight: measurement('length', 'm', { min: 0, description: 'Knee-wall height.' }).default(
-    0.35,
-  ),
-  wallThickness: measurement('length', 'm', {
-    positive: true,
-    description: 'Wall thickness.',
-  }).default(0.16),
-  overhang: measurement('length', 'm', { min: 0, description: 'Eave overhang.' }).default(0.45),
-  materialPreset: z.string().optional(),
-  name: z.string().optional(),
-}
-
-export const createRoofOutput = {
-  referenceLevelId: z.string(),
-  roofLevelId: z.string(),
-  createdRoofLevelId: z.string().nullable(),
-  roofId: z.string(),
-  roofSegmentId: z.string(),
   ...liveSyncOutput,
 }
 
@@ -158,14 +107,6 @@ function assertNode(bridge: SceneOperations, id: string, type: AnyNode['type']):
   return node
 }
 
-function getBuildingIdForLevel(bridge: SceneOperations, levelId: string): AnyNodeId {
-  const building = bridge.getAncestry(levelId as AnyNodeId).find((node) => node.type === 'building')
-  if (!building) {
-    throw new Error(`Building ancestor not found for level: ${levelId}`)
-  }
-  return building.id as AnyNodeId
-}
-
 function isRoofLevel(level: AnyNode): boolean {
   return (
     level.type === 'level' &&
@@ -174,20 +115,6 @@ function isRoofLevel(level: AnyNode): boolean {
     'role' in level.metadata &&
     level.metadata.role === 'roof'
   )
-}
-
-function nextLevelIndex(
-  bridge: SceneOperations,
-  buildingId: AnyNodeId,
-  referenceLevel: AnyNode,
-): number {
-  const existing = bridge
-    .getChildren(buildingId)
-    .filter((node): node is AnyNode & { type: 'level' } => node.type === 'level')
-    .map((level) => level.level)
-  const referenceIndex = referenceLevel.type === 'level' ? referenceLevel.level : 0
-  const candidate = referenceIndex + 1
-  return existing.includes(candidate) ? Math.max(candidate, ...existing) + 1 : candidate
 }
 
 function nodesOnLevel(bridge: SceneOperations, levelId: string): AnyNode[] {
@@ -342,111 +269,6 @@ export function registerConstructionTools(server: McpServer, bridge: SceneOperat
         slabId,
         ceilingId,
         createdIds: result.createdIds as string[],
-        ...persistencePayload(persistence),
-      })
-    },
-  )
-
-  server.registerTool(
-    'create_roof',
-    {
-      title: 'Create roof',
-      description:
-        'Create a roof container with one roof segment. By default creates a dedicated roof level above the reference level so exploded/solo level views can isolate the roof.',
-      inputSchema: createRoofInput,
-      outputSchema: createRoofOutput,
-    },
-    async ({
-      levelId,
-      roofLevelId,
-      useDedicatedRoofLevel,
-      roofLevelLabel,
-      roofLevelElevation,
-      roofLevelHeight,
-      center,
-      width,
-      depth,
-      roofType,
-      pitch,
-      wallHeight,
-      wallThickness,
-      overhang,
-      materialPreset,
-      name,
-    }) => {
-      const effectiveWidth = roofType === 'conical' ? Math.max(width, depth) : width
-      const effectiveDepth = roofType === 'conical' ? effectiveWidth : depth
-      // Peak height is derived from pitch + footprint + type; we still
-      // need it to size the auto-generated roof level container below.
-      const peakHeight = getActiveRoofHeight({
-        roofType,
-        pitch,
-        width: effectiveWidth,
-        depth: effectiveDepth,
-      })
-      const referenceLevel = assertNode(bridge, levelId, 'level')
-      const patches: Array<{ op: 'create'; node: AnyNode; parentId: AnyNodeId }> = []
-      let targetRoofLevelId = levelId as AnyNodeId
-      let createdRoofLevelId: string | null = null
-
-      if (roofLevelId !== undefined) {
-        const roofLevel = assertNode(bridge, roofLevelId, 'level')
-        if (!isRoofLevel(roofLevel)) {
-          throw new Error(
-            `roofLevelId ${roofLevelId} must reference a dedicated roof level with metadata.role = "roof"; omit roofLevelId to create one automatically`,
-          )
-        }
-        targetRoofLevelId = roofLevelId as AnyNodeId
-      } else if (useDedicatedRoofLevel && !isRoofLevel(referenceLevel)) {
-        const buildingId = getBuildingIdForLevel(bridge, levelId)
-        const roofLevel = LevelNode.parse({
-          name: roofLevelLabel,
-          level: roofLevelElevation ?? nextLevelIndex(bridge, buildingId, referenceLevel),
-          height: roofLevelHeight ?? Math.max(wallHeight + peakHeight, 0.2),
-          children: [],
-          metadata: {
-            role: 'roof',
-            label: roofLevelLabel,
-            referenceLevelId: levelId,
-          },
-        })
-        targetRoofLevelId = roofLevel.id as AnyNodeId
-        createdRoofLevelId = roofLevel.id
-        patches.push({ op: 'create', node: roofLevel, parentId: buildingId })
-      }
-
-      const segment = RoofSegmentNode.parse({
-        roofType,
-        width: effectiveWidth,
-        depth: effectiveDepth,
-        wallHeight,
-        pitch,
-        wallThickness,
-        overhang,
-        ...(materialPreset ? { materialPreset } : {}),
-      })
-      const roof = RoofNode.parse({
-        name: name ?? 'Roof',
-        position: (center as [number, number, number] | undefined) ?? [0, 0, 0],
-        children: [segment.id],
-        ...(materialPreset ? { materialPreset } : {}),
-        metadata: {
-          referenceLevelId: levelId,
-          roofLevelId: targetRoofLevelId,
-        },
-      })
-      bridge.applyPatch([
-        ...patches,
-        { op: 'create', node: roof, parentId: targetRoofLevelId },
-        { op: 'create', node: segment, parentId: roof.id as AnyNodeId },
-      ])
-      const persistence = await publishLiveSceneSnapshot(bridge, 'create_roof')
-      return textResult({
-        referenceLevelId: levelId,
-        roofLevelId: targetRoofLevelId,
-        createdRoofLevelId,
-        roofId: roof.id,
-        roofSegmentId: segment.id,
         ...persistencePayload(persistence),
       })
     },

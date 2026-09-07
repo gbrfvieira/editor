@@ -8,7 +8,6 @@ import {
   type FenceNode,
   type GuideNode,
   type LevelNode,
-  type RoofNode,
   type SiteNode,
   type SlabNode,
   type SpawnNode,
@@ -126,22 +125,6 @@ export function useFloorplanSceneData({
   const levelGuides = useLevelChildren(levelId, (node): node is GuideNode => node?.type === 'guide')
   const zones = useLevelChildren(levelId, (node): node is ZoneNodeType => node?.type === 'zone')
   const spawns = useLevelChildren(levelId, (node): node is SpawnNode => node?.type === 'spawn')
-  const roofs = useScene(
-    useShallow((state) => {
-      if (!levelId) {
-        return [] as RoofNode[]
-      }
-
-      const nextLevelNode = state.nodes[levelId]
-      if (nextLevelNode?.type !== 'level') {
-        return [] as RoofNode[]
-      }
-
-      return nextLevelNode.children
-        .map((childId) => state.nodes[childId])
-        .filter((node): node is RoofNode => node?.type === 'roof' && node.visible !== false)
-    }),
-  )
   const openings = useScene(
     useShallow((state) => {
       if (!levelId) {
@@ -191,7 +174,6 @@ export function useFloorplanSceneData({
     levelGuides,
     levelNode,
     openings,
-    roofs,
     site,
     slabs,
     spawns,

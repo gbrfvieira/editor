@@ -1034,8 +1034,6 @@ function nodeDisplayLabel(node: AnyNode): string {
       return 'Slab'
     case 'ceiling':
       return 'Ceiling'
-    case 'roof':
-      return 'Roof'
     case 'fence':
       return 'Fence'
     case 'column':

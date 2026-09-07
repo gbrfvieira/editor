@@ -38,7 +38,6 @@ const COPYABLE_ROOT_TYPES = new Set<AnyNode['type']>([
   'item',
   'slab',
   'ceiling',
-  'roof',
   'stair',
   'spawn',
   'zone',
@@ -121,7 +120,7 @@ function isClipboardRoot(
   if (
     allowHostedOpening &&
     (node.type === 'door' || node.type === 'window') &&
-    (parent?.type === 'wall' || parent?.type === 'roof-segment')
+    parent?.type === 'wall'
   ) {
     return true
   }

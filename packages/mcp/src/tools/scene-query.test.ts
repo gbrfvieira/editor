@@ -7,7 +7,6 @@ import {
   DoorNode,
   ItemNode,
   LevelNode,
-  RoofNode,
   SlabNode,
   StairNode,
   StairSegmentNode,
@@ -198,7 +197,7 @@ describe('scene query tools', () => {
     expect(parsed.issues.join('\n')).toContain(door.id)
   })
 
-  test('verify_scene separates occupied stories from dedicated roof levels', async () => {
+  test('verify_scene separates occupied stories from dedicated support levels', async () => {
     const building = Object.values(bridge.getNodes()).find((n) => n.type === 'building')!
     const ground = Object.values(bridge.getNodes()).find((n) => n.type === 'level')!
     const upper = LevelNode.parse({
@@ -206,14 +205,25 @@ describe('scene query tools', () => {
       level: 1,
       metadata: { height: 2.8 },
     })
-    const roofLevel = LevelNode.parse({
-      name: 'Roof',
+    const supportLevel = LevelNode.parse({
+      name: 'Support',
       level: 2,
-      metadata: { role: 'roof', referenceLevelId: upper.id, height: 2.5 },
+      metadata: { role: 'support', referenceLevelId: upper.id, height: 2.5 },
       children: [],
     })
     bridge.createNode(upper, building.id)
-    bridge.createNode(roofLevel, building.id)
+    bridge.createNode(supportLevel, building.id)
+    bridge.createNode(
+      SlabNode.parse({
+        polygon: [
+          [0, 0],
+          [4, 0],
+          [4, 3],
+          [0, 3],
+        ],
+      }),
+      supportLevel.id,
+    )
 
     for (const levelId of [ground.id, upper.id]) {
       bridge.createNode(
@@ -252,19 +262,12 @@ describe('scene query tools', () => {
       )
     }
 
-    const roof = RoofNode.parse({
-      name: 'Main roof',
-      metadata: { referenceLevelId: upper.id, roofLevelId: roofLevel.id },
-    })
-    bridge.createNode(roof, roofLevel.id)
-
     const result = await client.callTool({ name: 'verify_scene', arguments: {} })
     expect(result.isError).toBeFalsy()
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0]!.text)
     expect(parsed.levelCount).toBe(3)
     expect(parsed.occupiedStoryCount).toBe(2)
     expect(parsed.supportLevelCount).toBe(1)
-    expect(parsed.roofLevelIds).toEqual([roofLevel.id])
     expect(parsed.hasIssues).toBe(false)
 
     const listed = await client.callTool({ name: 'list_levels', arguments: {} })
@@ -273,11 +276,10 @@ describe('scene query tools', () => {
       (listed.content as Array<{ type: string; text: string }>)[0]!.text,
     )
     expect(listPayload.occupiedStoryCount).toBe(2)
-    expect(listPayload.roofLevelIds).toEqual([roofLevel.id])
     expect(
-      listPayload.levels.find((level: { id: string }) => level.id === roofLevel.id),
+      listPayload.levels.find((level: { id: string }) => level.id === supportLevel.id),
     ).toMatchObject({
-      role: 'roof',
+      role: 'support',
       isSupportLevel: true,
       referenceLevelId: upper.id,
     })

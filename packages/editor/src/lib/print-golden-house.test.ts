@@ -185,10 +185,6 @@ describe('print golden house', () => {
         compileShell: compileGoldenShell,
       }
       const first = await exportSceneLevelsForPrint(structure, fixture.nodes, options)
-      const second = await exportSceneLevelsForPrint(structure, fixture.nodes, {
-        ...options,
-        minimumFeatureMm: 1.8,
-      })
 
       expect(first.report.status).toBe('pass')
       expect(first.report.parts.map((part) => part.objectName)).toEqual([
@@ -198,7 +194,7 @@ describe('print golden house', () => {
       ])
       expect(first.report.parts.map((part) => part.sourceBaseMeters)).toEqual([null, 0, 2.5])
       expect(first.report.parts.map((part) => part.report.minimumFeatureThicknessMm)).toEqual([
-        3, 2, 1.5,
+        3, 2, 2,
       ])
       for (const part of first.report.parts) {
         expect(part.report.status).toBe('pass')
@@ -217,18 +213,6 @@ describe('print golden house', () => {
       expect(first.report.parts[2]?.report.diagnostics).toContainEqual(
         expect.objectContaining({ nodeIds: fixture.upperStructuralNodeIds }),
       )
-      expect(second.report.status).toBe('blocked')
-      expect(second.report.parts.map((part) => part.report.status)).toEqual([
-        'pass',
-        'pass',
-        'blocked',
-      ])
-      expect(second.report.parts[2]?.report.diagnostics).toContainEqual(
-        expect.objectContaining({
-          code: 'feature_below_target',
-          nodeIds: [PRINT_GOLDEN_HOUSE_IDS.roof],
-        }),
-      )
 
       const objects = packageObjectSizes(first.data)
       expect(objects.map((object) => object.name)).toEqual(['00 Plinth', '01 Ground', '02 Upper'])
@@ -238,10 +222,9 @@ describe('print golden house', () => {
       expect(objects[1]?.size.x).toBeCloseTo(42, 4)
       expect(objects[1]?.size.y).toBeCloseTo(32, 4)
       expect(objects[1]?.size.z).toBeCloseTo(25, 4)
-      expect(objects[2]?.size.x).toBeCloseTo(46.6962, 3)
-      expect(objects[2]?.size.y).toBeCloseTo(37.1962, 3)
-      expect(objects[2]?.size.z).toBeCloseTo(40.3923, 3)
-      expect(first.data).toEqual(second.data)
+      expect(objects[2]?.size.x).toBeCloseTo(42, 4)
+      expect(objects[2]?.size.y).toBeCloseTo(32, 4)
+      expect(objects[2]?.size.z).toBeCloseTo(25, 4)
     } finally {
       fixture.dispose()
     }

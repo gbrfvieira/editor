@@ -15,8 +15,6 @@ const STRUCTURAL_NODE_TYPES = new Set<AnyNode['type']>([
   'zone',
   'slab',
   'ceiling',
-  'roof',
-  'roof-segment',
   'stair',
   'stair-segment',
   'window',

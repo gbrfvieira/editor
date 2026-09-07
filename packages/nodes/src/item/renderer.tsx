@@ -46,7 +46,6 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { positionLocal, smoothstep, time } from 'three/tsl'
 import { BlockFaceHostFrame } from '../shared/block-face-host'
-import { RoofFaceHostFrame } from '../shared/roof-face-host'
 import { cancelItemModelLoad, getUnavailableItemAsset, ItemGLTFLoader } from './model-loader'
 
 type MutableMaterial = Material & {
@@ -476,12 +475,7 @@ export const ItemRenderer = ({ node: storeNode }: { node: ItemNode }) => {
       </BlockFaceHostFrame>
     )
   }
-  if (!node.roofSegmentId) return content
-  return (
-    <RoofFaceHostFrame roofFace={node.roofFace} roofSegmentId={node.roofSegmentId}>
-      {content}
-    </RoofFaceHostFrame>
-  )
+  return content
 }
 
 const previewOpacity = smoothstep(0.42, 0.55, positionLocal.y.add(time.mul(-0.2)).mul(10).fract())

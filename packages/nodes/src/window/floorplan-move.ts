@@ -18,7 +18,7 @@ import {
   usePlacementPreview,
 } from '@pascal-app/editor'
 import { createFloorplanCursorResolver } from '../shared/floorplan-cursor'
-import { getOpeningHostLevelId, getRoofHostedOpeningPlanPoint } from '../shared/roof-opening-host'
+import { getOpeningHostLevelId } from '../shared/opening-host'
 import {
   findClosestWallInPlan,
   projectWallLocalPointToPlan,
@@ -41,8 +41,8 @@ import { clampToWall, DEFAULT_WINDOW_SILL_M, hasWallChildOverlap } from './windo
 
 export const windowFloorplanMoveTarget: FloorplanMoveTarget<WindowNode> = ({ node }) => {
   const nodeId = node.id as AnyNodeId
-  // The level that owns the wall-snap candidates — resolves the wall-hosted,
-  // roof-hosted, and fresh-placement parentings (see `getOpeningHostLevelId`).
+  // The level that owns the wall-snap candidates — resolves the wall-hosted
+  // and fresh-placement parentings (see `getOpeningHostLevelId`).
   const startLevelId = getOpeningHostLevelId(node, useScene.getState().nodes)
   const originalWall = node.parentId
     ? (useScene.getState().nodes[node.parentId as AnyNodeId] as WallNode | undefined)
@@ -51,7 +51,7 @@ export const windowFloorplanMoveTarget: FloorplanMoveTarget<WindowNode> = ({ nod
     original:
       originalWall?.type === 'wall'
         ? projectWallLocalPointToPlan(originalWall, node.position[0])
-        : (getRoofHostedOpeningPlanPoint(node, useScene.getState().nodes) ?? [node.position[0], 0]),
+        : ([node.position[0], 0] as [number, number]),
     metadata: node.metadata,
     // Absolute: query the wall snap with the TRUE cursor (see the matching
     // comment in `doorFloorplanMoveTarget`). Relative mode anchored the search

@@ -6,12 +6,9 @@ import {
   type FloorplanMoveTarget,
   type FloorplanMoveTargetSession,
   getBlockFaceFrame,
-  getRoofWallFaceFrame,
   getScaledDimensions,
   type ItemNode,
   movingFootprintAnchors,
-  type RoofSegmentNode,
-  roofFacePointToSegment,
   useLiveNodeOverrides,
   useScene,
 } from '@pascal-app/core'
@@ -105,31 +102,6 @@ function resolveItemPlanTransform(
     result = {
       point: [parentTransform.point[0] + offsetX, parentTransform.point[1] + offsetZ],
       rotation: parentTransform.rotation + localRotation,
-    }
-  } else if (parent?.type === 'roof-segment') {
-    // Roof-hosted wall item: FACE-LOCAL position mapped through the face
-    // frame, then composed through the segment's and roof's yaw +
-    // position into level-local plan coords — without this the drag seed
-    // jumps off the roof at move start.
-    const segment = parent as RoofSegmentNode
-    const roof = segment.parentId
-      ? (nodes[segment.parentId as AnyNodeId] as
-          | (AnyNode & { position: [number, number, number]; rotation: number })
-          | undefined)
-      : undefined
-    if (roof?.type === 'roof' && item.roofFace) {
-      const frame = getRoofWallFaceFrame(segment, item.roofFace)
-      const segLocal = roofFacePointToSegment(segment, item.roofFace, item.position)
-      const [sx, sz] = rotateVec(segLocal[0], segLocal[2], segment.rotation ?? 0)
-      const [rx, rz] = rotateVec(
-        sx + segment.position[0],
-        sz + segment.position[2],
-        roof.rotation ?? 0,
-      )
-      result = {
-        point: [rx + roof.position[0], rz + roof.position[2]],
-        rotation: (roof.rotation ?? 0) + (segment.rotation ?? 0) + frame.yaw + localRotation,
-      }
     }
   } else if (parent?.type === 'block' && item.blockFaceId) {
     const frame = getBlockFaceFrame(parent.topology, item.blockFaceId)

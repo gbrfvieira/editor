@@ -3,42 +3,28 @@ import mitt from 'mitt'
 import type { Object3D } from 'three'
 import type {
   BlockNode,
-  BoxVentNode,
   BuildingNode,
   CabinetModuleNode,
   CabinetNode,
   CeilingNode,
-  ChimneyNode,
   ColumnNode,
   ConstructionDimensionNode,
-  CupolaNode,
   DoorNode,
-  DormerNode,
-  DownspoutNode,
   ElevatorNode,
-  EyebrowVentNode,
   FenceNode,
   GuideNode,
-  GutterNode,
   ItemNode,
-  LeanToExtensionNode,
   LevelNode,
   LinesetNode,
   MeasurementNode,
-  RidgeVentNode,
-  RoofNode,
-  RoofSegmentNode,
   ScanNode,
   ShelfNode,
   SiteNode,
-  SkylightNode,
   SlabNode,
-  SolarPanelNode,
   SpawnNode,
   StairNode,
   StairSegmentNode,
   StructuralGridNode,
-  TurbineVentNode,
   WallNode,
   WindowNode,
   ZoneNode,
@@ -91,7 +77,6 @@ export type BuildingEvent = NodeEvent<BuildingNode>
 export type CabinetEvent = NodeEvent<CabinetNode>
 export type CabinetModuleEvent = NodeEvent<CabinetModuleNode>
 export type LevelEvent = NodeEvent<LevelNode>
-export type LeanToExtensionEvent = NodeEvent<LeanToExtensionNode>
 export type ZoneEvent = NodeEvent<ZoneNode>
 export type ShelfEvent = NodeEvent<ShelfNode>
 export type SlabEvent = NodeEvent<SlabNode>
@@ -100,8 +85,6 @@ export type CeilingEvent = NodeEvent<CeilingNode>
 export type ColumnEvent = NodeEvent<ColumnNode>
 export type ConstructionDimensionEvent = NodeEvent<ConstructionDimensionNode>
 export type BlockEvent = NodeEvent<BlockNode>
-export type RoofEvent = NodeEvent<RoofNode>
-export type RoofSegmentEvent = NodeEvent<RoofSegmentNode>
 export type StairEvent = NodeEvent<StairNode>
 export type StairSegmentEvent = NodeEvent<StairSegmentNode>
 export type StructuralGridEvent = NodeEvent<StructuralGridNode>
@@ -110,17 +93,6 @@ export type DoorEvent = NodeEvent<DoorNode>
 export type ElevatorEvent = NodeEvent<ElevatorNode>
 export type ScanEvent = NodeEvent<ScanNode>
 export type GuideEvent = NodeEvent<GuideNode>
-export type BoxVentEvent = NodeEvent<BoxVentNode>
-export type RidgeVentEvent = NodeEvent<RidgeVentNode>
-export type TurbineVentEvent = NodeEvent<TurbineVentNode>
-export type CupolaEvent = NodeEvent<CupolaNode>
-export type EyebrowVentEvent = NodeEvent<EyebrowVentNode>
-export type GutterEvent = NodeEvent<GutterNode>
-export type ChimneyEvent = NodeEvent<ChimneyNode>
-export type SolarPanelEvent = NodeEvent<SolarPanelNode>
-export type SkylightEvent = NodeEvent<SkylightNode>
-export type DormerEvent = NodeEvent<DormerNode>
-export type DownspoutEvent = NodeEvent<DownspoutNode>
 export type LinesetEvent = NodeEvent<LinesetNode>
 export type MeasurementEvent = NodeEvent<MeasurementNode>
 
@@ -291,7 +263,6 @@ type EditorEvents = GridEvents &
   NodeEvents<'building', BuildingEvent> &
   NodeEvents<'elevator', ElevatorEvent> &
   NodeEvents<'level', LevelEvent> &
-  NodeEvents<'lean-to-extension', LeanToExtensionEvent> &
   NodeEvents<'zone', ZoneEvent> &
   NodeEvents<'slab', SlabEvent> &
   NodeEvents<'shelf', ShelfEvent> &
@@ -300,8 +271,6 @@ type EditorEvents = GridEvents &
   NodeEvents<'column', ColumnEvent> &
   NodeEvents<'construction-dimension', ConstructionDimensionEvent> &
   NodeEvents<'block', BlockEvent> &
-  NodeEvents<'roof', RoofEvent> &
-  NodeEvents<'roof-segment', RoofSegmentEvent> &
   NodeEvents<'stair', StairEvent> &
   NodeEvents<'stair-segment', StairSegmentEvent> &
   NodeEvents<'structural-grid', StructuralGridEvent> &
@@ -309,17 +278,6 @@ type EditorEvents = GridEvents &
   NodeEvents<'door', DoorEvent> &
   NodeEvents<'scan', ScanEvent> &
   NodeEvents<'guide', GuideEvent> &
-  NodeEvents<'box-vent', BoxVentEvent> &
-  NodeEvents<'ridge-vent', RidgeVentEvent> &
-  NodeEvents<'turbine-vent', TurbineVentEvent> &
-  NodeEvents<'cupola', CupolaEvent> &
-  NodeEvents<'eyebrow-vent', EyebrowVentEvent> &
-  NodeEvents<'gutter', GutterEvent> &
-  NodeEvents<'chimney', ChimneyEvent> &
-  NodeEvents<'solar-panel', SolarPanelEvent> &
-  NodeEvents<'skylight', SkylightEvent> &
-  NodeEvents<'dormer', DormerEvent> &
-  NodeEvents<'downspout', DownspoutEvent> &
   NodeEvents<'lineset', LinesetEvent> &
   NodeEvents<'measurement', MeasurementEvent> &
   CameraControlEvents &

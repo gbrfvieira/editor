@@ -37,7 +37,7 @@ describe('find_nodes', () => {
   test('returns empty list for unused type', async () => {
     const result = await client.callTool({
       name: 'find_nodes',
-      arguments: { type: 'roof' },
+      arguments: { type: 'scan' },
     })
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0]!.text)
     expect(Array.isArray(parsed.nodes)).toBe(true)

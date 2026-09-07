@@ -14,8 +14,6 @@ const ALL_NODE_TYPES = [
   'zone',
   'slab',
   'ceiling',
-  'roof',
-  'roof-segment',
   'stair',
   'stair-segment',
   'item',
@@ -48,8 +46,7 @@ function getPointForZoneFilter(node: AnyNode): [number, number] | null {
     node.type === 'door' ||
     node.type === 'window' ||
     node.type === 'building' ||
-    node.type === 'stair' ||
-    node.type === 'roof'
+    node.type === 'stair'
   ) {
     const [x, , z] = node.position
     return [x, z]

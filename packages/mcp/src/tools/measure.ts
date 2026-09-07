@@ -20,7 +20,7 @@ export const measureOutput = {
  * Compute a 3D centre point in level-coordinate space for distance measurement.
  *
  * For walls / fences: midpoint of the start/end segment at Y=0.
- * For positioned nodes (item, door, window, building, stair, roof): `position`.
+ * For positioned nodes (item, door, window, building, stair): `position`.
  * For polygon nodes (slab, ceiling, zone): 2D centroid lifted to Y=0.
  * For site: centroid of property line at Y=0 if available.
  *
@@ -40,7 +40,6 @@ function getCentre(node: AnyNode): [number, number, number] | null {
     case 'window':
     case 'building':
     case 'stair':
-    case 'roof':
       return node.position
     case 'slab':
     case 'ceiling':

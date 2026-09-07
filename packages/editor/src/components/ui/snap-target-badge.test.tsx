@@ -27,14 +27,4 @@ describe('resolveNodeSnapTarget', () => {
 
     expect(resolveNodeSnapTarget(node)).toBe('roof')
   })
-
-  test('badges gutter-hosted downspouts as roof accessories', () => {
-    const node = {
-      id: 'downspout_1',
-      type: 'downspout',
-      gutterId: 'gutter_1',
-    } as unknown as AnyNode
-
-    expect(resolveNodeSnapTarget(node)).toBe('roof')
-  })
 })

@@ -122,11 +122,11 @@ export const stairSegmentDefinition: NodeDefinition<typeof StairSegmentNode> = {
     deletable: true,
   },
 
-  // Bespoke move shared with roof / roof-segment / stair via
-  // `shared/move-roof-tool` — routed through `MoveTool`'s registry-
-  // affordance lookup rather than a hardcoded dispatcher arm.
+  // Bespoke move shared with stair via `shared/move-stair-tool` — routed
+  // through `MoveTool`'s registry-affordance lookup rather than a
+  // hardcoded dispatcher arm.
   affordanceTools: {
-    move: () => import('../shared/move-roof-tool'),
+    move: () => import('../shared/move-stair-tool'),
   },
 
   parametrics: stairSegmentParametrics,

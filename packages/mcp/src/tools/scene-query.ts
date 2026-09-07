@@ -32,7 +32,6 @@ export const listLevelsOutput = {
   levelCount: z.number(),
   occupiedStoryCount: z.number(),
   supportLevelCount: z.number(),
-  roofLevelIds: z.array(z.string()),
   levels: z.array(jsonObject),
 }
 
@@ -69,7 +68,6 @@ export const verifySceneOutput = {
   levelCount: z.number(),
   occupiedStoryCount: z.number(),
   supportLevelCount: z.number(),
-  roofLevelIds: z.array(z.string()),
   activeSceneId: z.string().nullable(),
   levels: z.array(jsonObject),
   emptyLevelIds: z.array(z.string()),
@@ -85,11 +83,10 @@ type ContentCounts = {
   items: number
   slabs: number
   ceilings: number
-  roofs: number
   stairs: number
 }
 
-type LevelRole = 'occupied' | 'roof' | 'support'
+type LevelRole = 'occupied' | 'support'
 
 function textResult<T extends Record<string, unknown>>(payload: T) {
   return {
@@ -153,24 +150,9 @@ function metadataString(node: AnyNode, key: string): string | undefined {
   return typeof value === 'string' ? value : undefined
 }
 
-function occupiedContentCount(counts: ContentCounts): number {
-  return (
-    counts.walls +
-    counts.zones +
-    counts.doors +
-    counts.windows +
-    counts.items +
-    counts.slabs +
-    counts.ceilings +
-    counts.stairs
-  )
-}
-
 function classifyLevel(level: AnyNode, counts: ContentCounts): LevelRole {
   const metadataRole = metadataString(level, 'role')
-  if (metadataRole === 'roof') return 'roof'
   if (metadataRole === 'support') return 'support'
-  if (counts.roofs > 0 && occupiedContentCount(counts) === 0) return 'roof'
   return 'occupied'
 }
 
@@ -459,7 +441,6 @@ function levelSummary(bridge: SceneOperations, levelId: AnyNodeId) {
     }))
   const doors = nodes.filter((node) => node.type === 'door')
   const windows = nodes.filter((node) => node.type === 'window')
-  const roofs = nodes.filter((node) => node.type === 'roof')
   const stairs = nodes.filter((node) => node.type === 'stair')
   const counts: ContentCounts = {
     walls: walls.length,
@@ -469,7 +450,6 @@ function levelSummary(bridge: SceneOperations, levelId: AnyNodeId) {
     items: items.length,
     slabs: slabs.length,
     ceilings: ceilings.length,
-    roofs: roofs.length,
     stairs: stairs.length,
   }
   const role = classifyLevel(level, counts)
@@ -522,15 +502,11 @@ export function registerListLevels(server: McpServer, bridge: SceneOperations): 
         }
       })
       const occupiedStoryCount = levels.filter((level) => level.isOccupiedStory).length
-      const roofLevelIds = levels
-        .filter((level) => level.role === 'roof')
-        .map((level) => level.id as string)
       return textResult({
         activeSceneId: activeScene?.id ?? null,
         levelCount: levels.length,
         occupiedStoryCount,
         supportLevelCount: levels.length - occupiedStoryCount,
-        roofLevelIds,
         levels,
       })
     },
@@ -631,38 +607,12 @@ export function registerVerifyScene(server: McpServer, bridge: SceneOperations):
 
       const issues: string[] = []
       const occupiedStoryCount = levels.filter((level) => level.isOccupiedStory).length
-      const roofLevelIds = levels
-        .filter((level) => level.role === 'roof')
-        .map((level) => level.levelId as string)
       const emptyLevelIds = levels.filter((level) => level.isEmpty).map((level) => level.levelId)
       if (emptyLevelIds.length > 0) {
         issues.push(`Empty level(s): ${emptyLevelIds.join(', ')}`)
       }
 
       for (const level of levels) {
-        const occupiedContent = occupiedContentCount(level.content)
-        if (level.role === 'roof') {
-          if (level.content.roofs === 0) {
-            issues.push(
-              `${level.levelName} is a roof support level but has no roof geometry; add or move roof geometry there rather than deleting the support level to satisfy story count`,
-            )
-          }
-          if (occupiedContent > 0) {
-            issues.push(
-              `${level.levelName} is a roof support level but contains occupied-story content; move rooms, walls, stairs, slabs, ceilings, and items to an occupied story and keep the roof level for roof geometry only`,
-            )
-          }
-          if (level.referenceLevelId) {
-            const referenceLevel = bridge.getNode(level.referenceLevelId as AnyNodeId)
-            if (referenceLevel?.type === 'level' && level.floorIndex <= referenceLevel.level) {
-              issues.push(
-                `${level.levelName} roof support level should be above its reference occupied level ${referenceLevel.name ?? referenceLevel.id}`,
-              )
-            }
-          }
-          continue
-        }
-
         if (level.content.walls > 0 && level.content.zones === 0) {
           issues.push(`${level.levelName} has walls but no zones/rooms`)
         }
@@ -674,14 +624,6 @@ export function registerVerifyScene(server: McpServer, bridge: SceneOperations):
         }
         if (level.content.walls > 0 && level.content.doors === 0) {
           issues.push(`${level.levelName} has walls but no doors`)
-        }
-        if (
-          level.content.roofs > 0 &&
-          (level.content.walls > 0 || level.content.zones > 0 || level.content.stairs > 0)
-        ) {
-          issues.push(
-            `${level.levelName} mixes roof geometry with occupied-level content; place roofs on a dedicated roof level for solo/exploded level views`,
-          )
         }
       }
 
@@ -844,7 +786,6 @@ export function registerVerifyScene(server: McpServer, bridge: SceneOperations):
         levelCount: levels.length,
         occupiedStoryCount,
         supportLevelCount: levels.length - occupiedStoryCount,
-        roofLevelIds,
         activeSceneId: bridge.getActiveScene()?.id ?? null,
         levels,
         emptyLevelIds,

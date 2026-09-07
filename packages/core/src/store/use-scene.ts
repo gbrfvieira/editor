@@ -10,19 +10,8 @@ import type { Collection, CollectionId } from '../schema/collections'
 import { generateCollectionId } from '../schema/collections'
 import { compiledNodeSchema } from '../schema/compiled-node-parsers'
 import { DoorNode as DoorNodeSchema } from '../schema/nodes/door'
-import {
-  createDormerDefaultWindow,
-  DormerNode as DormerNodeSchema,
-  getDormerDefaultWindowFace,
-} from '../schema/nodes/dormer'
 import { ElevatorNode as ElevatorNodeSchema } from '../schema/nodes/elevator'
 import { LevelNode, normalizeLevelBaseElevation } from '../schema/nodes/level'
-import {
-  getPitchFromActiveRoofHeight,
-  type RoofSegmentNode,
-  type RoofType,
-} from '../schema/nodes/roof-segment'
-import { segmentPointToRoofWallFace } from '../schema/nodes/roof-segment-walls'
 import { ShelfNode as ShelfNodeSchema } from '../schema/nodes/shelf'
 import { SiteNode } from '../schema/nodes/site'
 import {
@@ -387,50 +376,6 @@ function migrateSingleMaterialSlots(
   return { ...node, slots, material: undefined, materialPreset: undefined }
 }
 
-function migrateRoleMaterialSlots(
-  node: Record<string, any>,
-  roles: readonly string[],
-  mintedMaterials: Record<SceneMaterialId, SceneMaterial>,
-) {
-  const slots: Record<string, string> = { ...(node.slots ?? {}) }
-  const next = { ...node }
-  let changed = false
-
-  for (const role of roles) {
-    if (slots[role] === undefined) {
-      const ref = legacySpecToMaterialRef(
-        {
-          material: node[`${role}Material`] ?? node.material,
-          materialPreset: node[`${role}MaterialPreset`] ?? node.materialPreset,
-        },
-        mintedMaterials,
-      )
-      if (ref) {
-        slots[role] = ref
-        changed = true
-      }
-    }
-    if (`${role}Material` in next || `${role}MaterialPreset` in next) changed = true
-    delete next[`${role}Material`]
-    delete next[`${role}MaterialPreset`]
-  }
-
-  return changed ? { ...next, slots } : node
-}
-
-function migrateRenamedSlot(node: Record<string, any>, previousId: string, nextId: string) {
-  if (!node.slots || node.slots[previousId] === undefined) return node
-  const slots = { ...node.slots }
-  if (slots[nextId] === undefined) slots[nextId] = slots[previousId]
-  delete slots[previousId]
-  return { ...node, slots }
-}
-
-function migrateCupolaLouverSlot(node: Record<string, any>) {
-  if (!node.slots || node.slots.louvers !== undefined || node.slots.body === undefined) return node
-  return { ...node, slots: { ...node.slots, louvers: node.slots.body } }
-}
-
 // Stair carries per-role legacy fields (`treadMaterial*` / `sideMaterial*` /
 // `railingMaterial*`) plus a catch-all. Map each to its slot via the same
 // fallback chain the renderer uses (`getEffectiveStairSurfaceMaterial`):
@@ -561,62 +506,6 @@ function migrateStairSurfaceMaterials(node: Record<string, any>) {
   return next
 }
 
-function migrateRoofSurfaceMaterials(node: Record<string, any>) {
-  const hasTop = node.topMaterial !== undefined || typeof node.topMaterialPreset === 'string'
-  const hasEdge = node.edgeMaterial !== undefined || typeof node.edgeMaterialPreset === 'string'
-  const hasWall = node.wallMaterial !== undefined || typeof node.wallMaterialPreset === 'string'
-  const legacyFinish = {
-    material: node.material,
-    materialPreset: typeof node.materialPreset === 'string' ? node.materialPreset : undefined,
-  }
-
-  if (!(hasTop || hasEdge || hasWall)) {
-    if (legacyFinish.material === undefined && legacyFinish.materialPreset === undefined) {
-      return node
-    }
-
-    return {
-      ...node,
-      topMaterial: legacyFinish.material,
-      topMaterialPreset: legacyFinish.materialPreset,
-      edgeMaterial: legacyFinish.material,
-      edgeMaterialPreset: legacyFinish.materialPreset,
-      wallMaterial: legacyFinish.material,
-      wallMaterialPreset: legacyFinish.materialPreset,
-    }
-  }
-
-  const next = { ...node }
-
-  if (!hasTop) {
-    next.topMaterial = legacyFinish.material
-    next.topMaterialPreset = legacyFinish.materialPreset
-  }
-
-  if (!hasEdge) {
-    if (node.wallMaterial !== undefined || typeof node.wallMaterialPreset === 'string') {
-      next.edgeMaterial = node.wallMaterial
-      next.edgeMaterialPreset =
-        typeof node.wallMaterialPreset === 'string' ? node.wallMaterialPreset : undefined
-    } else {
-      next.edgeMaterial = legacyFinish.material
-      next.edgeMaterialPreset = legacyFinish.materialPreset
-    }
-  }
-
-  if (!hasWall) {
-    if (node.edgeMaterial !== undefined || typeof node.edgeMaterialPreset === 'string') {
-      next.wallMaterial = node.edgeMaterial
-      next.wallMaterialPreset =
-        typeof node.edgeMaterialPreset === 'string' ? node.edgeMaterialPreset : undefined
-    } else {
-      next.wallMaterial = legacyFinish.material
-      next.wallMaterialPreset = legacyFinish.materialPreset
-    }
-  }
-
-  return next
-}
 
 function migrateConstructionDimension(node: Record<string, any>) {
   const drawingOverrides = Array.isArray(node.drawingOverrides) ? node.drawingOverrides : []
@@ -732,75 +621,6 @@ function migrateNodes(nodes: Record<string, any>): {
     if (node.type === 'item' && !('scale' in node)) {
       patchedNodes[id] = { ...node, scale: [1, 1, 1] }
     }
-    // 2. Old roof to new roof + segment migration
-    if (node.type === 'roof' && !('children' in node)) {
-      const oldRoof = node
-      const suffix = id.includes('_') ? id.split('_')[1] : Math.random().toString(36).slice(2)
-      const segmentId = `rseg_${suffix}`
-
-      const segWidth = oldRoof.length ?? 8
-      const segDepth = (oldRoof.leftWidth ?? 2.2) + (oldRoof.rightWidth ?? 2.2)
-      const legacyRoofHeight = oldRoof.height ?? 2.5
-      const segment = {
-        object: 'node',
-        id: segmentId,
-        type: 'roof-segment',
-        parentId: id,
-        visible: oldRoof.visible ?? true,
-        metadata: {},
-        position: [0, 0, 0],
-        rotation: 0,
-        roofType: 'gable',
-        width: segWidth,
-        depth: segDepth,
-        // Schema default (0.5), NOT 0: a zero-height wall builds a flat,
-        // degenerate CSG brush → "Coplanar clip not handled" + NaN geometry, so
-        // the migrated legacy roof never renders. New roofs use 0.5 too.
-        wallHeight: 0.5,
-        pitch: getPitchFromActiveRoofHeight({
-          roofType: 'gable',
-          width: segWidth,
-          depth: segDepth,
-          roofHeight: legacyRoofHeight,
-        }),
-        wallThickness: 0.1,
-        deckThickness: 0.1,
-        overhang: 0.3,
-        shingleThickness: 0.05,
-      }
-
-      patchedNodes[segmentId] = segment
-      patchedNodes[id] = {
-        ...oldRoof,
-        children: [segmentId],
-      }
-    }
-
-    // 2b. roof-segment: guarantee a valid positive pitch (degrees).
-    // Saved scenes wrote `roofHeight` in metres; the schema now stores `pitch`
-    // in degrees. Convert the legacy field when present, and — crucially — fall
-    // back to the schema default for any segment that carries no usable pitch or
-    // roofHeight (older/partial saves). Without this, the slope-frame guard
-    // resolves a missing pitch to a FLAT frame, so the roof renders as a slab.
-    // The migration result is cast, not zod-parsed, so the schema default never
-    // applies on its own — this branch is the only place it lands.
-    if (node.type === 'roof-segment') {
-      const currentPitch = (node as { pitch?: unknown }).pitch
-      const hasValidPitch = typeof currentPitch === 'number' && currentPitch > 0
-      if (!hasValidPitch) {
-        const { roofHeight, ...rest } = node as RoofSegmentNode & { roofHeight?: unknown }
-        const width = typeof node.width === 'number' ? node.width : 8
-        const depth = typeof node.depth === 'number' ? node.depth : 6
-        const roofType = (typeof node.roofType === 'string' ? node.roofType : 'gable') as RoofType
-        const derived =
-          typeof roofHeight === 'number' && roofHeight > 0
-            ? getPitchFromActiveRoofHeight({ roofType, width, depth, roofHeight })
-            : 0
-        // 40° matches the RoofSegmentNode schema default.
-        patchedNodes[id] = { ...rest, pitch: derived > 0 ? derived : 40 }
-      }
-    }
-
     if (node.type === 'door') {
       const normalized = normalizeDoorNode(node)
       if (normalized) {
@@ -812,40 +632,6 @@ function migrateNodes(nodes: Record<string, any>): {
       const normalized = normalizeWindowNode(node)
       if (normalized) {
         patchedNodes[id] = normalized
-      }
-    }
-
-    // Dormers originally rendered one inline parametric window. Promote that
-    // default to a real hosted WindowNode so additional windows can use the
-    // regular window tool and inspector without changing the old appearance.
-    if (node.type === 'dormer') {
-      const hasLegacyInlineWindow = !Array.isArray(
-        (patchedNodes[id] as { children?: unknown }).children,
-      )
-      if (!hasLegacyInlineWindow) continue
-      const dormer = DormerNodeSchema.parse({
-        ...patchedNodes[id],
-        children: getStringArray((patchedNodes[id] as { children?: unknown }).children),
-      })
-      const children = getStringArray(dormer.children)
-      const hasHostedWindow = children.some((childId) => patchedNodes[childId]?.type === 'window')
-      if (!hasHostedWindow) {
-        const baseWindowId = `window_${id.replace(/^dormer_/, '')}_default`
-        let windowId = baseWindowId
-        let suffix = 1
-        while (patchedNodes[windowId]) {
-          windowId = `${baseWindowId}_${suffix}`
-          suffix += 1
-        }
-        const host = dormer.roofSegmentId ? patchedNodes[dormer.roofSegmentId] : undefined
-        const hostSegment = host?.type === 'roof-segment' ? (host as RoofSegmentNode) : undefined
-        const window = createDormerDefaultWindow(
-          dormer,
-          windowId,
-          getDormerDefaultWindowFace(dormer, hostSegment),
-        )
-        patchedNodes[windowId] = window
-        patchedNodes[id] = { ...dormer, children: [...children, window.id] }
       }
     }
 
@@ -922,48 +708,6 @@ function migrateNodes(nodes: Record<string, any>): {
       )
     }
 
-    if (node.type === 'gutter') {
-      patchedNodes[id] = migrateRenamedSlot(patchedNodes[id], 'surface', 'gutter')
-      patchedNodes[id] = migrateSingleMaterialSlots(patchedNodes[id], ['gutter'], mintedMaterials)
-    }
-
-    if (node.type === 'downspout') {
-      patchedNodes[id] = migrateSingleMaterialSlots(patchedNodes[id], ['surface'], mintedMaterials)
-    }
-
-    if (node.type === 'box-vent') {
-      patchedNodes[id] = migrateRoleMaterialSlots(
-        patchedNodes[id],
-        ['base', 'top'],
-        mintedMaterials,
-      )
-    }
-
-    if (node.type === 'cupola') {
-      patchedNodes[id] = migrateCupolaLouverSlot(patchedNodes[id])
-      patchedNodes[id] = migrateRoleMaterialSlots(
-        patchedNodes[id],
-        ['base', 'body', 'roof', 'louvers'],
-        mintedMaterials,
-      )
-    }
-
-    if (node.type === 'eyebrow-vent') {
-      patchedNodes[id] = migrateRoleMaterialSlots(
-        patchedNodes[id],
-        ['hood', 'front'],
-        mintedMaterials,
-      )
-    }
-
-    if (node.type === 'turbine-vent') {
-      patchedNodes[id] = migrateRoleMaterialSlots(
-        patchedNodes[id],
-        ['base', 'head'],
-        mintedMaterials,
-      )
-    }
-
     if (node.type === 'shelf') {
       const normalized = normalizeShelfNode(node)
       if (normalized) {
@@ -974,71 +718,6 @@ function migrateNodes(nodes: Record<string, any>): {
         ['shelves', 'frame', 'back'],
         mintedMaterials,
       )
-    }
-
-    // Roof-segment hosting was added in this migration cycle (the same
-    // pattern as shelf above). Older segments saved before the schema
-    // gained `children` need the field initialised so
-    // `createNode(chimney, segmentId)` finds an array to append to —
-    // without this every "Add Element" click on the roof panel results
-    // in an orphaned accessory (parented in scene state but never
-    // appended to `seg.children`, so the renderer's recursive
-    // `<NodeRenderer>` mount never sees it).
-    if (node.type === 'roof-segment' && !Array.isArray((node as { children?: unknown }).children)) {
-      patchedNodes[id] = { ...node, children: [] } as AnyNode
-    }
-
-    // Roof-hosted wall children (door / window / item) originally stored
-    // SEGMENT-LOCAL positions with the face yaw in rotation[1]; the
-    // format moved to explicit `roofFace` + FACE-LOCAL coords so the
-    // renderer's face frame can track segment edits live. Convert in
-    // place: face from the old cardinal yaw, u/v from the outer-plane
-    // projection, z re-based from the outer plane to the wall mid-plane.
-    if (
-      (node.type === 'door' || node.type === 'window' || node.type === 'item') &&
-      typeof (node as { roofSegmentId?: unknown }).roofSegmentId === 'string' &&
-      (node as { roofFace?: unknown }).roofFace === undefined
-    ) {
-      const current = patchedNodes[id] as AnyNode & {
-        roofSegmentId: string
-        position: [number, number, number]
-        rotation: [number, number, number]
-      }
-      const segment = patchedNodes[current.roofSegmentId] as
-        | (AnyNode & { wallThickness?: number })
-        | undefined
-      if (segment?.type === 'roof-segment') {
-        const tau = Math.PI * 2
-        const yaw = (((current.rotation?.[1] ?? 0) % tau) + tau) % tau
-        const eps = 1e-3
-        const face =
-          yaw < eps || tau - yaw < eps
-            ? ('front' as const)
-            : Math.abs(yaw - Math.PI) < eps
-              ? ('back' as const)
-              : Math.abs(yaw - Math.PI / 2) < eps
-                ? ('right' as const)
-                : Math.abs(yaw - (3 * Math.PI) / 2) < eps
-                  ? ('left' as const)
-                  : null
-        if (face) {
-          const { u, v, dist } = segmentPointToRoofWallFace(
-            segment as never,
-            face,
-            current.position,
-          )
-          patchedNodes[id] = {
-            ...current,
-            roofFace: face,
-            position: [u, v, dist + (segment.wallThickness ?? 0.1) / 2],
-            rotation: [0, 0, 0],
-          } as AnyNode
-        }
-      }
-    }
-
-    if (node.type === 'roof') {
-      patchedNodes[id] = migrateRoofSurfaceMaterials(patchedNodes[id])
     }
 
     // Legacy: site.children used to hold nested BuildingNode / ItemNode

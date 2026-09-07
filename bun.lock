@@ -284,6 +284,14 @@
         "typescript": "6.0.3",
       },
     },
+    "packages/quote": {
+      "name": "@pascal-app/quote",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@types/bun": "^1.3.0",
+        "typescript": "6.0.3",
+      },
+    },
     "packages/typescript-config": {
       "name": "@repo/typescript-config",
       "version": "0.0.0",
@@ -786,6 +794,8 @@
     "@pascal-app/plugin-streetscape": ["@pascal-app/plugin-streetscape@github:sudhir9297/streetscape-pascal-plugin#1c04ec9", { "peerDependencies": { "@pascal-app/core": ">=0.9.1 <1", "@pascal-app/editor": ">=0.9.1 <1", "@pascal-app/viewer": ">=0.9.1 <1", "@react-three/fiber": "^9", "react": "^18 || ^19", "three": "^0.185", "zod": "^4", "zustand": "^5" } }, "sudhir9297-streetscape-pascal-plugin-1c04ec9", "sha512-X7Zg7wi0ghZRcTtbH5LF6xye493uSZ2ft3AmAQBtguBCU6VCwCexA7pdKDr5AnVxX/JRj2s6JSd/OX4aIZ9Y6Q=="],
 
     "@pascal-app/plugin-trees": ["@pascal-app/plugin-trees@github:pascalorg/plugin-trees#56d978c", { "dependencies": { "@dgreenheck/ez-tree": "^1.1.0" }, "peerDependencies": { "@pascal-app/core": ">=0.9.1 <1", "@pascal-app/editor": ">=0.9.1 <1", "@pascal-app/viewer": ">=0.9.1 <1", "@react-three/fiber": "^9", "react": "^18 || ^19", "three": "^0.185", "zod": "^4", "zustand": "^5" } }, "pascalorg-plugin-trees-56d978c", "sha512-16VzWot1oadvxCPqsRwMJbaP0a3u5FESFy7F7++pY5wAAFq9JTFwzHvKAsllrY5TZ5TJ7Y5vSqvbmQk8sy8HaA=="],
+
+    "@pascal-app/quote": ["@pascal-app/quote@workspace:packages/quote"],
 
     "@pascal-app/viewer": ["@pascal-app/viewer@workspace:packages/viewer"],
 
@@ -2111,6 +2121,8 @@
 
     "@pascal-app/pdf-vector-extract/@types/bun": ["@types/bun@1.4.1", "", { "dependencies": { "bun-types": "1.4.1" } }, "sha512-0AVGiTXGajf1rgKom3N+c5L7CBxuoyyv1i44M0nX4UDK0G/fnRAMiri93nHuVPIb429KKtAgj7HatVmmOjeQLA=="],
 
+    "@pascal-app/quote/@types/bun": ["@types/bun@1.4.1", "", { "dependencies": { "bun-types": "1.4.1" } }, "sha512-0AVGiTXGajf1rgKom3N+c5L7CBxuoyyv1i44M0nX4UDK0G/fnRAMiri93nHuVPIb429KKtAgj7HatVmmOjeQLA=="],
+
     "@pascal-app/wall-detect/@types/bun": ["@types/bun@1.4.1", "", { "dependencies": { "bun-types": "1.4.1" } }, "sha512-0AVGiTXGajf1rgKom3N+c5L7CBxuoyyv1i44M0nX4UDK0G/fnRAMiri93nHuVPIb429KKtAgj7HatVmmOjeQLA=="],
 
     "@react-grab/cli/commander": ["commander@14.0.3", "", {}, "sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw=="],
@@ -2208,6 +2220,8 @@
     "@pascal-app/floorplan-import/@types/bun/bun-types": ["bun-types@1.4.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-loKuVrAFZKfEv+JvWkHRS9GW5IqLuLRjVXN9p+vZvBN86O5hf/pBZQ5hSoyipsrMmWObZBDvWnlmKvjKTM0PdA=="],
 
     "@pascal-app/pdf-vector-extract/@types/bun/bun-types": ["bun-types@1.4.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-loKuVrAFZKfEv+JvWkHRS9GW5IqLuLRjVXN9p+vZvBN86O5hf/pBZQ5hSoyipsrMmWObZBDvWnlmKvjKTM0PdA=="],
+
+    "@pascal-app/quote/@types/bun/bun-types": ["bun-types@1.4.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-loKuVrAFZKfEv+JvWkHRS9GW5IqLuLRjVXN9p+vZvBN86O5hf/pBZQ5hSoyipsrMmWObZBDvWnlmKvjKTM0PdA=="],
 
     "@pascal-app/wall-detect/@types/bun/bun-types": ["bun-types@1.4.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-loKuVrAFZKfEv+JvWkHRS9GW5IqLuLRjVXN9p+vZvBN86O5hf/pBZQ5hSoyipsrMmWObZBDvWnlmKvjKTM0PdA=="],
 

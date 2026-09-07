@@ -5,12 +5,9 @@ import {
   measurementArea,
   measurementDistance,
   nodeRegistry,
-  type RoofNode,
-  type RoofSegmentNode,
   registerNode,
   type WallNode,
 } from '@pascal-app/core'
-import { roofSegmentDefinition } from '../roof-segment/definition'
 import { wallDefinition } from '../wall/definition'
 import { remapMeasurementReferences, resolveMeasurementNode } from './resolve'
 
@@ -36,7 +33,6 @@ describe('associative measurement resolution', () => {
   beforeEach(() => {
     nodeRegistry._reset()
     registerNode(wallDefinition)
-    registerNode(roofSegmentDefinition)
   })
 
   afterEach(() => nodeRegistry._reset())
@@ -146,52 +142,6 @@ describe('associative measurement resolution', () => {
     expect(resolved.anchorNormals[1]?.[0]).toBeCloseTo(0)
     expect(resolved.anchorNormals[1]?.[1]).toBeCloseTo(0)
     expect(resolved.anchorNormals[1]?.[2]).toBeCloseTo(-1)
-  })
-
-  test('resolves roof ridge endpoints through segment and parent transforms', () => {
-    const roof = {
-      id: 'roof_a',
-      type: 'roof',
-      parentId: 'level_a',
-      children: ['roof-segment_a'],
-      position: [10, 1, 5],
-      rotation: 0,
-    } as RoofNode
-    const segment = {
-      id: 'roof-segment_a',
-      type: 'roof-segment',
-      parentId: roof.id,
-      children: [],
-      position: [0, 0, 0],
-      rotation: 0,
-      width: 8,
-      depth: 6,
-      wallHeight: 2.5,
-      roofType: 'gable',
-      pitch: 40,
-    } as RoofSegmentNode
-    const featureAnchor = (t: number) => ({
-      kind: 'feature' as const,
-      reference: {
-        nodeId: segment.id,
-        featureId: 'roof:ridge:0',
-        parameters: { t },
-      },
-      fallback: [0, 0, 0] as [number, number, number],
-    })
-    const resolved = resolveMeasurementNode(
-      {
-        measurement: {
-          kind: 'distance',
-          points: [featureAnchor(0), featureAnchor(1)],
-        },
-      },
-      resolveFrom([roof, segment]),
-    )
-
-    expect(resolved.dangling).toEqual([])
-    expect(measurementDistance(...resolved.payload.points)).toBeCloseTo(8)
-    expect(resolved.dependencies).toEqual([segment.id, roof.id])
   })
 
   test('falls back visibly when a reference dangles and remaps internal clone references', () => {

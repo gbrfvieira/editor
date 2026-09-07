@@ -48,7 +48,6 @@ import useFloorplanMode from '../../store/use-floorplan-mode'
 import useSessionGroups from '../../store/use-session-groups'
 import { CeilingSelectionAffordanceSystem } from '../systems/ceiling/ceiling-selection-affordance-system'
 import { CeilingSystem } from '../systems/ceiling/ceiling-system'
-import { RoofEditSystem } from '../systems/roof/roof-edit-system'
 import { SelectionAffordanceManager } from '../systems/selection-affordance-manager'
 import { StairEditSystem } from '../systems/stair/stair-edit-system'
 import { ZoneLabelEditorSystem } from '../systems/zone/zone-label-editor-system'
@@ -805,7 +804,6 @@ const ViewerSceneContent = memo(function ViewerSceneContent({
       <CeilingSystem />
       <CeilingSelectionAffordanceSystem />
       {!noEditing && <SelectionAffordanceManager />}
-      <RoofEditSystem />
       <StairEditSystem />
       {!(isLoading || isFirstPersonMode) && <SnapAwareGrid />}
       {!(isLoading || noEditing) && <ToolManager />}
@@ -1457,7 +1455,6 @@ function EditorContent({
       <ExportManager />
       <ViewerZoneSystem />
       <CeilingSystem />
-      <RoofEditSystem />
       <StairEditSystem />
       {isFirstPersonMode && <FirstPersonControls />}
       <CustomCameraControls />

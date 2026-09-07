@@ -44,8 +44,6 @@ type SelectableNodeType =
   | 'item'
   | 'slab'
   | 'ceiling'
-  | 'roof'
-  | 'roof-segment'
   | (string & {})
 
 // Expand polygon outward by a small amount to include items on edges
@@ -106,11 +104,9 @@ const isNodeOnLevel = (node: AnyNode, levelId: string): boolean => {
     if (parentNode?.type === 'wall' && parentNode.parentId === levelId) {
       return true
     }
-    // Ceiling/slab/roof-attached items: check if parent structure is on the level
+    // Ceiling/slab-attached items: check if parent structure is on the level
     if (
-      (parentNode?.type === 'ceiling' ||
-        parentNode?.type === 'slab' ||
-        parentNode?.type === 'roof') &&
+      (parentNode?.type === 'ceiling' || parentNode?.type === 'slab') &&
       parentNode.parentId === levelId
     ) {
       return true
@@ -173,11 +169,6 @@ const isNodeInZone = (node: AnyNode, levelId: string, zoneId: string): boolean =
       if (pointInPolygon(zx, zz, poly)) return true
     }
     return false
-  }
-
-  if (node.type === 'roof' || node.type === 'roof-segment') {
-    // Roofs on the same level are valid when zone is selected
-    return true
   }
 
   return false
@@ -244,28 +235,11 @@ const getStrategy = (): SelectionStrategy | null => {
     }
   }
 
-  // Zone selected -> can select/hover contents (walls, items, columns, slabs, ceilings, roofs, windows, doors)
+  // Zone selected -> can select/hover contents (walls, items, columns, slabs, ceilings, windows, doors)
   return {
-    types: [
-      'wall',
-      'fence',
-      'item',
-      'column',
-      'slab',
-      'ceiling',
-      'roof',
-      'roof-segment',
-      'window',
-      'door',
-    ],
+    types: ['wall', 'fence', 'item', 'column', 'slab', 'ceiling', 'window', 'door'],
     handleClick: (node, nativeEvent) => {
-      let nodeToSelect = node
-      if (node.type === 'roof-segment' && node.parentId) {
-        const parentNode = useScene.getState().nodes[node.parentId as AnyNodeId]
-        if (parentNode && parentNode.type === 'roof') {
-          nodeToSelect = parentNode
-        }
-      }
+      const nodeToSelect = node
 
       const { selectedIds } = useViewer.getState().selection
       const proxyId = resolveSelectionProxyId(
@@ -286,18 +260,7 @@ const getStrategy = (): SelectionStrategy | null => {
       }
     },
     isValid: (node) => {
-      const validTypes = [
-        'wall',
-        'fence',
-        'item',
-        'column',
-        'slab',
-        'ceiling',
-        'roof',
-        'roof-segment',
-        'window',
-        'door',
-      ]
+      const validTypes = ['wall', 'fence', 'item', 'column', 'slab', 'ceiling', 'window', 'door']
       if (!validTypes.includes(node.type)) return false
       return isNodeInZone(node, levelId, zoneId)
     },
@@ -379,8 +342,6 @@ export const SelectionManager = () => {
       'column',
       'slab',
       'ceiling',
-      'roof',
-      'roof-segment',
       'window',
       'door',
     ]

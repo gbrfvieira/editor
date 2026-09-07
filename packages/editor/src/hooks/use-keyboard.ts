@@ -177,13 +177,7 @@ export const runHistoryShortcut = (direction: 'undo' | 'redo') => {
 export const isToolOwnedRotation = () => {
   const editor = useEditor.getState()
   const moving = getMovingNode()
-  if (
-    moving?.type === 'door' ||
-    moving?.type === 'window' ||
-    moving?.type === 'item' ||
-    moving?.type === 'lean-to-extension'
-  )
-    return true
+  if (moving?.type === 'door' || moving?.type === 'window' || moving?.type === 'item') return true
   return (
     editor.mode === 'build' &&
     (editor.tool === 'door' ||

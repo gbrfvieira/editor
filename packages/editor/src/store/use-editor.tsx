@@ -6,12 +6,9 @@ import {
   type AnyNodeId,
   type BrushSettings,
   type BuildingNode,
-  type ChimneyMaterialRole,
   DEFAULT_BRUSH_SETTINGS,
-  type DormerSurfaceMaterialRole,
   type LevelNode,
   nodeRegistry,
-  type RoofSurfaceMaterialRole,
   type Space,
   type StairSurfaceMaterialRole,
   type TerrainVerb,
@@ -230,9 +227,6 @@ export type ToolDefaults = Record<string, unknown>
 export type MaterialTargetRole =
   | WallSurfaceSide
   | StairSurfaceMaterialRole
-  | RoofSurfaceMaterialRole
-  | ChimneyMaterialRole
-  | DormerSurfaceMaterialRole
   | SingleSurfaceMaterialRole
   | string
 
@@ -288,8 +282,6 @@ type EditorState = {
    */
   placementDragMode: boolean
   setPlacementDragMode: (dragMode: boolean) => void
-  roofHostDragArmedId: AnyNodeId | null
-  setRoofHostDragArmedId: (nodeId: AnyNodeId | null) => void
   setMovingNode: (node: AnyNode | null) => void
   /**
    * Which view (2D floor plan or 3D viewer) most recently completed
@@ -1133,8 +1125,6 @@ const useEditor = create<EditorState>()(
       setSelectedItem: (item) => set({ selectedItem: item }),
       placementDragMode: false,
       setPlacementDragMode: (dragMode) => set({ placementDragMode: dragMode }),
-      roofHostDragArmedId: null,
-      setRoofHostDragArmedId: (nodeId) => set({ roofHostDragArmedId: nodeId }),
       // The node being placed/moved now lives inside the interaction scope
       // (`useMovingNode` / `getMovingNode`), not a `useEditor` flag. This setter
       // remains the single entry point: it drives the scope and still touches

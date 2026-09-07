@@ -10,7 +10,6 @@ import type { GuideNode } from './guide'
 import type { ItemNode } from './item'
 import type { LinesetNode } from './lineset'
 import type { MeasurementNode } from './measurement'
-import type { RoofNode } from './roof'
 import type { ScanNode } from './scan'
 import type { ShelfNode } from './shelf'
 import type { SlabNode } from './slab'
@@ -31,7 +30,6 @@ type CoreLevelChildId =
   | ZoneNode['id']
   | SlabNode['id']
   | CeilingNode['id']
-  | RoofNode['id']
   | StairNode['id']
   | ScanNode['id']
   | GuideNode['id']

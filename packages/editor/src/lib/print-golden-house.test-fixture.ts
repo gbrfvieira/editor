@@ -6,7 +6,6 @@ import {
   getWallThickness,
   LevelNode,
   nodeRegistry,
-  RoofSegmentNode,
   registerNode,
   SlabNode,
   type SlabPolygonContext,
@@ -14,7 +13,7 @@ import {
   WallNode,
   WindowNode,
 } from '@pascal-app/core'
-import { generateRoofSegmentGeometry, generateSlabGeometry } from '@pascal-app/viewer'
+import { generateSlabGeometry } from '@pascal-app/viewer'
 import * as THREE from 'three'
 
 const EMPTY_SLAB_CONTEXT: SlabPolygonContext = { walls: [], siblingSlabs: [] }
@@ -40,7 +39,6 @@ export const PRINT_GOLDEN_HOUSE_IDS = {
   window: 'window_print-golden-upper-back',
   groundSlab: 'slab_print-golden-ground',
   upperSlab: 'slab_print-golden-upper',
-  roof: 'rseg_print-golden-upper',
   visibleFurniture: 'furniture_print-golden-visible',
   hiddenFurnitureParent: 'furniture_print-golden-hidden-parent',
   hiddenFurnitureChild: 'furniture_print-golden-hidden-child',
@@ -100,7 +98,7 @@ function disposeObject(root: THREE.Object3D) {
 
 export function createPrintGoldenHouseFixture(): PrintGoldenHouseFixture {
   const ids = PRINT_GOLDEN_HOUSE_IDS
-  for (const kind of ['wall', 'door', 'window', 'slab', 'roof-segment']) {
+  for (const kind of ['wall', 'door', 'window', 'slab']) {
     if (nodeRegistry.has(kind)) continue
     registerNode({
       kind,
@@ -140,20 +138,6 @@ export function createPrintGoldenHouseFixture(): PrintGoldenHouseFixture {
   })
   const groundSlab = slab(ids.groundSlab, ids.groundLevel)
   const upperSlab = slab(ids.upperSlab, ids.upperLevel)
-  const roof = RoofSegmentNode.parse({
-    id: ids.roof,
-    parentId: ids.upperLevel,
-    roofType: 'gable',
-    position: [0, 2.5, 0],
-    width: 4,
-    depth: 3,
-    wallHeight: 0.5,
-    pitch: 30,
-    wallThickness: 0.15,
-    deckThickness: 0.1,
-    overhang: 0.3,
-    shingleThickness: 0.05,
-  })
 
   if (!nodeRegistry.has(PRINT_GOLDEN_FURNITURE_KIND)) {
     registerNode({
@@ -208,7 +192,7 @@ export function createPrintGoldenHouseFixture(): PrintGoldenHouseFixture {
     name: 'Upper',
     level: 1,
     height: 2.5,
-    children: [...upperWalls.map((node) => node.id), upperSlab.id, roof.id],
+    children: [...upperWalls.map((node) => node.id), upperSlab.id],
   })
   const building = BuildingNode.parse({
     id: ids.building,
@@ -225,7 +209,6 @@ export function createPrintGoldenHouseFixture(): PrintGoldenHouseFixture {
       window,
       groundSlab,
       upperSlab,
-      roof,
       visibleFurniture,
       hiddenFurnitureParent,
       hiddenFurnitureChild,
@@ -302,13 +285,6 @@ export function createPrintGoldenHouseFixture(): PrintGoldenHouseFixture {
   mountSlab(groundRoot, groundSlab)
   mountSlab(upperRoot, upperSlab)
 
-  const roofRoot = new THREE.Group()
-  roofRoot.userData = { pascalId: roof.id }
-  roofRoot.position.set(...roof.position)
-  roofRoot.add(new THREE.Mesh(generateRoofSegmentGeometry(roof)))
-  upperRoot.add(roofRoot)
-  registerObject(roof.id, roofRoot)
-
   const visibleFurnitureRoot = new THREE.Group()
   visibleFurnitureRoot.userData = { pascalId: visibleFurniture.id }
   visibleFurnitureRoot.position.set(1, 0.5, 0)
@@ -329,11 +305,7 @@ export function createPrintGoldenHouseFixture(): PrintGoldenHouseFixture {
   registerObject(hiddenFurnitureChild.id, hiddenFurnitureChildRoot)
 
   const groundStructuralNodeIds = [...groundWalls.map((node) => node.id), groundSlab.id].sort()
-  const upperStructuralNodeIds = [
-    ...upperWalls.map((node) => node.id),
-    upperSlab.id,
-    roof.id,
-  ].sort()
+  const upperStructuralNodeIds = [...upperWalls.map((node) => node.id), upperSlab.id].sort()
 
   return {
     root,

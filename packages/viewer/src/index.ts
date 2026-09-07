@@ -218,23 +218,6 @@ export {
   getLevelPresentationY,
   snapLevelsToTruePositions,
 } from './systems/level/level-utils'
-export { getRoofMaterialArray } from './systems/roof/roof-materials'
-// Generic roof-segment primitives. Kinds that compose CSG against
-// the roof shell (chimney's self-trim, dormer's virtual-segment cut)
-// read these through the public surface. No kind-specific helpers
-// belong here — those live in `@pascal-app/nodes/<kind>/`.
-export {
-  clipGeometryBySegmentTrim,
-  generateRoofSegmentGeometry,
-  getRoofOuterSurfaceFrameAtPoint,
-  getRoofSegmentBrushes,
-  mapRoofGroupMaterialIndex,
-  ROOF_MATERIAL_SLOT_COUNT,
-  RoofSystem,
-  remapRoofShellFaces,
-  roofCsgDummyMats,
-  type SurfaceFrame,
-} from './systems/roof/roof-system'
 export { ScanSystem } from './systems/scan/scan-system'
 // Pure slab geometry generator — composed into the registry-driven slab
 // definition's `def.geometry` in `@pascal-app/nodes`.

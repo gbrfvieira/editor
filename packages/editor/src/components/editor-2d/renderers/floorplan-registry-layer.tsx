@@ -3420,16 +3420,6 @@ export function computeAffectedSiblingIds(
       if (hostId) affected.add(hostId as AnyNodeId)
       const liveHostId = (liveOverrides.get(id) as { parentId?: string } | undefined)?.parentId
       if (liveHostId) affected.add(liveHostId as AnyNodeId)
-    } else if (node.type === 'gutter') {
-      const roofId = (node as { parentId?: string }).parentId
-      if (roofId) {
-        for (const sid in nodes) {
-          const s = nodes[sid]
-          if (s?.type === 'gutter' && (s as { parentId?: string }).parentId === roofId) {
-            affected.add(sid as AnyNodeId)
-          }
-        }
-      }
     }
   }
   return affected

@@ -1,13 +1,11 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import { type AnyNode, RoofSegmentNode, registerNode, sceneRegistry } from '@pascal-app/core'
-import { generateRoofSegmentGeometry } from '@pascal-app/viewer'
+import { type AnyNode, registerNode, sceneRegistry } from '@pascal-app/core'
 import { XMLParser } from 'fast-xml-parser'
 import { strFromU8, unzipSync } from 'fflate'
 import * as THREE from 'three'
 import { prepareSceneForExport } from './glb-export'
 import { exportSceneLevelsForPrint } from './level-print-export'
 import { filterPreparedSceneForPrintContent } from './print-content-scope'
-import { compileSemanticPrintShell } from './print-shell-compiler'
 
 function registerFixtureKind(category: 'structure' | 'furnish'): string {
   const kind = `print-level-${category}-${crypto.randomUUID()}`
@@ -283,82 +281,6 @@ describe('per-level print STL export', () => {
 
     expect(bundle.report.parts.map((part) => part.report.triangleCount)).toEqual([12, 12])
     expect(bundle.report.status).toBe('pass')
-  })
-
-  test('uses the asynchronous shell compiler before exporting a level part', async () => {
-    const root = new THREE.Group()
-    const building = new THREE.Group()
-    building.userData = { pascalId: 'building_roof-print' }
-    const level = new THREE.Group()
-    level.userData = { pascalId: 'level_roof-print' }
-    const roof = RoofSegmentNode.parse({
-      id: 'rseg_level-print',
-      parentId: 'level_roof-print',
-      roofType: 'gable',
-      width: 4,
-      depth: 3,
-      wallHeight: 0.5,
-      pitch: 30,
-      wallThickness: 0.15,
-      deckThickness: 0.1,
-      overhang: 0.3,
-      shingleThickness: 0.05,
-    })
-    const roofRoot = new THREE.Group()
-    roofRoot.userData = { pascalId: roof.id }
-    roofRoot.add(new THREE.Mesh(generateRoofSegmentGeometry(roof)))
-    root.add(building)
-    building.add(level)
-    level.add(roofRoot)
-
-    const nodes: Record<string, AnyNode> = {
-      'building_roof-print': {
-        object: 'node',
-        id: 'building_roof-print',
-        type: 'building',
-        parentId: null,
-        children: ['level_roof-print'],
-      } as unknown as AnyNode,
-      'level_roof-print': {
-        object: 'node',
-        id: 'level_roof-print',
-        type: 'level',
-        name: 'Roof',
-        level: 0,
-        parentId: 'building_roof-print',
-        children: [roof.id],
-        visible: true,
-      } as unknown as AnyNode,
-      [roof.id]: roof,
-    }
-
-    let compileCalls = 0
-    const raw = await exportSceneLevelsForPrint(root, nodes, { scale: 100 })
-    const compiled = await exportSceneLevelsForPrint(root, nodes, {
-      scale: 100,
-      compileShells: true,
-      compileShell: async (source, compilerNodes) => {
-        compileCalls += 1
-        return compileSemanticPrintShell(source, compilerNodes)
-      },
-    })
-    const part = compiled.report.parts[0]!
-
-    expect(raw.report.parts[0]?.report.status).toBe('blocked')
-    expect(compileCalls).toBe(1)
-    expect(compiled.report.status).toBe('pass')
-    expect(part.report.status).toBe('pass')
-    expect(part.report.bounds?.width).toBeCloseTo(46.6962, 3)
-    expect(part.report.bounds?.depth).toBeCloseTo(37.1962, 3)
-    expect(part.report.bounds?.height).toBeCloseTo(15.3923, 3)
-    expect(part.report.boundaryEdgeCount).toBe(0)
-    expect(part.report.nonManifoldEdgeCount).toBe(0)
-    expect(part.report.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(
-      expect.arrayContaining(['baseline_compiler', 'compiler_limits']),
-    )
-    expect(part.report.diagnostics.map((diagnostic) => diagnostic.code)).not.toContain(
-      'compiler_pending',
-    )
   })
 
   test('produces deterministic archive bytes for the same level parts', async () => {
