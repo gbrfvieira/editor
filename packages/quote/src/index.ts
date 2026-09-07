@@ -44,6 +44,10 @@ export type QuoteReport = {
 const DEFAULT_SHEET_WIDTH_MM = 2750
 const DEFAULT_SHEET_HEIGHT_MM = 1830
 
+function roundMoney(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100
+}
+
 function addLine(
   lineItems: QuoteLineItem[],
   label: string,
@@ -51,7 +55,7 @@ function addLine(
   unitPrice: number,
 ): void {
   if (quantity <= 0 || unitPrice === 0) return
-  lineItems.push({ label, quantity, unitPrice, total: quantity * unitPrice })
+  lineItems.push({ label, quantity, unitPrice, total: roundMoney(quantity * unitPrice) })
 }
 
 export function calculateQuote(
@@ -79,11 +83,11 @@ export function calculateQuote(
     addLine(lineItems, `Ferragem (${item})`, quantity, prices.hardwarePrices[item])
   }
 
-  const subtotal = lineItems.reduce((sum, line) => sum + line.total, 0)
+  const subtotal = roundMoney(lineItems.reduce((sum, line) => sum + line.total, 0))
   return {
     lineItems,
     subtotal,
-    total: subtotal * (prices.laborMultiplier ?? 1),
+    total: roundMoney(subtotal * (prices.laborMultiplier ?? 1)),
   }
 }
 
