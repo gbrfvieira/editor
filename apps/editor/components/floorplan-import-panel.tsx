@@ -45,6 +45,8 @@ export function FloorplanImportPanel() {
   const [openings, setOpenings] = useState<PreviewOpening[]>([])
   const [removedWalls, setRemovedWalls] = useState<EditableWall[]>([])
   const [snapTolerance, setSnapTolerance] = useState(0.05)
+  const [unitScale, setUnitScale] = useState(1)
+  const [lastDxfText, setLastDxfText] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [converterMissing, setConverterMissing] = useState(false)
   const [converting, setConverting] = useState(false)
@@ -53,15 +55,28 @@ export function FloorplanImportPanel() {
   const [status, setStatus] = useState<string | null>(null)
 
   const processDxfText = useCallback(
-    (text: string) => {
+    (text: string, scale: number) => {
+      setLastDxfText(text)
       const dxfLayers = extractDxfVectorSegments(text)
       const segments = dxfLayers.flatMap((layer) =>
-        layer.segments.map((segment) => ({ ...segment, layer: layer.layer })),
+        layer.segments.map((segment) => ({
+          ...segment,
+          layer: layer.layer,
+          start: [segment.start[0] * scale, segment.start[1] * scale] as [number, number],
+          end: [segment.end[0] * scale, segment.end[1] * scale] as [number, number],
+        })),
       )
       let openingId = 0
       setOpenings(
         dxfLayers.flatMap((layer) =>
-          (layer.openings ?? []).map((opening) => ({ ...opening, id: openingId++ })),
+          (layer.openings ?? []).map((opening) => ({
+            ...opening,
+            position: [opening.position[0] * scale, opening.position[1] * scale] as [
+              number,
+              number,
+            ],
+            id: openingId++,
+          })),
         ),
       )
       const detected = detectWalls(segments, {
@@ -107,7 +122,7 @@ export function FloorplanImportPanel() {
             )
             return
           }
-          processDxfText(result.dxf)
+          processDxfText(result.dxf, unitScale)
           return
         }
         if (isPdf) {
@@ -117,7 +132,9 @@ export function FloorplanImportPanel() {
           if (segments.length === 0) {
             setWalls([])
             setPdfFallback(file)
-            setStatus('Este PDF não contém vetores de linha. Você pode adicioná-lo como guia visual.')
+            setStatus(
+              'Este PDF não contém vetores de linha. Você pode adicioná-lo como guia visual.',
+            )
             return
           }
           const detected = detectWalls(segments, {
@@ -128,15 +145,23 @@ export function FloorplanImportPanel() {
           setStatus(`${detected.length} parede(s) detectada(s). Revise e confirme.`)
           return
         }
-        processDxfText(await file.text())
+        processDxfText(await file.text(), unitScale)
       } catch (cause) {
         setConverting(false)
         setWalls([])
         setError(cause instanceof Error ? cause.message : 'Não foi possível ler o arquivo.')
       }
     },
-    [processDxfText, snapTolerance],
+    [processDxfText, snapTolerance, unitScale],
   )
+
+  const changeUnitScale = (scale: number) => {
+    setUnitScale(scale)
+    if (lastDxfText) {
+      setRemovedWalls([])
+      processDxfText(lastDxfText, scale)
+    }
+  }
 
   const updateWall = (id: number, update: (wall: EditableWall) => EditableWall) => {
     setWalls((current) => current.map((wall) => (wall.id === id ? update(wall) : wall)))
@@ -161,7 +186,10 @@ export function FloorplanImportPanel() {
       setError('Selecione um nível antes de confirmar as paredes.')
       return
     }
-    const patches = toWallNodePatches(walls)
+    // The user has already reviewed/edited/deleted each wall in the preview
+    // list above, so that review is the confidence gate — don't silently
+    // drop low-confidence walls a second time here.
+    const patches = toWallNodePatches(walls, { minConfidence: 0 })
     commitWalls(
       patches,
       {
@@ -202,8 +230,9 @@ export function FloorplanImportPanel() {
       <div>
         <h3 className="font-medium text-sm">Importar planta (DXF, DWG ou PDF)</h3>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          Carregue um arquivo em coordenadas de metro, revise as paredes detectadas e confirme. DWG
-          é convertido para DXF automaticamente (local e gratuito).
+          Carregue um arquivo, confira a unidade abaixo (a maioria dos DWG/DXF de arquitetura usa
+          milímetros ou centímetros), revise as paredes detectadas e confirme. DWG é convertido
+          para DXF automaticamente (local e gratuito).
         </p>
       </div>
 
@@ -215,6 +244,20 @@ export function FloorplanImportPanel() {
           onChange={(event) => void handleFile(event.target.files?.[0])}
           type="file"
         />
+      </label>
+
+      <label className="flex items-center justify-between gap-2 text-xs">
+        <span>Unidade do arquivo</span>
+        <select
+          aria-label="unidade do arquivo"
+          className="rounded border border-border/60 bg-background px-1.5 py-1"
+          onChange={(event) => changeUnitScale(Number(event.target.value))}
+          value={unitScale}
+        >
+          <option value={1}>Metros</option>
+          <option value={0.01}>Centímetros</option>
+          <option value={0.001}>Milímetros</option>
+        </select>
       </label>
 
       <label className="flex items-center justify-between gap-2 text-xs">
