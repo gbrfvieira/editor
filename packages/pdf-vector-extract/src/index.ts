@@ -1,4 +1,17 @@
-import { getDocument, OPS } from 'pdfjs-dist/legacy/build/pdf.mjs'
+import { GlobalWorkerOptions, getDocument, OPS } from 'pdfjs-dist/legacy/build/pdf.mjs'
+
+// In a browser, pdfjs-dist offloads parsing to a Web Worker and throws
+// immediately if it doesn't know where to load it from. In Node/Bun,
+// pdfjs's own isNodeJS detection skips the worker entirely, so this is a
+// no-op there — safe to always set. `import.meta.url`-relative resolution
+// lets bundlers (this app uses Turbopack) emit and serve the worker file
+// themselves instead of requiring a manual copy into `public/`.
+if (typeof window !== 'undefined') {
+  GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/legacy/build/pdf.worker.mjs',
+    import.meta.url,
+  ).toString()
+}
 
 export type Point = [number, number]
 
