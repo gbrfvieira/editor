@@ -28,4 +28,6 @@ pela tabela de preço atual do fornecedor.
 `toXlsx(report, quote?)` pode incluir uma aba opcional `Orcamento` no mesmo
 arquivo com painéis, ferragens e fita de borda. O editor usa esse formato na
 exportação do projeto inteiro, agregando os módulos da cena sem cobrar também
-as bancadas-pai.
+as bancadas-pai. O orçamento agregado da interface usa MDF 18 mm como valor de
+referência; o nesting v1 ainda não separa automaticamente chapas por material
+ou espessura, portanto projetos mistos exigem revisão da cotação.
