@@ -15,6 +15,8 @@ test('fits four 900 x 600 panels on one default sheet', () => {
   const result = nestPanels([panel('p', 900, 600, 4)])
   expect(result.sheetCount).toBe(1)
   expect(result.sheets[0]?.panels).toHaveLength(4)
+  expect(result.sheetWidthMm).toBe(2750)
+  expect(result.sheetHeightMm).toBe(1830)
 })
 
 test('uses a second sheet when shelves cannot fit', () => {

@@ -13,20 +13,17 @@ export interface PageSegments {
 }
 
 export interface ExtractPdfVectorOptions {
-  /** Maximum deviation, in transformed page units, when flattening curves. */
+  /** Curves are currently represented by a single chord; kept for API compatibility. */
   curveTolerance?: number
 }
 
 type Matrix = [number, number, number, number, number, number]
 
-const IDENTITY_MATRIX: Matrix = [1, 0, 0, 1, 0, 0]
-const DEFAULT_CURVE_TOLERANCE = 0.5
-const MAX_CURVE_SUBDIVISION_DEPTH = 12
+const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0]
 
-function multiplyMatrices(left: Matrix, right: Matrix): Matrix {
+function multiply(left: Matrix, right: Matrix): Matrix {
   const [a1, b1, c1, d1, e1, f1] = left
   const [a2, b2, c2, d2, e2, f2] = right
-
   return [
     a1 * a2 + c1 * b2,
     b1 * a2 + d1 * b2,
@@ -37,367 +34,178 @@ function multiplyMatrices(left: Matrix, right: Matrix): Matrix {
   ]
 }
 
-function transformPoint(matrix: Matrix, x: number, y: number): Point {
+function transform(matrix: Matrix, point: Point): Point {
   const [a, b, c, d, e, f] = matrix
-  return [a * x + c * y + e, b * x + d * y + f]
+  return [a * point[0] + c * point[1] + e, b * point[0] + d * point[1] + f]
 }
 
-function pointsEqual(left: Point, right: Point): boolean {
-  return left[0] === right[0] && left[1] === right[1]
-}
-
-function midpoint(left: Point, right: Point): Point {
-  return [(left[0] + right[0]) / 2, (left[1] + right[1]) / 2]
-}
-
-function squaredDistanceToLine(point: Point, start: Point, end: Point): number {
-  const dx = end[0] - start[0]
-  const dy = end[1] - start[1]
-  const squaredLength = dx * dx + dy * dy
-
-  if (squaredLength === 0) {
-    const pointDx = point[0] - start[0]
-    const pointDy = point[1] - start[1]
-    return pointDx * pointDx + pointDy * pointDy
-  }
-
-  const cross = dx * (start[1] - point[1]) - (start[0] - point[0]) * dy
-  return (cross * cross) / squaredLength
-}
-
-function flattenCubicBezier(
-  start: Point,
-  control1: Point,
-  control2: Point,
-  end: Point,
-  tolerance: number,
-  segments: LineSegment[],
-  depth = 0,
-): void {
-  const toleranceSquared = tolerance * tolerance
-  const isFlatEnough =
-    squaredDistanceToLine(control1, start, end) <= toleranceSquared &&
-    squaredDistanceToLine(control2, start, end) <= toleranceSquared
-
-  if (isFlatEnough || depth >= MAX_CURVE_SUBDIVISION_DEPTH) {
-    segments.push({ start, end })
-    return
-  }
-
-  const startControl = midpoint(start, control1)
-  const controls = midpoint(control1, control2)
-  const controlEnd = midpoint(control2, end)
-  const leftControl = midpoint(startControl, controls)
-  const rightControl = midpoint(controls, controlEnd)
-  const middle = midpoint(leftControl, rightControl)
-
-  flattenCubicBezier(start, startControl, leftControl, middle, tolerance, segments, depth + 1)
-  flattenCubicBezier(middle, rightControl, controlEnd, end, tolerance, segments, depth + 1)
-}
-
-function flattenQuadraticBezier(
-  start: Point,
-  control: Point,
-  end: Point,
-  tolerance: number,
-  segments: LineSegment[],
-): void {
-  const control1: Point = [
-    start[0] + (2 / 3) * (control[0] - start[0]),
-    start[1] + (2 / 3) * (control[1] - start[1]),
-  ]
-  const control2: Point = [
-    end[0] + (2 / 3) * (control[0] - end[0]),
-    end[1] + (2 / 3) * (control[1] - end[1]),
-  ]
-  flattenCubicBezier(start, control1, control2, end, tolerance, segments)
-}
-
-function asMatrix(values: ArrayLike<number>): Matrix {
-  return [values[0], values[1], values[2], values[3], values[4], values[5]]
+function asMatrix(value: ArrayLike<number>): Matrix {
+  return [value[0], value[1], value[2], value[3], value[4], value[5]]
 }
 
 function extractPageSegments(
   fnArray: ArrayLike<number>,
   argsArray: ArrayLike<unknown>,
-  curveTolerance: number,
 ): LineSegment[] {
   const segments: LineSegment[] = []
-  const matrixStack: Matrix[] = []
-  let matrix: Matrix = [...IDENTITY_MATRIX]
-  let currentPoint: Point | undefined
+  const stack: Matrix[] = []
+  let matrix: Matrix = [...IDENTITY]
+  let current: Point | undefined
   let subpathStart: Point | undefined
 
-  const moveTo = (x: number, y: number): void => {
-    currentPoint = transformPoint(matrix, x, y)
-    subpathStart = currentPoint
+  const moveTo = (point: Point) => {
+    current = transform(matrix, point)
+    subpathStart = current
   }
-
-  const lineTo = (x: number, y: number): void => {
-    const end = transformPoint(matrix, x, y)
-    if (currentPoint) {
-      segments.push({ start: currentPoint, end })
+  const lineTo = (point: Point) => {
+    const end = transform(matrix, point)
+    if (current) segments.push({ start: current, end })
+    current = end
+  }
+  const curveTo = (end: Point) => {
+    const transformedEnd = transform(matrix, end)
+    if (current) segments.push({ start: current, end: transformedEnd })
+    current = transformedEnd
+  }
+  const closePath = () => {
+    if (
+      current &&
+      subpathStart &&
+      (current[0] !== subpathStart[0] || current[1] !== subpathStart[1])
+    ) {
+      segments.push({ start: current, end: subpathStart })
     }
-    currentPoint = end
+    current = subpathStart
   }
-
-  const curveTo = (control1: Point, control2: Point, end: Point): void => {
-    if (currentPoint) {
-      flattenCubicBezier(currentPoint, control1, control2, end, curveTolerance, segments)
-    }
-    currentPoint = end
+  const rectangle = (x: number, y: number, width: number, height: number) => {
+    const points: Point[] = [
+      [x, y],
+      [x + width, y],
+      [x + width, y + height],
+      [x, y + height],
+    ]
+    points.forEach((point, index) => {
+      const next = points[(index + 1) % points.length]
+      segments.push({ start: transform(matrix, point), end: transform(matrix, next) })
+    })
+    current = transform(matrix, points[0])
+    subpathStart = current
   }
-
-  const closePath = (): void => {
-    if (currentPoint && subpathStart && !pointsEqual(currentPoint, subpathStart)) {
-      segments.push({ start: currentPoint, end: subpathStart })
-    }
-    currentPoint = subpathStart
-  }
-
-  const rectangle = (x: number, y: number, width: number, height: number): void => {
-    const first = transformPoint(matrix, x, y)
-    const second = transformPoint(matrix, x + width, y)
-    const third = transformPoint(matrix, x + width, y + height)
-    const fourth = transformPoint(matrix, x, y + height)
-    segments.push(
-      { start: first, end: second },
-      { start: second, end: third },
-      { start: third, end: fourth },
-      { start: fourth, end: first },
-    )
-    currentPoint = first
-    subpathStart = first
-  }
-
-  const processPath = (pathOperations: ArrayLike<number>, coordinates: ArrayLike<number>): void => {
-    let coordinateIndex = 0
-
-    for (let index = 0; index < pathOperations.length; index += 1) {
-      switch (pathOperations[index]) {
-        case OPS.moveTo:
-          moveTo(coordinates[coordinateIndex], coordinates[coordinateIndex + 1])
-          coordinateIndex += 2
-          break
-        case OPS.lineTo:
-          lineTo(coordinates[coordinateIndex], coordinates[coordinateIndex + 1])
-          coordinateIndex += 2
-          break
-        case OPS.curveTo: {
-          const control1 = transformPoint(
-            matrix,
-            coordinates[coordinateIndex],
-            coordinates[coordinateIndex + 1],
-          )
-          const control2 = transformPoint(
-            matrix,
-            coordinates[coordinateIndex + 2],
-            coordinates[coordinateIndex + 3],
-          )
-          const end = transformPoint(
-            matrix,
-            coordinates[coordinateIndex + 4],
-            coordinates[coordinateIndex + 5],
-          )
-          curveTo(control1, control2, end)
-          coordinateIndex += 6
-          break
-        }
-        case OPS.curveTo2: {
-          const end = transformPoint(
-            matrix,
-            coordinates[coordinateIndex + 2],
-            coordinates[coordinateIndex + 3],
-          )
-          curveTo(
-            currentPoint ?? transformPoint(matrix, 0, 0),
-            transformPoint(matrix, coordinates[coordinateIndex], coordinates[coordinateIndex + 1]),
-            end,
-          )
-          coordinateIndex += 4
-          break
-        }
-        case OPS.curveTo3: {
-          const end = transformPoint(
-            matrix,
-            coordinates[coordinateIndex + 2],
-            coordinates[coordinateIndex + 3],
-          )
-          curveTo(
-            transformPoint(matrix, coordinates[coordinateIndex], coordinates[coordinateIndex + 1]),
-            end,
-            end,
-          )
-          coordinateIndex += 4
-          break
-        }
-        case OPS.closePath:
-          closePath()
-          break
-        case OPS.rectangle:
-          rectangle(
-            coordinates[coordinateIndex],
-            coordinates[coordinateIndex + 1],
-            coordinates[coordinateIndex + 2],
-            coordinates[coordinateIndex + 3],
-          )
-          coordinateIndex += 4
-          break
-        default:
-          break
-      }
-    }
-  }
-
-  const processCompactPath = (data: ArrayLike<number>): void => {
+  // `OPS.constructPath` doesn't carry the classic parallel
+  // operations/coordinates arrays — pdfjs-dist (5.x) packs every subpath into
+  // one flat, interleaved array: a small sub-opcode followed by its fixed
+  // count of coordinates, repeated. These sub-opcodes are pdfjs-dist's
+  // internal `DrawOPS` enum (not part of the public API, so not importable —
+  // mirrored here: moveTo 0, lineTo 1, curveTo 2, quadraticCurveTo 3,
+  // closePath 4). Verified against the installed pdfjs-dist version; a major
+  // bump could renumber these.
+  const processPackedPath = (data: ArrayLike<number>) => {
     let index = 0
-
     while (index < data.length) {
-      const operation = data[index]
-      index += 1
-
-      switch (operation) {
-        case 0:
-          moveTo(data[index], data[index + 1])
-          index += 2
+      switch (data[index]) {
+        case 0: // moveTo
+          moveTo([data[index + 1], data[index + 2]])
+          index += 3
           break
-        case 1:
-          lineTo(data[index], data[index + 1])
-          index += 2
+        case 1: // lineTo
+          lineTo([data[index + 1], data[index + 2]])
+          index += 3
           break
-        case 2: {
-          const control1 = transformPoint(matrix, data[index], data[index + 1])
-          const control2 = transformPoint(matrix, data[index + 2], data[index + 3])
-          const end = transformPoint(matrix, data[index + 4], data[index + 5])
-          curveTo(control1, control2, end)
-          index += 6
+        case 2: // curveTo
+          curveTo([data[index + 5], data[index + 6]])
+          index += 7
           break
-        }
-        case 3: {
-          const control = transformPoint(matrix, data[index], data[index + 1])
-          const end = transformPoint(matrix, data[index + 2], data[index + 3])
-          if (currentPoint) {
-            flattenQuadraticBezier(currentPoint, control, end, curveTolerance, segments)
-          }
-          currentPoint = end
-          index += 4
+        case 3: // quadraticCurveTo
+          curveTo([data[index + 3], data[index + 4]])
+          index += 5
           break
-        }
-        case 4:
+        case 4: // closePath
           closePath()
+          index += 1
           break
         default:
-          return
+          // Unrecognized sub-opcode: stop rather than mis-align the rest of
+          // the stream on a guessed skip width.
+          index = data.length
+          break
       }
     }
   }
 
   for (let index = 0; index < fnArray.length; index += 1) {
     const operation = fnArray[index]
-    const args = argsArray[index] as ArrayLike<number> | undefined
-
+    const args = argsArray[index] as ArrayLike<unknown> | undefined
     switch (operation) {
       case OPS.save:
-        matrixStack.push([...matrix])
+        stack.push([...matrix])
         break
       case OPS.restore:
-        matrix = matrixStack.pop() ?? [...IDENTITY_MATRIX]
+        matrix = stack.pop() ?? [...IDENTITY]
         break
       case OPS.transform:
-        if (args) {
-          matrix = multiplyMatrices(matrix, asMatrix(args))
-        }
+        if (args) matrix = multiply(matrix, asMatrix(args as unknown as ArrayLike<number>))
         break
-      case OPS.paintFormXObjectBegin:
-        matrixStack.push([...matrix])
-        if (args?.[0]) {
-          matrix = multiplyMatrices(matrix, asMatrix(args[0] as unknown as ArrayLike<number>))
-        }
+      case OPS.constructPath: {
+        // args: [op, data, minMax] from the evaluator's packed operator list
+        // (see the CanvasGraphics#constructPath signature) — data[0] is the
+        // flat, interleaved sub-opcode/coordinate stream `processPackedPath`
+        // expects.
+        const data = (args as [unknown, ArrayLike<unknown>, unknown] | undefined)?.[1]?.[0]
+        if (data) processPackedPath(data as ArrayLike<number>)
         break
-      case OPS.paintFormXObjectEnd:
-        matrix = matrixStack.pop() ?? [...IDENTITY_MATRIX]
-        break
-      case OPS.constructPath:
-        if (args) {
-          if (typeof args[0] === 'number') {
-            const pathData = args[1] as unknown as ArrayLike<ArrayLike<number>>
-            if (pathData[0]) {
-              processCompactPath(pathData[0])
-            }
-          } else {
-            processPath(
-              args[0] as unknown as ArrayLike<number>,
-              args[1] as unknown as ArrayLike<number>,
-            )
-          }
-        }
-        break
+      }
       case OPS.moveTo:
-        if (args) {
-          moveTo(args[0], args[1])
-        }
+        if (args) moveTo([args[0] as number, args[1] as number])
         break
       case OPS.lineTo:
-        if (args) {
-          lineTo(args[0], args[1])
-        }
+        if (args) lineTo([args[0] as number, args[1] as number])
         break
       case OPS.curveTo:
+        if (args) curveTo([args[4] as number, args[5] as number])
+        break
       case OPS.curveTo2:
       case OPS.curveTo3:
-      case OPS.closePath:
-      case OPS.rectangle:
-        processPath([operation], args ?? [])
+        if (args) curveTo([args[2] as number, args[3] as number])
         break
-      default:
+      case OPS.closePath:
+        closePath()
+        break
+      case OPS.rectangle:
+        if (args)
+          rectangle(args[0] as number, args[1] as number, args[2] as number, args[3] as number)
         break
     }
   }
-
   return segments
 }
 
-/**
- * Extracts straight line segments from every page of a PDF without rasterizing it.
- */
 export async function extractPdfVectorSegments(
   pdfBytes: Uint8Array | ArrayBuffer,
   options: ExtractPdfVectorOptions = {},
 ): Promise<PageSegments[]> {
-  const curveTolerance = options.curveTolerance ?? DEFAULT_CURVE_TOLERANCE
-  if (!(curveTolerance > 0) || !Number.isFinite(curveTolerance)) {
+  if (
+    options.curveTolerance !== undefined &&
+    (!Number.isFinite(options.curveTolerance) || options.curveTolerance <= 0)
+  ) {
     throw new RangeError('curveTolerance must be a positive, finite number')
   }
-
   const data =
     pdfBytes instanceof ArrayBuffer ? new Uint8Array(pdfBytes.slice(0)) : new Uint8Array(pdfBytes)
   const loadingTask = getDocument({ data })
-
+  const document = await loadingTask.promise
   try {
-    const document = await loadingTask.promise
     const pages: PageSegments[] = []
-
-    try {
-      for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
-        const page = await document.getPage(pageNumber)
-        const operatorList = await page.getOperatorList()
-        pages.push({
-          pageIndex: pageNumber - 1,
-          segments: extractPageSegments(
-            operatorList.fnArray,
-            operatorList.argsArray,
-            curveTolerance,
-          ),
-        })
-        page.cleanup()
-      }
-    } finally {
-      await document.destroy()
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber)
+      const operatorList = await page.getOperatorList()
+      pages.push({
+        pageIndex: pageNumber - 1,
+        segments: extractPageSegments(operatorList.fnArray, operatorList.argsArray),
+      })
+      page.cleanup()
     }
-
     return pages
-  } catch (error) {
-    await loadingTask.destroy()
-    throw error
+  } finally {
+    await document.destroy()
   }
 }

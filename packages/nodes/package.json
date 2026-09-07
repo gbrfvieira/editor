@@ -33,6 +33,9 @@
     "three": "^0.185",
     "zustand": "^5"
   },
+  "dependencies": {
+    "@pascal-app/cutlist": "workspace:*"
+  },
   "devDependencies": {
     "@pascal-app/core": "^1.0.0-beta.5",
     "@pascal-app/editor": "^1.0.0-beta.5",

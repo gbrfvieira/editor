@@ -1,44 +1,42 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { extractDxfVectorSegments } from '@pascal-app/dxf-vector-extract'
-import type { DetectedWall } from '@pascal-app/floorplan-import'
 import { detectWalls } from '@pascal-app/wall-detect'
 import { z } from 'zod'
 import type { SceneOperations } from '../operations'
 
-const detectedWallSchema = z.object({
-  start: z.array(z.number()).length(2),
-  end: z.array(z.number()).length(2),
-  thickness: z.number(),
-  confidence: z.number().min(0).max(1),
-})
-
 export const importFloorplanDxfInput = {
-  dxfBase64: z.string().min(1).describe('ASCII DXF bytes encoded as base64.'),
+  bytesBase64: z.string().min(1),
+  preferLayerContaining: z.string().optional(),
+  snapToleranceM: z.number().positive().optional(),
 }
 
-export const importFloorplanDxfOutput = {
-  walls: z.array(detectedWallSchema),
-  wallCount: z.number().int().nonnegative(),
-}
+export const importFloorplanDxfOutput = { walls: z.array(z.unknown()) }
 
 export function registerImportFloorplanDxf(server: McpServer, _bridge: SceneOperations): void {
   server.registerTool(
     'import_floorplan_dxf',
     {
-      title: 'Preview DXF floor plan',
+      title: 'Preview floorplan DXF',
       description:
-        'Decode a DXF floor plan and return detected wall candidates without changing the scene.',
+        'Decode a base64 ASCII DXF and return detected walls for review without scene writes.',
       inputSchema: importFloorplanDxfInput,
       outputSchema: importFloorplanDxfOutput,
     },
-    async ({ dxfBase64 }) => {
-      const source = Buffer.from(dxfBase64, 'base64').toString('utf8')
-      const grouped = extractDxfVectorSegments(source)
-      const segments = grouped.flatMap((group) =>
-        group.segments.map((segment) => ({ ...segment, layer: group.layer })),
+    async ({ bytesBase64, preferLayerContaining, snapToleranceM }) => {
+      let source: string
+      try {
+        source = Buffer.from(bytesBase64, 'base64').toString('utf8')
+      } catch {
+        throw new Error('bytesBase64 is not valid base64')
+      }
+      const segments = extractDxfVectorSegments(source).flatMap((layer) =>
+        layer.segments.map((segment) => ({ ...segment, layer: layer.layer })),
       )
-      const walls = detectWalls(segments).walls as DetectedWall[]
-      const payload = { walls, wallCount: walls.length }
+      const result = detectWalls(segments, {
+        ...(preferLayerContaining !== undefined ? { preferLayerContaining } : {}),
+        ...(snapToleranceM !== undefined ? { snapToleranceM } : {}),
+      })
+      const payload = { walls: result.walls }
       return {
         content: [{ type: 'text' as const, text: JSON.stringify(payload) }],
         structuredContent: payload,

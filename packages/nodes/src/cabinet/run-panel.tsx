@@ -6,6 +6,7 @@ import type {
   CabinetModuleNode as CabinetModuleNodeType,
   CabinetNode as CabinetNodeType,
 } from '@pascal-app/core'
+import type { CabinetLike } from '@pascal-app/cutlist'
 import { createSceneApi, resolveLevelId, useScene } from '@pascal-app/core'
 import {
   ActionButton,
@@ -33,6 +34,7 @@ import {
   cabinetDimensionProfileId,
 } from './profiles'
 import { MAX_CABINET_WIDTH } from './resize-limits'
+import { CabinetCutlistExportActions } from './cutlist-export-actions'
 import {
   CABINET_REVEAL_GAPS,
   type CabinetRevealGapId,
@@ -384,7 +386,15 @@ export function updateCabinetRun({
   const shouldSyncModules = Object.keys(nextPatch).some((key) =>
     RUN_MODULE_SYNC_PATCH_KEYS.has(key as keyof CabinetNodeType),
   )
-  if (!shouldSyncDepth && !shouldSyncHeight && !shouldSyncPosition && !shouldSyncModules) return
+  const shouldSyncBoardThickness = 'boardThickness' in nextPatch
+  if (
+    !shouldSyncDepth &&
+    !shouldSyncHeight &&
+    !shouldSyncPosition &&
+    !shouldSyncModules &&
+    !shouldSyncBoardThickness
+  )
+    return
 
   const stylePatch: Partial<CabinetNodeType> = {}
   if ('frontStyle' in nextPatch) stylePatch.frontStyle = nextNode.frontStyle
@@ -404,6 +414,7 @@ export function updateCabinetRun({
         minCabinetCarcassHeightForStack(module),
       )
     }
+    if (shouldSyncBoardThickness) modulePatch.boardThickness = nextNode.boardThickness
     if (shouldSyncPosition) {
       modulePatch.position = [module.position[0], runModuleBaseY(nextNode), module.position[2]]
     }
@@ -723,6 +734,22 @@ export function CabinetRunPanel({
 
       <PanelSection title="Shared Plinth & Countertop">
         <div className="space-y-2 px-1 pb-2">
+          <div>
+            <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+              Board thickness
+            </div>
+            <SegmentedControl
+              onChange={(value) => updateRun({ boardThickness: Number(value) })}
+              options={[
+                { value: '0.015', label: '15 mm' },
+                { value: '0.018', label: '18 mm' },
+              ]}
+              value={node.boardThickness.toFixed(3)}
+            />
+            <p className="px-1 pt-1 text-[10px] text-muted-foreground">
+              Applies the selected MDF thickness to this run and its modules.
+            </p>
+          </div>
           {node.runTier === 'base' && (
             <div>
               <div className="px-1 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -1008,6 +1035,9 @@ export function CabinetRunPanel({
           )}
         </div>
       </PanelSection>
+      <CabinetCutlistExportActions
+        cabinets={(modules.length > 0 ? modules : [node]) as unknown as CabinetLike[]}
+      />
     </PanelWrapper>
   )
 }

@@ -1,0 +1,235 @@
+'use client'
+
+import { type AnyNodeId, GuideNode, saveAsset, useScene, WallNode } from '@pascal-app/core'
+import { extractDxfVectorSegments } from '@pascal-app/dxf-vector-extract'
+import { commitWalls, type DetectedWall, toWallNodePatches } from '@pascal-app/floorplan-import'
+import { extractPdfVectorSegments } from '@pascal-app/pdf-vector-extract'
+import { useViewer } from '@pascal-app/viewer'
+import { detectWalls } from '@pascal-app/wall-detect'
+import { useCallback, useState } from 'react'
+
+type EditableWall = DetectedWall & { id: number }
+
+function toEditableWalls(source: DetectedWall[]): EditableWall[] {
+  return source.map((wall, id) => ({
+    ...wall,
+    start: [...wall.start] as [number, number],
+    end: [...wall.end] as [number, number],
+    id,
+  }))
+}
+
+function updatePoint(
+  wall: EditableWall,
+  point: 'start' | 'end',
+  axis: 0 | 1,
+  value: string,
+): EditableWall {
+  const next = Number(value)
+  if (!Number.isFinite(next)) return wall
+  const coordinates = [...wall[point]] as [number, number]
+  coordinates[axis] = next
+  return { ...wall, [point]: coordinates }
+}
+
+/**
+ * Small, deliberately app-local DXF workflow. It keeps the extracted geometry
+ * editable until the user explicitly confirms, then adapts patches to the
+ * scene's WallNode schema at the boundary.
+ */
+export function FloorplanImportPanel() {
+  const levelId = useViewer((state) => state.selection.levelId)
+  const createNode = useScene((state) => state.createNode)
+  const [walls, setWalls] = useState<EditableWall[]>([])
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [dwgFileName, setDwgFileName] = useState<string | null>(null)
+  const [pdfFallback, setPdfFallback] = useState<File | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [status, setStatus] = useState<string | null>(null)
+
+  const handleFile = useCallback(async (file: File | undefined) => {
+    if (!file) return
+    setFileName(file.name)
+    setError(null)
+    setStatus(null)
+    setPdfFallback(null)
+    if (file.name.toLocaleLowerCase().endsWith('.dwg')) {
+      setDwgFileName(file.name)
+      setWalls([])
+      setStatus(
+        'DWG selecionado. Converta-o para DXF com o ODA File Converter e carregue o DXF gerado abaixo.',
+      )
+      return
+    }
+    setDwgFileName(null)
+    try {
+      const isPdf = file.name.toLocaleLowerCase().endsWith('.pdf')
+      const segments = isPdf
+        ? (await extractPdfVectorSegments(new Uint8Array(await file.arrayBuffer()))).flatMap(
+            (page) => page.segments,
+          )
+        : extractDxfVectorSegments(await file.text()).flatMap((layer) =>
+            layer.segments.map((segment) => ({ ...segment, layer: layer.layer })),
+          )
+      const detected = detectWalls(segments, { preferLayerContaining: 'PAREDE' }).walls
+      setWalls(toEditableWalls(detected))
+      if (isPdf && segments.length === 0) {
+        setPdfFallback(file)
+        setStatus('Este PDF não contém vetores de linha. Você pode adicioná-lo como guia visual.')
+      } else {
+        setStatus(`${detected.length} parede(s) detectada(s). Revise e confirme.`)
+      }
+    } catch (cause) {
+      setWalls([])
+      setError(cause instanceof Error ? cause.message : 'Não foi possível ler o arquivo.')
+    }
+  }, [])
+
+  const updateWall = (id: number, update: (wall: EditableWall) => EditableWall) => {
+    setWalls((current) => current.map((wall) => (wall.id === id ? update(wall) : wall)))
+  }
+
+  const confirm = () => {
+    if (!levelId) {
+      setError('Selecione um nível antes de confirmar as paredes.')
+      return
+    }
+    const patches = toWallNodePatches(walls)
+    commitWalls(
+      patches,
+      {
+        createNode: (data, parentId) => {
+          createNode(WallNode.parse(data), parentId as AnyNodeId)
+        },
+      },
+      levelId,
+    )
+    setStatus(`${patches.length} parede(s) adicionada(s) ao nível.`)
+  }
+
+  const addPdfGuide = async () => {
+    if (!pdfFallback || !levelId) {
+      setError('Selecione um nível antes de adicionar o PDF como guia.')
+      return
+    }
+    try {
+      const url = await saveAsset(pdfFallback)
+      const guide = GuideNode.parse({
+        name: pdfFallback.name.replace(/\.pdf$/i, ''),
+        url,
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        scale: 1,
+        opacity: 50,
+        scaleReference: null,
+      })
+      createNode(guide, levelId as AnyNodeId)
+      setStatus('PDF adicionado como guia visual no nível.')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Não foi possível salvar o PDF como guia.')
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-border/60 p-3">
+      <div>
+        <h3 className="font-medium text-sm">Importar planta (DXF, DWG ou PDF)</h3>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Carregue um DXF em coordenadas de metro, revise os eixos e confirme para criar paredes.
+        </p>
+      </div>
+
+      <label className="flex cursor-pointer items-center justify-center rounded-lg bg-muted/50 px-3 py-2 text-sm hover:bg-muted">
+        <span>{fileName ?? 'Escolher arquivo DXF ou DWG'}</span>
+        <input
+          accept=".dxf,.dwg,.pdf,text/plain,application/pdf"
+          className="sr-only"
+          onChange={(event) => void handleFile(event.target.files?.[0])}
+          type="file"
+        />
+      </label>
+
+      {dwgFileName ? (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-[11px] text-muted-foreground">
+          <p className="font-medium text-foreground">Conversão DWG manual necessária</p>
+          <p className="mt-1">
+            ODA File Converter é offline e deve ser instalado separadamente. Abra-o, escolha a pasta
+            do DWG como entrada, uma pasta de saída e o formato DXF desejado; depois carregue o DXF
+            resultante nesta mesma caixa. O importador não envia o arquivo para nenhum serviço.
+          </p>
+          <p className="mt-1 font-mono text-[10px]">
+            ODAFileConverter &lt;entrada&gt; &lt;saída&gt; &lt;versão&gt; &lt;recursivo&gt;
+            &lt;auditar&gt;
+          </p>
+        </div>
+      ) : null}
+
+      {error ? <p className="text-red-500 text-xs">{error}</p> : null}
+      {status ? <p className="text-emerald-600 text-xs">{status}</p> : null}
+
+      {walls.length > 0 ? (
+        <div className="flex max-h-72 flex-col gap-2 overflow-y-auto">
+          {walls.map((wall, index) => (
+            <div className="rounded-lg bg-muted/30 p-2" key={wall.id}>
+              <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>Parede {index + 1}</span>
+                <span>{Math.round(wall.confidence * 100)}% confiança</span>
+              </div>
+              <div className="grid grid-cols-5 gap-1">
+                {(['start', 'end'] as const).flatMap((point) =>
+                  ([0, 1] as const).map((axis) => (
+                    <input
+                      aria-label={`${point} ${axis === 0 ? 'x' : 'y'}`}
+                      className="min-w-0 rounded border border-border/60 bg-background px-1.5 py-1 text-xs"
+                      key={`${point}-${axis}`}
+                      onChange={(event) =>
+                        updateWall(wall.id, (current) =>
+                          updatePoint(current, point, axis, event.target.value),
+                        )
+                      }
+                      step="0.01"
+                      type="number"
+                      value={wall[point][axis]}
+                    />
+                  )),
+                )}
+                <input
+                  aria-label="thickness"
+                  className="min-w-0 rounded border border-border/60 bg-background px-1.5 py-1 text-xs"
+                  onChange={(event) => {
+                    const thickness = Number(event.target.value)
+                    if (Number.isFinite(thickness)) {
+                      updateWall(wall.id, (current) => ({ ...current, thickness }))
+                    }
+                  }}
+                  step="0.01"
+                  type="number"
+                  value={wall.thickness}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {pdfFallback ? (
+        <button
+          className="rounded-lg border border-border/60 px-3 py-2 font-medium text-sm hover:bg-muted"
+          onClick={() => void addPdfGuide()}
+          type="button"
+        >
+          Adicionar PDF como guia
+        </button>
+      ) : null}
+
+      <button
+        className="rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground text-sm disabled:cursor-not-allowed disabled:opacity-50"
+        disabled={walls.length === 0}
+        onClick={confirm}
+        type="button"
+      >
+        Confirmar paredes
+      </button>
+    </div>
+  )
+}

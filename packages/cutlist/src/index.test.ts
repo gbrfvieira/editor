@@ -60,3 +60,22 @@ test('toCsv includes all three sections', () => {
   expect(csv).toContain('[edgeBanding]')
   expect(csv).toContain('cabinetId,label,widthMm')
 })
+
+test('reports each visible front edge separately', () => {
+  const report = createCutList([
+    base({ id: 'fronts', stack: [{ type: 'door', doorType: 'single-left', height: 0.8 }] }),
+  ])
+  expect(report.edgeBanding).toHaveLength(4)
+  expect(report.edgeBanding.map((edge) => edge.edge)).toEqual(['top', 'bottom', 'left', 'right'])
+  expect(report.edgeBanding.reduce((sum, edge) => sum + edge.lengthMm, 0)).toBeCloseTo(2.6 * 1000)
+})
+
+test('uses three hinges for each tall door leaf', () => {
+  const report = createCutList([
+    base({
+      id: 'tall-door',
+      stack: [{ type: 'door', doorType: 'double', height: 1.2 }],
+    }),
+  ])
+  expect(report.hardware).toContainEqual({ cabinetId: 'tall-door', item: 'hinge', quantity: 6 })
+})

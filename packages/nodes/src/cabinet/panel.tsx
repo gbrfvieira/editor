@@ -6,6 +6,7 @@ import type {
   CabinetModuleNode as CabinetModuleNodeType,
   CabinetNode as CabinetNodeType,
 } from '@pascal-app/core'
+import type { CabinetLike } from '@pascal-app/cutlist'
 import { createSceneApi, useScene } from '@pascal-app/core'
 import {
   ActionButton,
@@ -19,6 +20,7 @@ import { AlertTriangle, Pause, Play, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { CompartmentCard } from './compartment-card'
+import { CabinetCutlistExportActions } from './cutlist-export-actions'
 import {
   animateCabinetOperationState,
   isCabinetAnimationRunning,
@@ -713,6 +715,27 @@ export default function CabinetPanel() {
           </>
         )}
       </PanelSection>
+
+      <CabinetCutlistExportActions cabinets={[node] as unknown as CabinetLike[]} />
+
+      {node.type === 'cabinet-module' && !isHoodOnlyNode && (
+        <PanelSection title="Board thickness">
+          <div className="space-y-1 px-1 pb-2">
+            <SegmentedControl
+              mixed={node.boardThickness !== 0.015 && node.boardThickness !== 0.018}
+              onChange={(value) => updateNode({ boardThickness: Number(value) })}
+              options={[
+                { value: '0.015', label: '15 mm' },
+                { value: '0.018', label: '18 mm' },
+              ]}
+              value={node.boardThickness.toFixed(3)}
+            />
+            <p className="px-1 pt-1 text-[10px] text-muted-foreground">
+              Quick MDF thickness preset for this module.
+            </p>
+          </div>
+        </PanelSection>
+      )}
 
       {node.type === 'cabinet-module' && parentRun?.type === 'cabinet' && !isHoodOnlyNode && (
         <PanelSection title="Cabinet Type">

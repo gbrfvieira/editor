@@ -18,7 +18,7 @@ export function registerGenerateCutlist(server: McpServer, bridge: SceneOperatio
     'generate_cutlist',
     {
       title: 'Generate cabinet cut list',
-      description: 'Generate panels, hardware and edge banding for one or more cabinet nodes.',
+      description: 'Generate panels, hardware and edge banding for cabinet nodes.',
       inputSchema: generateCutlistInput,
       outputSchema: generateCutlistOutput,
     },
@@ -34,8 +34,7 @@ export function registerGenerateCutlist(server: McpServer, bridge: SceneOperatio
       )
       if (invalid)
         throwMcpError(ErrorCode.InvalidParams, `Node ${invalid.id} is not a cabinet node`)
-      const report = createCutList(nodes as unknown as CabinetLike[])
-      const payload = { report }
+      const payload = { report: createCutList(nodes as unknown as CabinetLike[]) }
       return {
         content: [{ type: 'text' as const, text: JSON.stringify(payload) }],
         structuredContent: payload,

@@ -6,11 +6,11 @@ import { z } from 'zod'
 import type { SceneOperations } from '../operations'
 import { ErrorCode, throwMcpError } from './errors'
 import { liveSyncOutput, persistencePayload, publishLiveSceneSnapshot } from './live-sync'
-import { NodeIdSchema } from './schemas'
+import { NodeIdSchema, Vec2Schema } from './schemas'
 
 const detectedWallSchema = z.object({
-  start: z.array(z.number()).length(2),
-  end: z.array(z.number()).length(2),
+  start: Vec2Schema,
+  end: Vec2Schema,
   thickness: z.number().positive(),
   confidence: z.number().min(0).max(1),
 })
@@ -18,6 +18,8 @@ const detectedWallSchema = z.object({
 export const commitFloorplanWallsInput = {
   levelId: NodeIdSchema,
   walls: z.array(detectedWallSchema),
+  minConfidence: z.number().min(0).max(1).optional(),
+  defaultHeight: z.number().positive().optional(),
 }
 
 export const commitFloorplanWallsOutput = { wallIds: z.array(z.string()), ...liveSyncOutput }
@@ -26,24 +28,28 @@ export function registerCommitFloorplanWalls(server: McpServer, bridge: SceneOpe
   server.registerTool(
     'commit_floorplan_walls',
     {
-      title: 'Commit floor plan walls',
-      description: 'Create approved detected walls on a scene level.',
+      title: 'Commit floorplan walls',
+      description: 'Create approved detected walls on a level after preview/review.',
       inputSchema: commitFloorplanWallsInput,
       outputSchema: commitFloorplanWallsOutput,
     },
-    async ({ levelId, walls }) => {
-      const level = bridge.getNode(levelId as AnyNodeId)
-      if (!level) throwMcpError(ErrorCode.InvalidParams, `Level not found: ${levelId}`)
-      if (level.type !== 'level')
-        throwMcpError(ErrorCode.InvalidParams, `Node ${levelId} is not a level`)
+    async ({ levelId, walls, minConfidence, defaultHeight }) => {
+      const parent = bridge.getNode(levelId as AnyNodeId)
+      if (!parent) throwMcpError(ErrorCode.InvalidParams, `Level not found: ${levelId}`)
+      if (parent.type !== 'level') {
+        throwMcpError(
+          ErrorCode.InvalidParams,
+          `Node ${levelId} is a ${parent.type}, expected level`,
+        )
+      }
+      const patches = toWallNodePatches(walls as DetectedWall[], { minConfidence, defaultHeight })
       const wallIds: string[] = []
-      const patches = toWallNodePatches(walls as DetectedWall[])
       commitWalls(
         patches,
         {
-          createNode(data, parentId) {
-            const id = bridge.createNode(WallNode.parse(data), parentId as AnyNodeId)
-            wallIds.push(id as string)
+          createNode: (data, parentId) => {
+            const node = WallNode.parse(data)
+            wallIds.push(bridge.createNode(node, parentId as AnyNodeId) as string)
           },
         },
         levelId,

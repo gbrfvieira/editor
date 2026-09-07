@@ -14,7 +14,7 @@ import {
 } from '@pascal-app/editor'
 import { useViewer } from '@pascal-app/viewer'
 import Image from 'next/image'
-import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from '@/components/toolbar-tooltip'
 import { cn } from '@/lib/utils'
+import { FloorplanImportPanel } from './floorplan-import-panel'
 
 type BuildType = {
   /** Selection id — equals `kind` for tool types, with dedicated ids for modes and groups. */
@@ -29,11 +30,13 @@ type BuildType = {
   label: string
   /** Raster asset tile (legacy Build sidebar artwork). */
   iconSrc: string
-  /** Present for structure-tool types (absent for paint mode). */
+  /** Present for structure-tool types (absent for paint mode and the import action). */
   kind?: string
   paletteOrder?: number
   /** Non-placement special mode. */
   mode?: 'material-paint' | 'terrain-sculpt'
+  /** App-local workflow that does not alter the editor tool state. */
+  action?: 'floorplan-import'
 }
 
 // Same icons + ordering as the community Build sidebar, minus presets.
@@ -50,6 +53,12 @@ const BASE_BUILD_TYPES: BuildType[] = [
   { id: 'shelf', label: 'Shelf', iconSrc: '/icons/shelf.webp', kind: 'shelf' },
   { id: 'spawn', label: 'Spawn Point', iconSrc: '/icons/spawn-point.webp', kind: 'spawn' },
   { id: 'kitchen', label: 'Kitchen', iconSrc: '/icons/kitchen.webp' },
+  {
+    id: 'floorplan-import',
+    label: 'Import floorplan',
+    iconSrc: '/icons/floor.webp',
+    action: 'floorplan-import',
+  },
   { id: 'painting', label: 'Painting', iconSrc: '/icons/paint.webp', mode: 'material-paint' },
   { id: 'terrain', label: 'Terrain', iconSrc: '/icons/mesh.webp', mode: 'terrain-sculpt' },
 ]
@@ -159,6 +168,7 @@ export function BuildTab() {
     () => false,
   )
   const buildTypes = registryReady ? collectBuildTypes(floorplanMode) : BASE_BUILD_TYPES
+  const [showFloorplanImport, setShowFloorplanImport] = useState(false)
 
   // Tile highlight derives from the single source of truth (the active tool /
   // mode), never a separate local selection — so keyboard shortcuts and panel
@@ -166,12 +176,18 @@ export function BuildTab() {
   const isKitchenActive = mode === 'build' && activeTool === 'cabinet'
 
   const isTypeActive = (type: BuildType) => {
+    if (type.action === 'floorplan-import') return showFloorplanImport
     if (type.mode) return mode === type.mode
     if (type.id === 'kitchen') return isKitchenActive
     return mode === 'build' && activeTool === type.kind
   }
 
   const handleTypeClick = useCallback((type: BuildType) => {
+    if (type.action === 'floorplan-import') {
+      setShowFloorplanImport(true)
+      return
+    }
+    setShowFloorplanImport(false)
     if (type.mode === 'material-paint') {
       activatePaintMode()
     } else if (type.mode === 'terrain-sculpt') {
@@ -241,7 +257,11 @@ export function BuildTab() {
         </div>
       </TooltipProvider>
 
-      {mode === 'material-paint' ? (
+      {showFloorplanImport ? (
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <FloorplanImportPanel />
+        </div>
+      ) : mode === 'material-paint' ? (
         <div className="min-h-0 flex-1 overflow-y-auto">
           <MaterialPaintPanel />
         </div>

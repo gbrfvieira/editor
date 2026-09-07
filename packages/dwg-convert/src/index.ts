@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync } from 'node:fs'
 import { dirname, join, parse, resolve } from 'node:path'
 
 export type ConversionResult =
@@ -7,6 +7,28 @@ export type ConversionResult =
   | { ok: false; reason: 'converter_not_found' | 'conversion_failed'; message: string }
 
 const TIMEOUT_MS = 120_000
+const ODA_EXECUTABLE = 'ODAFileConverter.exe'
+
+function converterCandidates(root: string): string[] {
+  const candidates = [join(root, ODA_EXECUTABLE)]
+  const visit = (directory: string, depth: number): void => {
+    if (depth > 3 || !existsSync(directory)) return
+    let entries
+    try {
+      entries = readdirSync(directory, { withFileTypes: true })
+    } catch {
+      return
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue
+      const child = join(directory, entry.name)
+      if (entry.name.toLowerCase().startsWith('oda')) candidates.push(join(child, ODA_EXECUTABLE))
+      visit(child, depth + 1)
+    }
+  }
+  visit(root, 0)
+  return candidates
+}
 
 function findConverter(): string | undefined {
   const override = process.env.ODA_FILE_CONVERTER_PATH
@@ -18,16 +40,7 @@ function findConverter(): string | undefined {
     'C:\\Program Files (x86)',
   ]
   for (const root of roots.filter((value): value is string => Boolean(value))) {
-    if (!existsSync(root)) continue
-    const names = [
-      'ODAFileConverter.exe',
-      ...readdirSync(root, { withFileTypes: true })
-        .filter((entry) => entry.isDirectory() && entry.name.toLowerCase().startsWith('oda'))
-        .map((entry) => join(entry.name, 'ODAFileConverter.exe')),
-    ]
-    for (const name of names) {
-      const candidate =
-        name.includes('\\') || name.includes('/') ? join(root, name) : join(root, name)
+    for (const candidate of converterCandidates(root)) {
       if (existsSync(candidate)) return candidate
     }
   }
@@ -63,31 +76,35 @@ function runConverter(
 
 export async function convertDwgToDxf(dwgPath: string, outDir: string): Promise<ConversionResult> {
   const executable = findConverter()
-  if (!executable)
+  if (!executable) {
     return {
       ok: false,
       reason: 'converter_not_found',
       message:
         'ODA File Converter executable was not found. Set ODA_FILE_CONVERTER_PATH or install it.',
     }
+  }
   const sourceDir = dirname(resolve(dwgPath))
   const targetDir = resolve(outDir)
   const args = [sourceDir, targetDir, 'ACAD2018', 'DXF', '0', '1']
   try {
+    mkdirSync(targetDir, { recursive: true })
     const result = await runConverter(executable, args)
-    if (result.error || result.code !== 0)
+    if (result.error || result.code !== 0) {
       return {
         ok: false,
         reason: 'conversion_failed',
         message: result.error?.message ?? `ODA File Converter exited with code ${result.code}`,
       }
+    }
     const dxfPath = join(targetDir, `${parse(dwgPath).name}.dxf`)
-    if (!existsSync(dxfPath))
+    if (!existsSync(dxfPath)) {
       return {
         ok: false,
         reason: 'conversion_failed',
         message: `Converter completed but did not create ${dxfPath}`,
       }
+    }
     return { ok: true, dxfPath }
   } catch (error) {
     return {

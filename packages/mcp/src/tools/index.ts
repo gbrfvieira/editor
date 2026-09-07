@@ -17,6 +17,7 @@ import { registerExportGlb } from './export-glb'
 import { registerExportJson } from './export-json'
 import { registerFindNodes } from './find-nodes'
 import { registerGenerateCutlist } from './generate-cutlist'
+import { registerGenerateQuote } from './generate-quote'
 import { registerGetNode } from './get-node'
 import { registerGetScene } from './get-scene'
 import { registerImportFloorplanDxf } from './import-floorplan-dxf'
@@ -48,6 +49,7 @@ export function registerTools(server: McpServer, operations: SceneOperations): v
   registerImportFloorplanDxf(server, operations)
   registerCommitFloorplanWalls(server, operations)
   registerGenerateCutlist(server, operations)
+  registerGenerateQuote(server, operations)
   registerGetScene(server, operations)
   registerGetNode(server, operations)
   registerDescribeNode(server, operations)

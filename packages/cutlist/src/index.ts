@@ -33,7 +33,12 @@ export type CutListReport = {
     quantity: number
   }[]
   hardware: { cabinetId: string; item: 'hinge' | 'drawer-slide' | 'handle'; quantity: number }[]
-  edgeBanding: { cabinetId: string; panel: string; lengthMm: number }[]
+  edgeBanding: {
+    cabinetId: string
+    panel: string
+    edge: 'top' | 'bottom' | 'left' | 'right'
+    lengthMm: number
+  }[]
 }
 
 const mm = (meters: number) => meters * 1000
@@ -85,6 +90,31 @@ function addHardware(
   else report.hardware.push({ cabinetId, item, quantity })
 }
 
+function addFrontEdgeBanding(
+  report: CutListReport,
+  cabinetId: string,
+  panel: string,
+  width: number,
+  height: number,
+  quantity: number,
+): void {
+  const edges = [
+    { edge: 'top' as const, length: width },
+    { edge: 'bottom' as const, length: width },
+    { edge: 'left' as const, length: height },
+    { edge: 'right' as const, length: height },
+  ]
+  for (let panelIndex = 0; panelIndex < quantity; panelIndex += 1) {
+    for (const { edge, length } of edges) {
+      report.edgeBanding.push({ cabinetId, panel, edge, lengthMm: mm(length) })
+    }
+  }
+}
+
+function hingesPerLeaf(height: number): number {
+  return height > 0.9 ? 3 : 2
+}
+
 export function createCutList(cabinets: CabinetLike[]): CutListReport {
   const report: CutListReport = { panels: [], hardware: [], edgeBanding: [] }
   for (const cabinet of cabinets) {
@@ -131,26 +161,16 @@ export function createCutList(cabinets: CabinetLike[]): CutListReport {
           )
         }
         addPanel(report, cabinet, 'door', cabinet.width / leaves, height, board, leaves)
-        addHardware(report, cabinet.id, 'hinge', leaves === 2 ? 4 : 2)
+        addHardware(report, cabinet.id, 'hinge', hingesPerLeaf(height) * leaves)
         if (cabinet.handleStyle !== 'none') addHardware(report, cabinet.id, 'handle', leaves)
-        for (let i = 0; i < leaves; i++)
-          report.edgeBanding.push({
-            cabinetId: cabinet.id,
-            panel: 'door',
-            lengthMm: mm(2 * (cabinet.width / leaves + height)),
-          })
+        addFrontEdgeBanding(report, cabinet.id, 'door', cabinet.width / leaves, height, leaves)
       } else if (compartment.type === 'drawer') {
         const count = Math.max(0, Math.floor(compartment.drawerCount ?? 0))
         const height = (compartment.height ?? cabinet.carcassHeight) / Math.max(1, count)
         addPanel(report, cabinet, 'drawer-front', cabinet.width, height, board, count)
         addHardware(report, cabinet.id, 'drawer-slide', count)
         if (cabinet.handleStyle !== 'none') addHardware(report, cabinet.id, 'handle', count)
-        for (let i = 0; i < count; i++)
-          report.edgeBanding.push({
-            cabinetId: cabinet.id,
-            panel: 'drawer-front',
-            lengthMm: mm(2 * (cabinet.width + height)),
-          })
+        addFrontEdgeBanding(report, cabinet.id, 'drawer-front', cabinet.width, height, count)
       }
     }
   }
@@ -184,9 +204,9 @@ export function toCsv(report: CutListReport): string {
   rows.push('', '[hardware]', 'cabinetId,item,quantity')
   for (const item of report.hardware)
     rows.push([item.cabinetId, item.item, item.quantity].map(csvCell).join(','))
-  rows.push('', '[edgeBanding]', 'cabinetId,panel,lengthMm')
+  rows.push('', '[edgeBanding]', 'cabinetId,panel,edge,lengthMm')
   for (const item of report.edgeBanding)
-    rows.push([item.cabinetId, item.panel, item.lengthMm].map(csvCell).join(','))
+    rows.push([item.cabinetId, item.panel, item.edge, item.lengthMm].map(csvCell).join(','))
   return rows.join('\n')
 }
 

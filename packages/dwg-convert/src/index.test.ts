@@ -5,9 +5,6 @@ import { join } from 'node:path'
 const temp = join(process.cwd(), '.dwg-convert-test')
 const original = process.env.ODA_FILE_CONVERTER_PATH
 
-// afterEach removes `temp` for isolation, so each test needs it recreated —
-// a module-level mkdirSync only ran once, before the first test's cleanup
-// deleted it out from under every test after it.
 beforeEach(() => {
   mkdirSync(temp, { recursive: true })
 })

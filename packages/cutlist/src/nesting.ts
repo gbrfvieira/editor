@@ -16,7 +16,6 @@ export type NestingResult = {
   sheetCount: number
   wasteAreaM2: number
   utilizationPercent: number
-  /** Physical sheet dimensions used for the calculation (optional for compatibility). */
   sheetWidthMm?: number
   sheetHeightMm?: number
 }

@@ -9,7 +9,7 @@ export type CutListReport = {
     quantity: number
   }[]
   hardware: { cabinetId: string; item: 'hinge' | 'drawer-slide' | 'handle'; quantity: number }[]
-  edgeBanding: { cabinetId: string; panel: string; lengthMm: number }[]
+  edgeBanding: { cabinetId: string; panel: string; lengthMm: number; edge?: string }[]
 }
 
 export type NestingResult = {
@@ -70,8 +70,12 @@ export function calculateQuote(
     1_000_000
   const materials = new Set(cutList.panels.map((panel) => panel.material ?? 'default'))
   for (const material of materials) {
-    const unitPrice = sheetAreaM2 * (prices.boardPricePerM2[material] ?? 0)
-    addLine(lineItems, `Chapa (${material})`, nesting.sheetCount, unitPrice)
+    addLine(
+      lineItems,
+      `Chapa (${material})`,
+      nesting.sheetCount,
+      sheetAreaM2 * (prices.boardPricePerM2[material] ?? 0),
+    )
   }
 
   const edgeMeters = cutList.edgeBanding.reduce((sum, edge) => sum + edge.lengthMm / 1000, 0)

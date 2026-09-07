@@ -12,9 +12,11 @@ export const createCabinetRunInput = {
   levelId: NodeIdSchema,
   start: Vec2Schema.optional(),
   end: Vec2Schema.optional(),
-  width: measurement('length', 'm', { positive: true }).optional(),
+  width: measurement('length', 'm', { min: 0.05, max: 3 }).optional(),
   position: Vec3Schema.optional(),
-  rotation: measurement('angle', 'rad').optional(),
+  rotation: z.number().finite().optional(),
+  depth: measurement('length', 'm', { min: 0.3, max: 1.2 }).optional(),
+  name: z.string().optional(),
 }
 
 export const createCabinetRunOutput = { cabinetId: z.string(), ...liveSyncOutput }
@@ -25,37 +27,49 @@ export function registerCreateCabinetRun(server: McpServer, bridge: SceneOperati
     {
       title: 'Create cabinet run',
       description:
-        'Create a parametric cabinet run on a level, optionally aligned between two plan points.',
+        'Create a parametric cabinet run on a level. Provide start/end points or an explicit width, position and rotation.',
       inputSchema: createCabinetRunInput,
       outputSchema: createCabinetRunOutput,
     },
-    async ({ levelId, start, end, width, position, rotation }) => {
-      const level = bridge.getNode(levelId as AnyNodeId)
-      if (!level) throwMcpError(ErrorCode.InvalidParams, `Level not found: ${levelId}`)
-      if (level.type !== 'level') {
-        throwMcpError(ErrorCode.InvalidParams, `Node ${levelId} is a ${level.type}, expected level`)
+    async ({ levelId, start, end, width, position, rotation, depth, name }) => {
+      const parent = bridge.getNode(levelId as AnyNodeId)
+      if (!parent) throwMcpError(ErrorCode.InvalidParams, `Level not found: ${levelId}`)
+      if (parent.type !== 'level') {
+        throwMcpError(
+          ErrorCode.InvalidParams,
+          `Node ${levelId} is a ${parent.type}, expected level`,
+        )
       }
       if ((start && !end) || (!start && end)) {
-        throwMcpError(ErrorCode.InvalidParams, 'start and end must be provided together')
+        throwMcpError(ErrorCode.InvalidParams, 'start and end must be supplied together')
       }
 
-      let runWidth = width
-      let runPosition = (position ?? [0, 0, 0]) as [number, number, number]
-      let runRotation = rotation ?? 0
+      let resolvedWidth = width
+      let resolvedPosition = position ? ([...position] as [number, number, number]) : [0, 0, 0]
+      let resolvedRotation = rotation ?? 0
       if (start && end) {
         const [sx, sz] = start as [number, number]
         const [ex, ez] = end as [number, number]
         const dx = ex - sx
         const dz = ez - sz
-        runWidth = Math.hypot(dx, dz)
-        runPosition = [(sx + ex) / 2, 0, (sz + ez) / 2]
-        runRotation = Math.atan2(dz, dx)
+        resolvedWidth = Math.hypot(dx, dz)
+        if (resolvedWidth < 0.05) {
+          throwMcpError(ErrorCode.InvalidParams, 'start and end must be at least 0.05 m apart')
+        }
+        resolvedPosition = [(sx + ex) / 2, 0, (sz + ez) / 2]
+        resolvedRotation = Math.atan2(dz, dx)
       }
+      if (resolvedWidth === undefined) {
+        throwMcpError(ErrorCode.InvalidParams, 'Provide start/end or an explicit width')
+      }
+
       const cabinet = CabinetNode.parse({
-        width: runWidth ?? 0.5,
-        position: runPosition,
-        rotation: runRotation,
-        children: [],
+        ...(name ? { name } : {}),
+        parentId: levelId,
+        width: resolvedWidth,
+        position: resolvedPosition,
+        rotation: resolvedRotation,
+        ...(depth !== undefined ? { depth } : {}),
       })
       const id = bridge.createNode(cabinet, levelId as AnyNodeId)
       const persistence = await publishLiveSceneSnapshot(bridge, 'create_cabinet_run')
