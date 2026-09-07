@@ -26,7 +26,7 @@ import {
   type WindowOpening,
 } from '@pascal-app/wall-detect'
 import { useCallback, useState } from 'react'
-import { recenterSegments } from './floorplan-import-geometry'
+import { recenterSegments, sameSegmentGeometry } from './floorplan-import-geometry'
 
 type EditableWall = DetectedWall & { id: number }
 type PreviewOpening = (DxfOpening | WindowOpening) & { id: number }
@@ -129,7 +129,6 @@ export function FloorplanImportPanel() {
         preferLayerContaining: 'PAREDE',
         snapToleranceM: snapTolerance,
       }).walls
-      setWalls(toEditableWalls(detected))
 
       // Doors are commonly drawn as pure geometry (a ~90° swing arc + a
       // radial leaf line) rather than a named block — detectDoorOpenings
@@ -161,6 +160,16 @@ export function FloorplanImportPanel() {
               ) < 0.4,
           ),
       )
+      const windowSymbolSegmentIndices = new Set(
+        geometricWindows.flatMap((window) => window.segmentIndices),
+      )
+      const windowSymbolSegments = [...windowSymbolSegmentIndices]
+        .map((segmentIndex) => recenteredSegments[segmentIndex])
+        .filter((segment) => segment !== undefined)
+      const previewWalls = detected.filter(
+        (wall) => !windowSymbolSegments.some((segment) => sameSegmentGeometry(wall, segment)),
+      )
+      setWalls(toEditableWalls(previewWalls))
 
       let openingId = 0
       setOpenings([
@@ -178,7 +187,7 @@ export function FloorplanImportPanel() {
 
       const openingCount = blockOpenings.length + arcDoors.length + geometricWindows.length
       setStatus(
-        `${detected.length} parede(s) e ${openingCount} vão(s) detectados (recentralizado na origem). Revise e confirme.`,
+        `${previewWalls.length} parede(s) e ${openingCount} vão(s) detectados (recentralizado na origem). Revise e confirme.`,
       )
     },
     [snapTolerance],

@@ -3,6 +3,19 @@ export type RecenterableSegment = {
   end: [number, number]
 }
 
+export function sameSegmentGeometry(
+  first: RecenterableSegment,
+  second: RecenterableSegment,
+  tolerance = 0.07,
+): boolean {
+  const close = (left: [number, number], right: [number, number]) =>
+    Math.hypot(left[0] - right[0], left[1] - right[1]) <= tolerance
+  return (
+    (close(first.start, second.start) && close(first.end, second.end)) ||
+    (close(first.start, second.end) && close(first.end, second.start))
+  )
+}
+
 export function recenterSegments<T extends RecenterableSegment>(
   segments: T[],
 ): {
