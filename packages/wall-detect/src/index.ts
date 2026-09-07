@@ -139,6 +139,96 @@ function pairCandidate(
   }
 }
 
+/**
+ * Buckets points into a uniform grid (cell size = `radius`) and returns, for
+ * each point index, every other point index sharing its cell or an adjacent
+ * one (deduplicated, `left < right`). Two points within `radius` of each
+ * other always land in the same or a neighboring cell, so this never misses
+ * a candidate pair — it only skips pairs already known to be farther apart
+ * than `radius`. Turns the naive O(n^2) all-pairs scan into roughly O(n) for
+ * geometry that isn't pathologically dense everywhere (real floor plans).
+ */
+function nearbyPairs(points: Point[], radius: number): Array<[number, number]> {
+  const cellSize = Math.max(radius, 1e-6)
+  const cellOf = (value: number) => Math.floor(value / cellSize)
+  const grid = new Map<string, number[]>()
+  points.forEach((point, index) => {
+    const key = `${cellOf(point[0])},${cellOf(point[1])}`
+    const bucket = grid.get(key)
+    if (bucket) bucket.push(index)
+    else grid.set(key, [index])
+  })
+
+  const pairs: Array<[number, number]> = []
+  const seen = new Set<string>()
+  points.forEach((point, index) => {
+    const cx = cellOf(point[0])
+    const cy = cellOf(point[1])
+    for (let dx = -1; dx <= 1; dx += 1) {
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (const other of grid.get(`${cx + dx},${cy + dy}`) ?? []) {
+          if (other === index) continue
+          const first = Math.min(index, other)
+          const second = Math.max(index, other)
+          const key = `${first}:${second}`
+          if (seen.has(key)) continue
+          seen.add(key)
+          pairs.push([first, second])
+        }
+      }
+    }
+  })
+  return pairs
+}
+
+/** Grid cells for a segment's bounding box, expanded by `margin` on each side. */
+function segmentCells(segment: InputSegment, cellSize: number, margin: number): string[] {
+  const minX = Math.min(segment.start[0], segment.end[0]) - margin
+  const maxX = Math.max(segment.start[0], segment.end[0]) + margin
+  const minY = Math.min(segment.start[1], segment.end[1]) - margin
+  const maxY = Math.max(segment.start[1], segment.end[1]) + margin
+  const cells: string[] = []
+  const cx0 = Math.floor(minX / cellSize)
+  const cx1 = Math.floor(maxX / cellSize)
+  const cy0 = Math.floor(minY / cellSize)
+  const cy1 = Math.floor(maxY / cellSize)
+  for (let cx = cx0; cx <= cx1; cx += 1) {
+    for (let cy = cy0; cy <= cy1; cy += 1) cells.push(`${cx},${cy}`)
+  }
+  return cells
+}
+
+/** Candidate segment pairs whose bounding boxes are within `maxThickness` of each other. */
+function nearbySegmentPairs(
+  segments: InputSegment[],
+  maxThickness: number,
+): Array<[number, number]> {
+  const cellSize = Math.max(maxThickness, 1e-6)
+  const grid = new Map<string, number[]>()
+  segments.forEach((segment, index) => {
+    for (const key of segmentCells(segment, cellSize, maxThickness)) {
+      const bucket = grid.get(key)
+      if (bucket) bucket.push(index)
+      else grid.set(key, [index])
+    }
+  })
+  const pairs: Array<[number, number]> = []
+  const seen = new Set<string>()
+  for (const bucket of grid.values()) {
+    for (let i = 0; i < bucket.length; i += 1) {
+      for (let j = i + 1; j < bucket.length; j += 1) {
+        const first = Math.min(bucket[i], bucket[j])
+        const second = Math.max(bucket[i], bucket[j])
+        const key = `${first}:${second}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        pairs.push([first, second])
+      }
+    }
+  }
+  return pairs
+}
+
 function snapWallEndpoints(walls: Wall[], tolerance: number): void {
   const endpoints = walls.flatMap((wall) => [wall.start, wall.end])
   const parent = endpoints.map((_, index) => index)
@@ -157,11 +247,9 @@ function snapWallEndpoints(walls: Wall[], tolerance: number): void {
     }
   }
 
-  for (let left = 0; left < endpoints.length; left += 1) {
-    for (let right = left + 1; right < endpoints.length; right += 1) {
-      if (distance(endpoints[left], endpoints[right]) <= tolerance) {
-        union(left, right)
-      }
+  for (const [left, right] of nearbyPairs(endpoints, tolerance)) {
+    if (distance(endpoints[left], endpoints[right]) <= tolerance) {
+      union(left, right)
     }
   }
 
@@ -198,17 +286,25 @@ export function detectWalls(
   const preferredSegments = preferred
     ? inputSegments.filter((segment) => segment.layer?.toLocaleLowerCase().includes(preferred))
     : []
-  const segments = preferredSegments.length > 0 ? preferredSegments : inputSegments
+  // A caller-supplied substring (e.g. "PAREDE") wins when it matches
+  // anything; otherwise fall back to the same wall-layer heuristic used for
+  // the single-line confidence boost — many real offices name wall layers
+  // "ALV1"/"ALV2"/etc. rather than anything containing "parede" — before
+  // finally giving up and running detection over every segment (including
+  // non-wall geometry pulled in by resolved block INSERTs).
+  const wallLayerSegments =
+    preferredSegments.length > 0
+      ? preferredSegments
+      : inputSegments.filter((segment) => isWallLayer(segment.layer))
+  const segments = wallLayerSegments.length > 0 ? wallLayerSegments : inputSegments
   const walls: Wall[] = []
   const paired = new Set<number>()
   const candidates: Array<{ first: number; second: number; thickness: number; wall: Wall }> = []
 
-  for (let first = 0; first < segments.length; first += 1) {
-    for (let second = first + 1; second < segments.length; second += 1) {
-      const candidate = pairCandidate(segments[first], segments[second], minThickness, maxThickness)
-      if (candidate) {
-        candidates.push({ first, second, ...candidate })
-      }
+  for (const [first, second] of nearbySegmentPairs(segments, maxThickness)) {
+    const candidate = pairCandidate(segments[first], segments[second], minThickness, maxThickness)
+    if (candidate) {
+      candidates.push({ first, second, ...candidate })
     }
   }
   candidates.sort((left, right) => left.thickness - right.thickness)

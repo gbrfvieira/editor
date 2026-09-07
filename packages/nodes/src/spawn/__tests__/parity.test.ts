@@ -42,7 +42,7 @@ describe('spawn definition', () => {
   })
 
   test('presentation declares a url palette icon', () => {
-    expect(spawnDefinition.presentation?.label).toBe('Spawn Point')
+    expect(spawnDefinition.presentation?.label).toBe('Ponto inicial')
     expect(spawnDefinition.presentation?.icon.kind).toBe('url')
     expect(spawnDefinition.presentation?.paletteSection).toBe('structure')
   })
@@ -132,7 +132,7 @@ describe('spawn definition', () => {
     expect(typeof SpawnPreview).toBe('function')
     expect(spawnDefinition.toolHints).toContainEqual({
       key: 'R / T',
-      label: 'Rotate spawn point',
+      label: 'Girar ponto inicial',
     })
   })
 

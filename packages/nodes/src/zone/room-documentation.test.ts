@@ -65,7 +65,7 @@ describe('buildRoomFloorplanSchedule', () => {
       unit: 'metric',
     })
 
-    expect(schedule?.title).toBe('ROOM SCHEDULE')
+    expect(schedule?.title).toBe('QUADRO DE AMBIENTES')
     expect(schedule?.rows.map((row) => row.id)).toEqual(['zone_lobby', 'zone_office'])
     expect(schedule?.rows[0]?.cells).toMatchObject({
       number: '101',

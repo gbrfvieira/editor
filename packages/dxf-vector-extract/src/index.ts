@@ -45,6 +45,52 @@ type SupportedEntity = {
   position?: { x?: number; y?: number }
   rotation?: number
   xScale?: number
+  yScale?: number
+}
+
+type DxfBlock = { entities?: unknown[] }
+type DxfDocument = {
+  entities?: unknown[]
+  blocks?: Record<string, DxfBlock>
+  header?: Record<string, unknown>
+  tables?: { layer?: { layers?: Record<string, unknown> } }
+}
+
+/** 2D affine matrix [a, b, c, d, e, f]: x' = a*x + c*y + e, y' = b*x + d*y + f. */
+type Mat = [number, number, number, number, number, number]
+
+const IDENTITY_MATRIX: Mat = [1, 0, 0, 1, 0, 0]
+const MAX_BLOCK_DEPTH = 12
+
+function applyMatrix(m: Mat, p: Point): Point {
+  return [m[0] * p[0] + m[2] * p[1] + m[4], m[1] * p[0] + m[3] * p[1] + m[5]]
+}
+
+/** Composes `outer ∘ inner` — applying the result to a point first applies `inner`, then `outer`. */
+function composeMatrix(outer: Mat, inner: Mat): Mat {
+  const [a1, b1, c1, d1, e1, f1] = outer
+  const [a2, b2, c2, d2, e2, f2] = inner
+  return [
+    a1 * a2 + c1 * b2,
+    b1 * a2 + d1 * b2,
+    a1 * c2 + c1 * d2,
+    b1 * c2 + d1 * d2,
+    a1 * e2 + c1 * f2 + e1,
+    b1 * e2 + d1 * f2 + f1,
+  ]
+}
+
+/** Scale, then rotate, then translate — matches DXF INSERT semantics. */
+function insertMatrix(position: Point, rotationDeg: number, xScale: number, yScale: number): Mat {
+  const rot = (rotationDeg * Math.PI) / 180
+  const cos = Math.cos(rot)
+  const sin = Math.sin(rot)
+  return [cos * xScale, sin * xScale, -sin * yScale, cos * yScale, position[0], position[1]]
+}
+
+/** Approximate scalar magnitude of a matrix's linear part — exact for uniform scale/rotation. */
+function matrixScale(m: Mat): number {
+  return Math.hypot(m[0], m[1])
 }
 
 function pointFromVertex(vertex: { x?: number; y?: number }): Point | undefined {
@@ -114,7 +160,15 @@ function openingWidth(name: string | undefined, type: DxfOpening['type'], scale:
   return (type === 'door' ? 0.9 : 1.2) * scale
 }
 
-/** Extracts lines, flattened arcs/bulges and named door/window inserts. */
+/**
+ * Extracts lines, flattened arcs/bulges and named door/window inserts.
+ *
+ * Architecture DWG/DXF files very commonly draw the whole floor plan (or
+ * large chunks of it) inside a BLOCK definition placed once via INSERT,
+ * rather than as loose top-level entities — sometimes nested more than one
+ * level deep. Every INSERT is resolved recursively (depth-capped, cycle-safe)
+ * so geometry buried inside blocks is not silently dropped.
+ */
 export function extractDxfVectorSegments(
   source: string,
   options: { curveTolerance?: number } = {},
@@ -123,7 +177,8 @@ export function extractDxfVectorSegments(
   if (!Number.isFinite(curveTolerance) || curveTolerance <= 0) {
     throw new RangeError('curveTolerance must be a positive, finite number')
   }
-  const document = new DxfParser().parseSync(source)
+  const document = new DxfParser().parseSync(source) as DxfDocument
+  const blocksByName = document?.blocks ?? {}
   const byLayer = new Map<string, DxfSegment[]>()
   const openingsByLayer = new Map<string, DxfOpening[]>()
   const arcsByLayer = new Map<string, DxfArc[]>()
@@ -148,108 +203,122 @@ export function extractDxfVectorSegments(
     openingsByLayer.set(layerName, openings)
   }
 
-  for (const rawEntity of document?.entities ?? []) {
-    const entity = rawEntity as SupportedEntity
-    const layer = entity.layer ?? '0'
-    if (entity.type === 'LINE') {
-      const vertices = entity.vertices ?? []
-      const start = pointFromVertex(vertices[0] ?? {})
-      const end = pointFromVertex(vertices[1] ?? {})
-      if (start && end) {
-        addSegment(layer, start, end)
-      }
-      continue
-    }
+  const walkEntities = (entities: unknown[], transform: Mat, depth: number, path: Set<string>) => {
+    for (const rawEntity of entities) {
+      const entity = rawEntity as SupportedEntity
+      const layer = entity.layer ?? '0'
+      const scale = matrixScale(transform)
 
-    if (entity.type === 'ARC') {
-      const center = pointFromVertex(entity.center ?? {})
-      if (
-        center &&
-        entity.radius !== undefined &&
-        entity.startAngle !== undefined &&
-        entity.endAngle !== undefined
-      ) {
+      if (entity.type === 'LINE') {
+        const vertices = entity.vertices ?? []
+        const start = pointFromVertex(vertices[0] ?? {})
+        const end = pointFromVertex(vertices[1] ?? {})
+        if (start && end) addSegment(layer, applyMatrix(transform, start), applyMatrix(transform, end))
+        continue
+      }
+
+      if (entity.type === 'ARC') {
+        const center = pointFromVertex(entity.center ?? {})
         if (
-          ![entity.radius, entity.startAngle, entity.endAngle].every(Number.isFinite) ||
-          entity.radius <= 0
-        )
-          continue
-        const arcs = arcsByLayer.get(layer) ?? []
-        arcs.push({
-          center,
-          radius: entity.radius,
-          startAngle: entity.startAngle,
-          endAngle: entity.endAngle,
-          layer,
-        })
-        arcsByLayer.set(layer, arcs)
-        for (const segment of segmentsForArc(
-          center,
-          entity.radius,
-          entity.startAngle,
-          entity.endAngle,
-          curveTolerance,
-        )) {
-          addSegment(layer, segment.start, segment.end, 'arc')
+          center &&
+          entity.radius !== undefined &&
+          entity.startAngle !== undefined &&
+          entity.endAngle !== undefined &&
+          [entity.radius, entity.startAngle, entity.endAngle].every(Number.isFinite) &&
+          entity.radius > 0
+        ) {
+          const worldCenter = applyMatrix(transform, center)
+          const worldRadius = entity.radius * scale
+          // Uniform-scale/rotation approximation: a mirrored INSERT (negative
+          // xScale/yScale) would also reverse the arc's sweep direction, which
+          // this doesn't attempt to correct — mirrored block inserts are rare
+          // in practice for architectural symbols.
+          const worldRotation = Math.atan2(transform[1], transform[0])
+          arcsByLayer.set(layer, [
+            ...(arcsByLayer.get(layer) ?? []),
+            {
+              center: worldCenter,
+              radius: worldRadius,
+              startAngle: entity.startAngle + worldRotation,
+              endAngle: entity.endAngle + worldRotation,
+              layer,
+            },
+          ])
+          for (const segment of segmentsForArc(
+            center,
+            entity.radius,
+            entity.startAngle,
+            entity.endAngle,
+            curveTolerance / Math.max(scale, 1e-9),
+          )) {
+            addSegment(
+              layer,
+              applyMatrix(transform, segment.start),
+              applyMatrix(transform, segment.end),
+              'arc',
+            )
+          }
+        }
+        continue
+      }
+
+      if (entity.type === 'INSERT') {
+        const position = pointFromVertex(entity.position ?? {})
+        if (!position) continue
+        const rotationDeg = entity.rotation ?? 0
+        const xScale = entity.xScale ?? 1
+        const yScale = entity.yScale ?? 1
+        const localMatrix = insertMatrix(position, rotationDeg, xScale, yScale)
+        const worldMatrix = composeMatrix(transform, localMatrix)
+
+        const type = openingType(entity.name)
+        if (type) {
+          const worldPosition = applyMatrix(transform, position)
+          addOpening(layer, {
+            type,
+            position: worldPosition,
+            width: openingWidth(entity.name, type, Math.abs(xScale) * scale),
+            rotation: (rotationDeg * Math.PI) / 180 + Math.atan2(transform[1], transform[0]),
+            blockName: entity.name ?? '',
+          })
+        }
+
+        const blockName = entity.name ?? ''
+        const block = blocksByName[blockName]
+        if (block?.entities && depth < MAX_BLOCK_DEPTH && !path.has(blockName)) {
+          path.add(blockName)
+          walkEntities(block.entities, worldMatrix, depth + 1, path)
+          path.delete(blockName)
+        }
+        continue
+      }
+
+      if (entity.type !== 'LWPOLYLINE') continue
+
+      const vertices = (entity.vertices ?? []).flatMap((vertex) => {
+        const point = pointFromVertex(vertex)
+        return point ? [{ point, bulge: vertex.bulge }] : []
+      })
+      const emit = (a: { point: Point; bulge?: number }, b: { point: Point; bulge?: number }) => {
+        for (const segment of segmentsForBulge(a.point, b.point, a.bulge, curveTolerance)) {
+          addSegment(
+            layer,
+            applyMatrix(transform, segment.start),
+            applyMatrix(transform, segment.end),
+            a.bulge ? 'bulge' : undefined,
+          )
         }
       }
-      continue
-    }
-
-    if (entity.type === 'INSERT') {
-      const type = openingType(entity.name)
-      const position = pointFromVertex(entity.position ?? {})
-      if (type && position) {
-        addOpening(layer, {
-          type,
-          position,
-          width: openingWidth(entity.name, type, Math.abs(entity.xScale ?? 1)),
-          rotation: ((entity.rotation ?? 0) * Math.PI) / 180,
-          blockName: entity.name ?? '',
-        })
+      for (let index = 1; index < vertices.length; index += 1) {
+        emit(vertices[index - 1], vertices[index])
       }
-      continue
-    }
-
-    if (entity.type !== 'LWPOLYLINE') {
-      continue
-    }
-
-    const vertices = (entity.vertices ?? []).flatMap((vertex) => {
-      const point = pointFromVertex(vertex)
-      return point ? [{ point, bulge: vertex.bulge }] : []
-    })
-    for (let index = 1; index < vertices.length; index += 1) {
-      for (const segment of segmentsForBulge(
-        vertices[index - 1].point,
-        vertices[index].point,
-        vertices[index - 1].bulge,
-        curveTolerance,
-      )) {
-        addSegment(
-          layer,
-          segment.start,
-          segment.end,
-          vertices[index - 1].bulge ? 'bulge' : undefined,
-        )
-      }
-    }
-    if ((entity.shape === true || entity.closed === true) && vertices.length > 2) {
-      for (const segment of segmentsForBulge(
-        vertices[vertices.length - 1].point,
-        vertices[0].point,
-        vertices[vertices.length - 1].bulge,
-        curveTolerance,
-      )) {
-        addSegment(
-          layer,
-          segment.start,
-          segment.end,
-          vertices[vertices.length - 1].bulge ? 'bulge' : undefined,
-        )
+      if ((entity.shape === true || entity.closed === true) && vertices.length > 2) {
+        emit(vertices[vertices.length - 1], vertices[0])
       }
     }
   }
+
+  walkEntities(document?.entities ?? [], IDENTITY_MATRIX, 0, new Set())
 
   const layerNames = new Set([...byLayer.keys(), ...openingsByLayer.keys()])
   return [...layerNames].map((layer) => {
@@ -270,7 +339,7 @@ export function inspectDxf(
   insertionUnits: number | null
   layers: { layer: string; segmentCount: number; entityCount: number }[]
 } {
-  const document = new DxfParser().parseSync(source)
+  const document = new DxfParser().parseSync(source) as DxfDocument
   const layers = new Map<string, { layer: string; segmentCount: number; entityCount: number }>()
   const ensure = (layer: string) => {
     let entry = layers.get(layer)
@@ -281,7 +350,8 @@ export function inspectDxf(
     return entry
   }
   for (const layer of Object.keys(document?.tables?.layer?.layers ?? {})) ensure(layer)
-  for (const entity of document?.entities ?? []) ensure(entity.layer ?? '0').entityCount += 1
+  for (const entity of document?.entities ?? [])
+    ensure((entity as SupportedEntity).layer ?? '0').entityCount += 1
   for (const result of extractDxfVectorSegments(source, options))
     ensure(result.layer).segmentCount = result.segments.length
   const units = document?.header?.$INSUNITS
