@@ -18,6 +18,10 @@ export interface WallDetectOptions {
   wallThicknessRangeM?: [number, number]
   snapToleranceM?: number
   preferLayerContaining?: string
+  minSegmentLengthM?: number
+  mergeAngleToleranceRad?: number
+  mergeOffsetToleranceM?: number
+  mergeGapToleranceM?: number
 }
 
 export interface WallDetectResult {
@@ -27,6 +31,10 @@ export interface WallDetectResult {
 const DEFAULT_THICKNESS_RANGE: [number, number] = [0.05, 0.4]
 const DEFAULT_SNAP_TOLERANCE = 0.05
 const DEFAULT_SINGLE_WALL_THICKNESS = 0.2
+const DEFAULT_MIN_SEGMENT_LENGTH = 0.15
+const DEFAULT_MERGE_ANGLE_TOLERANCE = Math.PI / 90
+const DEFAULT_MERGE_OFFSET_TOLERANCE = 0.03
+const DEFAULT_MERGE_GAP_TOLERANCE = 0.02
 const PARALLEL_ANGLE_TOLERANCE = Math.PI / 18
 const MIN_OVERLAP_FRACTION = 0.1
 
@@ -274,6 +282,101 @@ function snapWallEndpoints(walls: Wall[], tolerance: number): void {
   })
 }
 
+interface MergeOptions {
+  angleToleranceRad: number
+  offsetToleranceM: number
+  gapToleranceM: number
+}
+
+function mergeWallPair(first: Wall, second: Wall, options: MergeOptions): Wall | undefined {
+  const firstInfo = normalizedDirection(first)
+  const secondInfo = normalizedDirection(second)
+  if (!firstInfo || !secondInfo) {
+    return undefined
+  }
+
+  if (
+    Math.abs(cross(firstInfo.direction, secondInfo.direction)) > Math.sin(options.angleToleranceRad)
+  ) {
+    return undefined
+  }
+
+  const direction = firstInfo.direction
+  const normal: Point = [-direction[1], direction[0]]
+  const firstNormal = (dot(first.start, normal) + dot(first.end, normal)) / 2
+  const secondNormal = (dot(second.start, normal) + dot(second.end, normal)) / 2
+  if (
+    Math.max(
+      Math.abs(dot(second.start, normal) - firstNormal),
+      Math.abs(dot(second.end, normal) - firstNormal),
+    ) > options.offsetToleranceM
+  ) {
+    return undefined
+  }
+
+  const firstInterval = [dot(first.start, direction), dot(first.end, direction)].sort(
+    (left, right) => left - right,
+  )
+  const secondInterval = [dot(second.start, direction), dot(second.end, direction)].sort(
+    (left, right) => left - right,
+  )
+  const gap =
+    Math.max(firstInterval[0], secondInterval[0]) - Math.min(firstInterval[1], secondInterval[1])
+  if (gap > options.gapToleranceM) {
+    return undefined
+  }
+
+  const startProjection = Math.min(firstInterval[0], secondInterval[0])
+  const endProjection = Math.max(firstInterval[1], secondInterval[1])
+  const normalProjection =
+    (firstNormal * firstInfo.length + secondNormal * secondInfo.length) /
+    (firstInfo.length + secondInfo.length)
+
+  return {
+    start: add(scale(direction, startProjection), scale(normal, normalProjection)),
+    end: add(scale(direction, endProjection), scale(normal, normalProjection)),
+    thickness:
+      (first.thickness * firstInfo.length + second.thickness * secondInfo.length) /
+      (firstInfo.length + secondInfo.length),
+    confidence: Math.max(first.confidence, second.confidence),
+  }
+}
+
+export function mergeNearlyDuplicateWalls(
+  walls: Wall[],
+  options: Partial<MergeOptions> = {},
+): Wall[] {
+  const configured: MergeOptions = {
+    angleToleranceRad: options.angleToleranceRad ?? DEFAULT_MERGE_ANGLE_TOLERANCE,
+    offsetToleranceM: options.offsetToleranceM ?? DEFAULT_MERGE_OFFSET_TOLERANCE,
+    gapToleranceM: options.gapToleranceM ?? DEFAULT_MERGE_GAP_TOLERANCE,
+  }
+  const merged: Wall[] = walls.map((wall) => ({
+    ...wall,
+    start: [...wall.start] as Point,
+    end: [...wall.end] as Point,
+  }))
+
+  let changed = true
+  while (changed) {
+    changed = false
+    for (let first = 0; first < merged.length && !changed; first += 1) {
+      for (let second = first + 1; second < merged.length; second += 1) {
+        const combined = mergeWallPair(merged[first], merged[second], configured)
+        if (!combined) {
+          continue
+        }
+        merged[first] = combined
+        merged.splice(second, 1)
+        changed = true
+        break
+      }
+    }
+  }
+
+  return merged
+}
+
 export function detectWalls(
   inputSegments: InputSegment[],
   options: WallDetectOptions = {},
@@ -282,6 +385,7 @@ export function detectWalls(
   const minThickness = Math.min(configuredMin, configuredMax)
   const maxThickness = Math.max(configuredMin, configuredMax)
   const snapTolerance = options.snapToleranceM ?? DEFAULT_SNAP_TOLERANCE
+  const minSegmentLength = options.minSegmentLengthM ?? DEFAULT_MIN_SEGMENT_LENGTH
   const preferred = options.preferLayerContaining?.toLocaleLowerCase()
   const preferredSegments = preferred
     ? inputSegments.filter((segment) => segment.layer?.toLocaleLowerCase().includes(preferred))
@@ -296,7 +400,13 @@ export function detectWalls(
     preferredSegments.length > 0
       ? preferredSegments
       : inputSegments.filter((segment) => isWallLayer(segment.layer))
-  const segments = wallLayerSegments.length > 0 ? wallLayerSegments : inputSegments
+  const selectedSegments = wallLayerSegments.length > 0 ? wallLayerSegments : inputSegments
+  const segments = selectedSegments.filter(
+    (segment) =>
+      segment.start.every(Number.isFinite) &&
+      segment.end.every(Number.isFinite) &&
+      distance(segment.start, segment.end) >= minSegmentLength,
+  )
   const walls: Wall[] = []
   const paired = new Set<number>()
   const candidates: Array<{ first: number; second: number; thickness: number; wall: Wall }> = []
@@ -328,8 +438,13 @@ export function detectWalls(
     }
   })
 
-  snapWallEndpoints(walls, snapTolerance)
-  return { walls }
+  const mergedWalls = mergeNearlyDuplicateWalls(walls, {
+    angleToleranceRad: options.mergeAngleToleranceRad,
+    offsetToleranceM: options.mergeOffsetToleranceM,
+    gapToleranceM: options.mergeGapToleranceM,
+  })
+  snapWallEndpoints(mergedWalls, snapTolerance)
+  return { walls: mergedWalls }
 }
 
 export const detectWallSegments = detectWalls
@@ -338,3 +453,5 @@ export type { DoorArc, DoorOpening } from './openings'
 export { detectDoorOpenings } from './openings'
 export type { CadUnit, UnitSuggestion } from './units'
 export { suggestCadUnit } from './units'
+export type { WindowDetectOptions, WindowOpening } from './windows'
+export { detectWindowOpenings } from './windows'

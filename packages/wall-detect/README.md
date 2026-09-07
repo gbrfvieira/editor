@@ -9,6 +9,7 @@ lower-confidence single-line walls.
 const result = detectWalls(segments, {
   preferLayerContaining: "PAREDE",
   snapToleranceM: 0.05,
+  minSegmentLengthM: 0.15,
 })
 // { walls: [{ start: [0, 0], end: [4, 0], thickness: 0.2, confidence: 0.9 }] }
 ```
@@ -18,7 +19,12 @@ The default thickness range is `[0.05, 0.40]` m and single-line walls use a
 on clearly named wall layers (`PAREDE`, `WALL`, `ALVEN`, or an `ALV` token,
 case-insensitive). An arbitrary preferred layer does not raise confidence.
 Segments marked `source: 'arc' | 'bulge'` do not get this semantic boost.
-Endpoint snapping replaces nearby endpoints with their average.
+Segments shorter than 0.15 m are discarded by default. After face pairing,
+overlapping near-collinear walls are merged when their angle differs by at
+most 2 degrees and their perpendicular offset is at most 0.03 m. These values
+can be adjusted with `minSegmentLengthM`, `mergeAngleToleranceRad`,
+`mergeOffsetToleranceM`, and `mergeGapToleranceM`. Endpoint snapping replaces
+nearby endpoints with their average.
 
 ## CAD inspection and preview integration
 
@@ -42,6 +48,15 @@ Each candidate contains `type: 'door'`, `position` (opening midpoint), `hinge`,
 `leafSegmentIndex` into the supplied arrays. Those indices let a preview
 identify the source symbol; candidates are not committed or cut into walls.
 
+`detectWindowOpenings(segments, walls, options)` recognizes a gap between two
+collinear wall fragments when the gap contains one or more short segments
+perpendicular to the wall and approximately as long as its thickness. A pair
+of transverse jamb/glass lines raises confidence from 0.68 to 0.88. Source
+segments may be expressed in file units through `metersPerUnit`; walls and
+returned window geometry are always in metres. The default plausible opening
+width is 0.3-3 m. The result includes the wall and source-segment indices so a
+preview can explain and edit each candidate.
+
 For the importing UI:
 
 1. Inspect the DXF layers/header and keep all source layers for review.
@@ -52,7 +67,9 @@ For the importing UI:
    segments to `detectDoorOpenings`, since doors may live on a separate layer.
 5. Review candidates, especially walls accidentally made from door symbols.
 
-This remains a heuristic, not a CAD semantic model: no geometry-only window
-recognition, nested INSERT expansion, bulge-based door symbols, double leaves,
-sliding doors or reliable handing inference. Layer names and plausible geometry
-are evidence, not a guarantee that a line is a wall or a symbol is a door.
+This remains a heuristic, not a CAD semantic model: nested INSERT expansion,
+bulge-based door symbols, double leaves, sliding doors and reliable handing
+inference are not covered. Geometry-only windows require a visible gap plus a
+transverse line, so continuous wall centerlines or unconventional symbols are
+not recognized. Layer names and plausible geometry are evidence, not a
+guarantee that a line is a wall or an opening symbol.
