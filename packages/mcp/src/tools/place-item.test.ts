@@ -37,7 +37,10 @@ describe('place_item', () => {
     expect(result.isError).toBeFalsy()
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0]!.text)
     expect(parsed.itemId).toMatch(/^item_/)
-    expect(parsed.status).toBe('ok')
+    // The built-in MCP catalog is empty (pending a first-party catalog — see
+    // asset-catalog.ts), so 'shelf' falls back to a generic placeholder box
+    // rather than resolving to a real asset.
+    expect(parsed.status).toBe('catalog_unavailable')
     const item = bridge.getNode(parsed.itemId)
     expect(item).not.toBeNull()
     // Midpoint of a [0..10] wall at x=5 → wallT = 0.5.

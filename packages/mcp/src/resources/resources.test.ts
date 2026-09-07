@@ -184,7 +184,7 @@ describe('pascal://scene/current/summary', () => {
 describe('pascal://catalog/items', () => {
   beforeEach(() => resetScene())
 
-  test('returns built-in catalog subset', async () => {
+  test('returns the built-in catalog subset (empty pending a first-party catalog)', async () => {
     const pair = await spinUp(registerCatalogItems)
     try {
       const res = await pair.client.readResource({ uri: 'pascal://catalog/items' })
@@ -192,8 +192,7 @@ describe('pascal://catalog/items', () => {
       expect(content.mimeType).toBe('application/json')
       const parsed = JSON.parse(content.text ?? '{}')
       expect(parsed.status).toBe('ok')
-      expect(parsed.items.length).toBeGreaterThan(0)
-      expect(parsed.items.map((item: { id: string }) => item.id)).toContain('sofa')
+      expect(parsed.items).toEqual([])
       expect(typeof parsed.note).toBe('string')
     } finally {
       await pair.close()

@@ -21,15 +21,15 @@ describe('room tools', () => {
     await Promise.all([server.connect(srvT), client.connect(cliT)])
   })
 
-  test('search_assets returns built-in catalog matches', async () => {
+  test('search_assets returns no matches — the built-in catalog is empty pending a first-party one', async () => {
     const result = await client.callTool({
       name: 'search_assets',
       arguments: { query: 'sofa' },
     })
     expect(result.isError).toBeFalsy()
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0]!.text)
-    expect(parsed.total).toBeGreaterThan(0)
-    expect(parsed.results.map((item: { id: string }) => item.id)).toContain('sofa')
+    expect(parsed.total).toBe(0)
+    expect(parsed.results).toEqual([])
   })
 
   test('create_room creates a valid zone/slab/ceiling/wall bundle', async () => {
@@ -166,7 +166,7 @@ describe('room tools', () => {
     expect(bridge.validateScene().valid).toBe(true)
   })
 
-  test('furnish_room parents floor items to the level and keeps the scene valid', async () => {
+  test('furnish_room skips every placement — the built-in catalog is empty pending a first-party one — and keeps the scene valid', async () => {
     const level = Object.values(bridge.getNodes()).find((n) => n.type === 'level')!
     const result = await client.callTool({
       name: 'furnish_room',
@@ -184,7 +184,11 @@ describe('room tools', () => {
     })
     expect(result.isError).toBeFalsy()
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0]!.text)
-    expect(parsed.placed).toBeGreaterThan(0)
+    expect(parsed.placed).toBe(0)
+    expect(parsed.skipped.length).toBeGreaterThan(0)
+    expect((parsed.skipped as string[]).every((reason) => reason.includes('asset not found'))).toBe(
+      true,
+    )
     for (const itemId of parsed.itemIds) {
       expect(bridge.getNode(itemId)?.parentId).toBe(level.id)
     }
@@ -217,7 +221,8 @@ describe('room tools', () => {
     })
     expect(result.isError).toBeFalsy()
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0]!.text)
-    expect(parsed.placed).toBeGreaterThan(0)
+    expect(parsed.placed).toBe(0)
+    expect(parsed.skipped.length).toBeGreaterThan(0)
     for (const itemId of parsed.itemIds) {
       expect(bridge.getNode(itemId)?.parentId).toBe(level.id)
     }
@@ -299,7 +304,7 @@ describe('room tools', () => {
     expect(findBlockedDoors({ nodes })).toEqual([])
   })
 
-  test('furnish_room records door-clearance skips when a door sits on the furniture wall', async () => {
+  test('furnish_room skips placements on a door wall — the built-in catalog is empty pending a first-party one — and reports no blocked doors', async () => {
     const level = Object.values(bridge.getNodes()).find((n) => n.type === 'level')!
     // Large bedroom so bed placement is near the "back" wall (edge opposite doorWallIndex).
     const roomResult = await client.callTool({
@@ -333,17 +338,16 @@ describe('room tools', () => {
     expect(furnish.isError).toBeFalsy()
     const parsed = JSON.parse((furnish.content as Array<{ type: string; text: string }>)[0]!.text)
     const { findBlockedDoors } = await import('./door-clearance')
+    // No furniture resolves (empty catalog), so nothing can block the door.
     expect(findBlockedDoors({ nodes: Object.values(bridge.getNodes()) })).toEqual([])
-    // Bed is placed against the back wall where the door is; expect clearance skip or empty bed.
     const bedPlaced = Object.values(bridge.getNodes()).some(
       (n) => n.type === 'item' && (n.name === 'Double Bed' || n.name === 'Single Bed'),
     )
-    const doorSkips = (parsed.skipped as string[]).filter((s) =>
-      s.includes('blocks door clearance'),
+    expect(bedPlaced).toBe(false)
+    expect(parsed.placed).toBe(0)
+    expect((parsed.skipped as string[]).length).toBeGreaterThan(0)
+    expect((parsed.skipped as string[]).every((reason) => reason.includes('asset not found'))).toBe(
+      true,
     )
-    expect(bedPlaced || doorSkips.length > 0).toBe(true)
-    if (bedPlaced) {
-      expect(doorSkips.length).toBe(0)
-    }
   })
 })

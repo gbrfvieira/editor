@@ -22,7 +22,7 @@ export function registerCatalogItems(server: McpServer, _bridge: SceneOperations
       const payload = {
         status: 'ok' as const,
         items: MCP_CATALOG_ITEMS,
-        note: 'Standalone MCP catalog subset; host applications can still expose a larger catalog separately.',
+        note: 'Empty until a first-party catalog is available; host applications can still expose their own catalog separately.',
       }
       return {
         contents: [
