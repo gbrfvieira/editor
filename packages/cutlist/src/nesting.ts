@@ -54,7 +54,8 @@ function candidateOrientations(
 }
 
 function placementId(panel: CutPanel & { instance: number; sourceIndex: number }): string {
-  return panel.panelId ?? `${panel.cabinetId}:${panel.label}:${panel.sourceIndex}:${panel.instance}`
+  const base = panel.panelId ?? `${panel.cabinetId}:${panel.label}:${panel.sourceIndex}`
+  return panel.instance === 0 ? base : `${base}:${panel.instance}`
 }
 
 /**
