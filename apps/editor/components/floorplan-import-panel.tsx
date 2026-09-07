@@ -46,10 +46,35 @@ export function FloorplanImportPanel() {
   const [removedWalls, setRemovedWalls] = useState<EditableWall[]>([])
   const [snapTolerance, setSnapTolerance] = useState(0.05)
   const [fileName, setFileName] = useState<string | null>(null)
-  const [dwgFileName, setDwgFileName] = useState<string | null>(null)
+  const [converterMissing, setConverterMissing] = useState(false)
+  const [converting, setConverting] = useState(false)
   const [pdfFallback, setPdfFallback] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState<string | null>(null)
+
+  const processDxfText = useCallback(
+    (text: string) => {
+      const dxfLayers = extractDxfVectorSegments(text)
+      const segments = dxfLayers.flatMap((layer) =>
+        layer.segments.map((segment) => ({ ...segment, layer: layer.layer })),
+      )
+      let openingId = 0
+      setOpenings(
+        dxfLayers.flatMap((layer) =>
+          (layer.openings ?? []).map((opening) => ({ ...opening, id: openingId++ })),
+        ),
+      )
+      const detected = detectWalls(segments, {
+        preferLayerContaining: 'PAREDE',
+        snapToleranceM: snapTolerance,
+      }).walls
+      setWalls(toEditableWalls(detected))
+      setStatus(
+        `${detected.length} parede(s) e ${dxfLayers.reduce((sum, layer) => sum + (layer.openings?.length ?? 0), 0)} vão(s) detectados. Revise e confirme.`,
+      )
+    },
+    [snapTolerance],
+  )
 
   const handleFile = useCallback(
     async (file: File | undefined) => {
@@ -60,50 +85,57 @@ export function FloorplanImportPanel() {
       setPdfFallback(null)
       setOpenings([])
       setRemovedWalls([])
-      if (file.name.toLocaleLowerCase().endsWith('.dwg')) {
-        setDwgFileName(file.name)
-        setWalls([])
-        setStatus(
-          'DWG selecionado. Converta-o para DXF com o ODA File Converter e carregue o DXF gerado abaixo.',
-        )
-        return
-      }
-      setDwgFileName(null)
+      setConverterMissing(false)
+      const isDwg = file.name.toLocaleLowerCase().endsWith('.dwg')
+      const isPdf = file.name.toLocaleLowerCase().endsWith('.pdf')
       try {
-        const isPdf = file.name.toLocaleLowerCase().endsWith('.pdf')
-        const dxfLayers = isPdf ? [] : extractDxfVectorSegments(await file.text())
-        const segments = isPdf
-          ? (await extractPdfVectorSegments(new Uint8Array(await file.arrayBuffer()))).flatMap(
-              (page) => page.segments,
+        if (isDwg) {
+          setWalls([])
+          setConverting(true)
+          const body = new FormData()
+          body.set('file', file)
+          const response = await fetch('/api/floorplan/convert-dwg', { method: 'POST', body })
+          const result = (await response.json()) as
+            | { ok: true; dxf: string }
+            | { ok: false; reason: string; message?: string }
+          setConverting(false)
+          if (!result.ok) {
+            if (result.reason === 'converter_not_found') setConverterMissing(true)
+            setError(
+              result.message ??
+                'Não foi possível converter o DWG. Verifique se o ODA File Converter está instalado.',
             )
-          : dxfLayers.flatMap((layer) =>
-              layer.segments.map((segment) => ({ ...segment, layer: layer.layer })),
-            )
-        let openingId = 0
-        setOpenings(
-          dxfLayers.flatMap((layer) =>
-            (layer.openings ?? []).map((opening) => ({ ...opening, id: openingId++ })),
-          ),
-        )
-        const detected = detectWalls(segments, {
-          preferLayerContaining: 'PAREDE',
-          snapToleranceM: snapTolerance,
-        }).walls
-        setWalls(toEditableWalls(detected))
-        if (isPdf && segments.length === 0) {
-          setPdfFallback(file)
-          setStatus('Este PDF não contém vetores de linha. Você pode adicioná-lo como guia visual.')
-        } else {
-          setStatus(
-            `${detected.length} parede(s) e ${dxfLayers.reduce((sum, layer) => sum + (layer.openings?.length ?? 0), 0)} vão(s) detectados. Revise e confirme.`,
-          )
+            return
+          }
+          processDxfText(result.dxf)
+          return
         }
+        if (isPdf) {
+          const segments = (
+            await extractPdfVectorSegments(new Uint8Array(await file.arrayBuffer()))
+          ).flatMap((page) => page.segments)
+          if (segments.length === 0) {
+            setWalls([])
+            setPdfFallback(file)
+            setStatus('Este PDF não contém vetores de linha. Você pode adicioná-lo como guia visual.')
+            return
+          }
+          const detected = detectWalls(segments, {
+            preferLayerContaining: 'PAREDE',
+            snapToleranceM: snapTolerance,
+          }).walls
+          setWalls(toEditableWalls(detected))
+          setStatus(`${detected.length} parede(s) detectada(s). Revise e confirme.`)
+          return
+        }
+        processDxfText(await file.text())
       } catch (cause) {
+        setConverting(false)
         setWalls([])
         setError(cause instanceof Error ? cause.message : 'Não foi possível ler o arquivo.')
       }
     },
-    [snapTolerance],
+    [processDxfText, snapTolerance],
   )
 
   const updateWall = (id: number, update: (wall: EditableWall) => EditableWall) => {
@@ -170,7 +202,8 @@ export function FloorplanImportPanel() {
       <div>
         <h3 className="font-medium text-sm">Importar planta (DXF, DWG ou PDF)</h3>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          Carregue um DXF em coordenadas de metro, revise os eixos e confirme para criar paredes.
+          Carregue um arquivo em coordenadas de metro, revise as paredes detectadas e confirme. DWG
+          é convertido para DXF automaticamente (local e gratuito).
         </p>
       </div>
 
@@ -200,17 +233,18 @@ export function FloorplanImportPanel() {
         />
       </label>
 
-      {dwgFileName ? (
+      {converting ? (
+        <p className="text-muted-foreground text-xs">Convertendo DWG para DXF…</p>
+      ) : null}
+
+      {converterMissing ? (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-[11px] text-muted-foreground">
-          <p className="font-medium text-foreground">Conversão DWG manual necessária</p>
+          <p className="font-medium text-foreground">ODA File Converter não encontrado</p>
           <p className="mt-1">
-            ODA File Converter é offline e deve ser instalado separadamente. Abra-o, escolha a pasta
-            do DWG como entrada, uma pasta de saída e o formato DXF desejado; depois carregue o DXF
-            resultante nesta mesma caixa. O importador não envia o arquivo para nenhum serviço.
-          </p>
-          <p className="mt-1 font-mono text-[10px]">
-            ODAFileConverter &lt;entrada&gt; &lt;saída&gt; &lt;versão&gt; &lt;recursivo&gt;
-            &lt;auditar&gt;
+            A conversão de DWG roda localmente e é gratuita, mas precisa do ODA File Converter
+            instalado nesta máquina (uma vez só). Baixe em opendesign.com/guestfiles, instale e
+            tente carregar o DWG de novo — a conversão passa a ser automática, sem nenhum passo
+            manual. O arquivo não é enviado para nenhum serviço externo.
           </p>
         </div>
       ) : null}

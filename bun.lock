@@ -31,6 +31,7 @@
         "@mint/pascal-plugin": "github:mintdotgg/mint-pascal-plugin#902c546dbaece6b31455c0dc394afe6b9cd136fe",
         "@number-flow/react": "^0.6.0",
         "@pascal-app/core": "*",
+        "@pascal-app/dwg-convert": "*",
         "@pascal-app/dxf-vector-extract": "*",
         "@pascal-app/editor": "*",
         "@pascal-app/floorplan-import": "*",
