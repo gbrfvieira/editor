@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
-import { summarizeImport } from './summary'
 import type { DetectedWall } from './index'
+import { summarizeImport } from './summary'
 
 test('summarizes lengths, confidence and review candidates', () => {
   const walls: DetectedWall[] = [
