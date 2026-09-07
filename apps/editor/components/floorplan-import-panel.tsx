@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  type AnyNode,
   type AnyNodeId,
   DoorNode,
   GuideNode,
@@ -60,6 +61,7 @@ function updatePoint(
 export function FloorplanImportPanel() {
   const levelId = useViewer((state) => state.selection.levelId)
   const createNode = useScene((state) => state.createNode)
+  const createNodes = useScene((state) => state.createNodes)
   const [walls, setWalls] = useState<EditableWall[]>([])
   const [openings, setOpenings] = useState<PreviewOpening[]>([])
   const [removedWalls, setRemovedWalls] = useState<EditableWall[]>([])
@@ -209,6 +211,12 @@ export function FloorplanImportPanel() {
     // list above, so that review is the confidence gate — don't silently
     // drop low-confidence walls a second time here.
     const patches = toWallNodePatches(walls, { minConfidence: 0 })
+    // Build every wall/door/window node up front and create them in a single
+    // batched store update instead of one createNode() call per node — with
+    // hundreds of walls (real DWG/DXF floor plans easily produce that many),
+    // calling createNode() in a loop triggers a full store update and
+    // re-render per node and can freeze the tab for tens of seconds.
+    const ops: { node: AnyNode; parentId: AnyNodeId }[] = []
     const createdWalls: {
       id: string
       start: [number, number]
@@ -220,7 +228,7 @@ export function FloorplanImportPanel() {
       {
         createNode: (data, parentId) => {
           const wall = WallNode.parse(data)
-          createNode(wall, parentId as AnyNodeId)
+          ops.push({ node: wall, parentId: parentId as AnyNodeId })
           createdWalls.push({
             id: wall.id,
             start: wall.start,
@@ -249,7 +257,7 @@ export function FloorplanImportPanel() {
           width: patch.width,
           height: DOOR_HEIGHT,
         })
-        createNode(door, patch.wallId as AnyNodeId)
+        ops.push({ node: door, parentId: patch.wallId as AnyNodeId })
       } else {
         const windowNode = WindowNode.parse({
           wallId: patch.wallId,
@@ -258,9 +266,10 @@ export function FloorplanImportPanel() {
           width: patch.width,
           height: WINDOW_HEIGHT,
         })
-        createNode(windowNode, patch.wallId as AnyNodeId)
+        ops.push({ node: windowNode, parentId: patch.wallId as AnyNodeId })
       }
     }
+    createNodes(ops)
 
     const skippedOpenings = openings.length - openingPatches.length
     setStatus(
