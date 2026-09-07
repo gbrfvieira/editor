@@ -16,6 +16,9 @@ export type NestingResult = {
   sheetCount: number
   wasteAreaM2: number
   utilizationPercent: number
+  /** Physical sheet dimensions used for the calculation (optional for compatibility). */
+  sheetWidthMm?: number
+  sheetHeightMm?: number
 }
 
 export type SheetSize = { widthMm: number; heightMm: number }
@@ -154,5 +157,7 @@ export function nestPanels(
     sheetCount: sheets.length,
     wasteAreaM2: (totalArea - usedArea) / 1_000_000,
     utilizationPercent: totalArea === 0 ? 0 : (usedArea / totalArea) * 100,
+    sheetWidthMm: sheet.widthMm,
+    sheetHeightMm: sheet.heightMm,
   }
 }
